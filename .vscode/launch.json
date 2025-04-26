@@ -1,0 +1,48 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "coreclr",
+      "request": "launch",
+      "name": "Debug MqttToOrion",
+      "program": "${workspaceFolder}/mqtttoorion/bin/Debug/net9.0/mqtttoorion.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/mqtttoorion",
+      "stopAtEntry": false,
+      "console": "internalConsole",
+      "preLaunchTask": "build-mqtttoorion"
+    },
+    {
+      "type": "coreclr",
+      "request": "launch",
+      "name": "Debug SensorsReportAudit.API",
+      "program": "${workspaceFolder}/SensorsReportAudit.API/bin/Debug/net8.0/SensorsReportAudit.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/SensorsReportAudit.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "preLaunchTask": "build-sensorsreportaudit-api",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SR_AUDIT_QUANTUMLEAP_HOST": "localhost",
+        "SR_AUDIT_QUANTUMLEAP_PORT": "8668",
+        "SR_AUDIT_KEYCLOAK_URL": "localhost",
+        "SR_AUDIT_KEYCLOAK_PORT": "8080",
+        "SR_AUDIT_KEYCLOAK_REALM": "master"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "targetFramework",
+      "type": "pickString",
+      "description": "Select the target framework for MqttToOrion",
+      "options": [
+        "net9.0"
+      ]
+    }
+  ]
+}

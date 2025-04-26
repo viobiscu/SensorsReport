@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensors-report-audit-config
+data:
+  SR_AUDIT_QUANTUMLEAP_HOST: "quantumleap"
+  SR_AUDIT_QUANTUMLEAP_PORT: "8668"
+  SR_AUDIT_KEYCLOAK_URL: "keycloak"
+  SR_AUDIT_KEYCLOAK_PORT: "8080"
+  SR_AUDIT_KEYCLOAK_RELM: "sensors"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sensors-report-audit-secrets
+type: Opaque
+data:
+  # These are placeholders. In a real environment, replace with actual base64-encoded values
+  SR_AUDIT_KEYCLOAK_CLIENTID: Y2xpZW50SWQ=  # clientId
+  SR_AUDIT_KEYCLOAK_CLIENTSECRET: Y2xpZW50U2VjcmV0  # clientSecret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-audit-api
+  labels:
+    app: sensors-report-audit-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-audit-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-audit-api
+    spec:
+      containers:
+      - name: sensors-report-audit-api
+        image: ${DOCKER_REGISTRY}/sensors-report-audit-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: sensors-report-audit-config
+        - secretRef:
+            name: sensors-report-audit-secrets
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensors-report-audit-api
+  labels:
+    app: sensors-report-audit-api
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: sensors-report-audit-api

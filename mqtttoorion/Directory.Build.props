@@ -1,0 +1,7 @@
+<Project>
+  <!-- Define properties that affect all projects -->
+  <PropertyGroup>
+    <!-- Disable automatic generation of assembly attributes -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,7 @@
+2025-04-25 12:06:43.1115 Info Loading assembly name: NLog.Web.AspNetCore
+2025-04-25 12:06:43.1413 Info NLog.Web.AspNetCore, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.4.0.1202. Product version: 5.4.0+1a84e4cd5773967e452956643bd8d3fe4b688e55. GlobalAssemblyCache: False
+2025-04-25 12:06:43.1905 Info Registered target NLog.Targets.ConsoleTarget(Name=console)
+2025-04-25 12:06:43.1948 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.4.0.3182. Product version: 5.4.0+4d45d445601312040107cbe2ac00e56c4bf4a60b. GlobalAssemblyCache: False
+2025-04-25 12:06:43.2239 Info Validating config: TargetNames=console, ConfigItems=22, FilePath=/home/vio/Documents/SensorsReport/SensorsReportAudit.API/bin/Debug/net8.0/nlog.config
+2025-04-25 12:06:43.2328 Info Configuration initialized.
+2025-04-25 12:06:43.7568 Info Validating config: TargetNames=console, ConfigItems=22, FilePath=/home/vio/Documents/SensorsReport/SensorsReportAudit.API/bin/Debug/net8.0/nlog.config
