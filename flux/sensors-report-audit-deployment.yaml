@@ -6,8 +6,12 @@ data:
   SR_AUDIT_QUANTUMLEAP_HOST: "quantum.sensorsreport.net"
   SR_AUDIT_QUANTUMLEAP_PORT: "8668"
   SR_AUDIT_KEYCLOAK_URL: "keycloak.sensorsreport.net"
-  SR_AUDIT_KEYCLOAK_PORT: "30100"
-  SR_AUDIT_KEYCLOAK_RELM: "sr"
+  SR_AUDIT_KEYCLOAK_PORT: "8080"
+  SR_AUDIT_KEYCLOAK_REALM: "sr"  # Fixed typo from RELM to REALM
+  DOTNET_USE_POLLING_FILE_WATCHER: "false"  # Disable file watching
+  ASPNETCORE_URLS: "http://+:5000"  # Using port 5000
+  ASPNETCORE_HTTP_PORTS: "5000"  # Explicitly set HTTP port
+  DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT: "true"  # For allowing HTTP/2 without HTTPS
 ---
 apiVersion: v1
 kind: Secret
@@ -37,15 +41,16 @@ spec:
     spec:
       containers:
       - name: sensors-report-audit-api
-        image: ${DOCKER_REGISTRY}/sensors-report-audit-api:latest
-        imagePullPolicy: Always
+        image: sensors-report-audit-api:latest
+        imagePullPolicy: Never
         ports:
-        - containerPort: 80
+        - containerPort: 5000
         envFrom:
         - configMapRef:
             name: sensors-report-audit-config
-        - secretRef:
-            name: sensors-report-audit-secrets
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
         resources:
           limits:
             cpu: "500m"
@@ -56,13 +61,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 80
+            port: 5000
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health
-            port: 80
+            port: 5000
           initialDelaySeconds: 5
           periodSeconds: 10
 ---
@@ -75,8 +80,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 80
-    targetPort: 80
+  - port: 80  # External port remains 80
+    targetPort: 5000  # Internal port is 5000
     protocol: TCP
     name: http
   selector:

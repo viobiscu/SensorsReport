@@ -27,11 +27,11 @@
       "preLaunchTask": "build-sensorsreportaudit-api",
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "SR_AUDIT_QUANTUMLEAP_HOST": "localhost",
+        "SR_AUDIT_QUANTUMLEAP_HOST": "quantum.sensorsreport.net",
         "SR_AUDIT_QUANTUMLEAP_PORT": "8668",
-        "SR_AUDIT_KEYCLOAK_URL": "localhost",
-        "SR_AUDIT_KEYCLOAK_PORT": "8080",
-        "SR_AUDIT_KEYCLOAK_REALM": "master"
+        "SR_AUDIT_KEYCLOAK_URL": "keycloak.sensorsreport.net",
+        "SR_AUDIT_KEYCLOAK_PORT": "30100",
+        "SR_AUDIT_KEYCLOAK_REALM": "sr"
       }
     }
   ],

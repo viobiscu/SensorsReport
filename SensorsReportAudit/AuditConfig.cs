@@ -25,13 +25,13 @@ namespace SensorsReportAudit
         {
             return new AuditConfig
             {
-                QuantumLeapHost = Environment.GetEnvironmentVariable("SR_AUDIT_QUANTUMLEAP_HOST") ?? "localhost",
+                QuantumLeapHost = Environment.GetEnvironmentVariable("SR_AUDIT_QUANTUMLEAP_HOST") ?? "quantum.sensorsreport.net",
                 QuantumLeapPort = Environment.GetEnvironmentVariable("SR_AUDIT_QUANTUMLEAP_PORT") ?? "8668",
-                KeycloakUrl = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_URL") ?? "localhost",
-                KeycloakPort = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_PORT") ?? "8080",
-                KeycloakRealm = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_REALM") ?? "master",
-                KeycloakClientId = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_CLIENTID") ?? "",
-                KeycloakClientSecret = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_CLIENTSECRET") ?? ""
+                KeycloakUrl = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_URL") ?? "keycloak.sensorsreport.net",
+                KeycloakPort = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_PORT") ?? "30100",
+                KeycloakRealm = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_REALM") ?? "sr",
+                KeycloakClientId = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_CLIENTID") ?? "ContextBroker",
+                KeycloakClientSecret = Environment.GetEnvironmentVariable("SR_AUDIT_KEYCLOAK_CLIENTSECRET") ?? "AELYK4tusYazvIDIvw0meQZiSnGMnVJP"
             };
         }
     }

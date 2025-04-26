@@ -47,8 +47,7 @@ namespace SensorsReportAudit
         }
 
         /// <summary>
-        /// Logs an audit event to QuantumLeap
-        /// </summary>
+        /// Logs an audit event to quantum        /// </summary>
         /// <param name="auditRecord">The audit record to log</param>
         /// <returns>True if successful, false otherwise</returns>
         public async Task<bool> LogAuditAsync(AuditRecord auditRecord)

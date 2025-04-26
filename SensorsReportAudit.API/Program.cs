@@ -26,18 +26,37 @@ try
     ProcessArguments(args);
     LogEnvironmentVariables(logger);
 
-    var builder = WebApplication.CreateBuilder(args);
+    // Create builder with options that disable file monitoring
+    var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+    {
+        Args = args,
+        WebRootPath = "wwwroot",
+        ContentRootPath = AppDomain.CurrentDomain.BaseDirectory,
+        EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+    });
+
+    // Disable file provider watcher
+    builder.Host.ConfigureAppConfiguration((hostingContext, config) => {
+        config.Sources.Clear();
+        config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
+        config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false);
+        config.AddEnvironmentVariables();
+        if (args != null)
+        {
+            config.AddCommandLine(args);
+        }
+    });
 
     // Load configuration from environment variables
     var auditConfig = new AuditConfig
     {
-        QuantumLeapHost = GetConfigValue("SR_AUDIT_QUANTUMLEAP_HOST", "localhost"),
+        QuantumLeapHost = GetConfigValue("SR_AUDIT_QUANTUMLEAP_HOST", "quantum.sensorsreport.net"),
         QuantumLeapPort = GetConfigValue("SR_AUDIT_QUANTUMLEAP_PORT", "8668"),
-        KeycloakUrl = GetConfigValue("SR_AUDIT_KEYCLOAK_URL", "localhost"),
-        KeycloakPort = GetConfigValue("SR_AUDIT_KEYCLOAK_PORT", "8080"),
-        KeycloakRealm = GetConfigValue("SR_AUDIT_KEYCLOAK_REALM", "master"), // Fixed spelling from RELM to REALM
-        KeycloakClientId = GetConfigValue("SR_AUDIT_KEYCLOAK_CLIENTID", ""),
-        KeycloakClientSecret = GetConfigValue("SR_AUDIT_KEYCLOAK_CLIENTSECRET", "")
+        KeycloakUrl = GetConfigValue("SR_AUDIT_KEYCLOAK_URL", "keycloak.sensorsreport.net"),
+        KeycloakPort = GetConfigValue("SR_AUDIT_KEYCLOAK_PORT", "30100"),
+        KeycloakRealm = GetConfigValue("SR_AUDIT_KEYCLOAK_REALM", "sr"), // Fixed spelling from RELM to REALM
+        KeycloakClientId = GetConfigValue("SR_AUDIT_KEYCLOAK_CLIENTID", "ContextBroker"),
+        KeycloakClientSecret = GetConfigValue("SR_AUDIT_KEYCLOAK_CLIENTSECRET", "AELYK4tusYazvIDIvw0meQZiSnGMnVJP")
     };
 
     // Add services to the container
