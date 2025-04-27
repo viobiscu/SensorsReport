@@ -10,7 +10,10 @@
       "cwd": "${workspaceFolder}/mqtttoorion",
       "stopAtEntry": false,
       "console": "internalConsole",
-      "preLaunchTask": "build-mqtttoorion"
+      "preLaunchTask": "build-mqtttoorion",
+      "env": {
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      }
     },
     {
       "type": "coreclr",
@@ -31,7 +34,11 @@
         "SR_AUDIT_QUANTUMLEAP_PORT": "8668",
         "SR_AUDIT_KEYCLOAK_URL": "keycloak.sensorsreport.net",
         "SR_AUDIT_KEYCLOAK_PORT": "30100",
-        "SR_AUDIT_KEYCLOAK_REALM": "sr"
+        "SR_AUDIT_KEYCLOAK_REALM": "sr",
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      },
+      "logging": {
+        "moduleLoad": false
       }
     }
   ],

@@ -5,6 +5,7 @@ EXPOSE 80
 # Set environment variables
 ENV ASPNETCORE_URLS="http://+:80"
 ENV DOTNET_USE_POLLING_FILE_WATCHER="false"
+ENV DOTNET_MODIFIABLE_ASSEMBLIES="debug"
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src

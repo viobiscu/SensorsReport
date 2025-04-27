@@ -22,22 +22,22 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sensors-report-audit-api
+  name: sensors-report-audit
   labels:
-    app: sensors-report-audit-api
+    app: sensors-report-audit
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sensors-report-audit-api
+      app: sensors-report-audit
   template:
     metadata:
       labels:
-        app: sensors-report-audit-api
+        app: sensors-report-audit
     spec:
       containers:
-      - name: sensors-report-audit-api
-        image: ${DOCKER_REGISTRY}/sensors-report-audit-api:latest
+      - name: sensors-report-audit
+        image: viobiscu/sensorsreportaudit:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -69,9 +69,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sensors-report-audit-api
+  name: sensors-report-audit
   labels:
-    app: sensors-report-audit-api
+    app: sensors-report-audit
 spec:
   type: ClusterIP
   ports:
@@ -80,4 +80,4 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: sensors-report-audit-api
+    app: sensors-report-audit
