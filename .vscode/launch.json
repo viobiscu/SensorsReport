@@ -4,13 +4,13 @@
     {
       "type": "coreclr",
       "request": "launch",
-      "name": "Debug MqttToOrion",
-      "program": "${workspaceFolder}/mqtttoorion/bin/Debug/net9.0/mqtttoorion.dll",
+      "name": "Debug SensorsReportMQTT-toOrion",
+      "program": "${workspaceFolder}/SensorsReportMQTT-to-Orion/bin/Debug/net8.0/SensorsReportMQTT-toOrion.dll",
       "args": [],
-      "cwd": "${workspaceFolder}/mqtttoorion",
+      "cwd": "${workspaceFolder}/SensorsReportMQTT-to-Orion",
       "stopAtEntry": false,
       "console": "internalConsole",
-      "preLaunchTask": "build-mqtttoorion",
+      "preLaunchTask": "build-sensorsreportmqtt-to-orion",
       "env": {
         "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
       }
@@ -46,9 +46,9 @@
     {
       "id": "targetFramework",
       "type": "pickString",
-      "description": "Select the target framework for MqttToOrion",
+      "description": "Select the target framework for SensorsReportMQTT-toOrion",
       "options": [
-        "net9.0"
+        "net8.0"
       ]
     }
   ]

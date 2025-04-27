@@ -2,12 +2,12 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build-mqtttoorion",
+      "label": "build-sensorsreportmqtt-to-orion",
       "command": "dotnet",
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/mqtttoorion/mqtttoorion.csproj",
+        "${workspaceFolder}/SensorsReportMQTT-to-Orion/SensorsReportMQTT-toOrion.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
@@ -36,7 +36,7 @@
     {
       "label": "build-all",
       "dependsOn": [
-        "build-mqtttoorion",
+        "build-sensorsreportmqtt-to-orion",
         "build-sensorsreportaudit-api"
       ],
       "group": {

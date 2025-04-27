@@ -97,52 +97,52 @@ public static class Program
         // check for an environment variable for the MqttCleanSession
         if (string.IsNullOrEmpty(ConfigProgram.MqttCleanSession))
         {
-            ConfigProgram.MqttCleanSession = Environment.GetEnvironmentVariable("MQTTTOORION_MQTTCLEANSESSION");
+            ConfigProgram.MqttCleanSession = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_MQTTCLEANSESSION");
         }
         // check for an environment variable for the MqttClientId
         if (string.IsNullOrEmpty(ConfigProgram.MqttClientId))
         {
-            ConfigProgram.MqttClientId = Environment.GetEnvironmentVariable("MQTTTOORION_MQTTCLIENTID");
+            ConfigProgram.MqttClientId = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_MQTTCLIENTID");
         }
         // check for an environment variable for the MqttHost
         if (string.IsNullOrEmpty(ConfigProgram.MqttHost))
         {
-            ConfigProgram.MqttHost = Environment.GetEnvironmentVariable("MQTTTOORION_MQTTHOST");
+            ConfigProgram.MqttHost = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_MQTTHOST");
         }
         // check for an environment variable for the MqttPassword
         if (string.IsNullOrEmpty(ConfigProgram.MqttPassword))
         {
-            ConfigProgram.MqttPassword = Environment.GetEnvironmentVariable("MQTTTOORION_MQTTPASSWORD");
+            ConfigProgram.MqttPassword = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_MQTTPASSWORD");
         }
         // check for an environment variable for the MqttPort
         if (string.IsNullOrEmpty(ConfigProgram.MqttPort))
         {
-            ConfigProgram.MqttPort = Environment.GetEnvironmentVariable("MQTTTOORION_MQTTPORT");
+            ConfigProgram.MqttPort = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_MQTTPORT");
         }
         // check for an environment variable for the MqttTopic
         if (string.IsNullOrEmpty(ConfigProgram.MqttTopic))
         {
-            ConfigProgram.MqttTopic = Environment.GetEnvironmentVariable("MQTTTOORION_MQTTTOPIC");
+            ConfigProgram.MqttTopic = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_MQTTTOPIC");
         }
         // check for an environment variable for the MqttUser
         if (string.IsNullOrEmpty(ConfigProgram.MqttUser))
         {
-            ConfigProgram.MqttUser = Environment.GetEnvironmentVariable("MQTTTOORION_MQTTUSER");
+            ConfigProgram.MqttUser = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_MQTTUSER");
         }
         // check for an environment variable for the OrionUrl
         if (string.IsNullOrEmpty(ConfigProgram.OrionUrl))
         {
-            ConfigProgram.OrionUrl = Environment.GetEnvironmentVariable("MQTTTOORION_ORIONURL");
+            ConfigProgram.OrionUrl = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_ORIONURL");
         }
         // check for an environment variable for the Jsonld
         if (string.IsNullOrEmpty(ConfigProgram.Jsonld))
         {
-            ConfigProgram.Jsonld = Environment.GetEnvironmentVariable("MQTTTOORION_JSONLD");
+            ConfigProgram.Jsonld = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_JSONLD");
         }
         // check for an environment variable for the MqttKeepAlivePeriod
         if (string.IsNullOrEmpty(ConfigProgram.MqttKeepAlivePeriod))
         {
-            ConfigProgram.MqttKeepAlivePeriod = Environment.GetEnvironmentVariable("MQTTTOORION_MQTTKEEPALIVEPERIOD");
+            ConfigProgram.MqttKeepAlivePeriod = Environment.GetEnvironmentVariable("SENSORSREPORTMQTT_TO_ORION_MQTTKEEPALIVEPERIOD");
         }
 
 
@@ -263,7 +263,7 @@ public static class Program
             var title = assembly
                 .GetCustomAttributes(typeof(AssemblyTitleAttribute), false)
                 .OfType<AssemblyTitleAttribute>()
-                .FirstOrDefault()?.Title ?? "MqttToOrion";
+                .FirstOrDefault()?.Title ?? "SensorsReportMQTT-toOrion";
             
             logger.Info($"Application: {title}");
             logger.Info($"Version: {version}");
@@ -273,7 +273,7 @@ public static class Program
         catch (Exception ex)
         {
             logger.Warn($"Error retrieving assembly attributes: {ex.Message}");
-            logger.Info($"Application: MqttToOrion");
+            logger.Info($"Application: SensorsReportMQTT-toOrion");
             logger.Info($"Version: {version}");
         }
     }
@@ -287,10 +287,10 @@ public static class Program
             logger.Trace(arg);
         }
         //log the environment variables
-        logger.Trace("Environment variables starting with MQTTTOORION_:");
+        logger.Trace("Environment variables starting with SENSORSREPORTMQTT_TO_ORION_:");
         foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>().OrderBy(entry => entry.Key))
         {
-            if (env.Key.ToString()?.StartsWith("MQTTTOORION_") == true)
+            if (env.Key.ToString()?.StartsWith("SENSORSREPORTMQTT_TO_ORION_") == true)
             {
             logger.Trace($"{env.Key}={env.Value}");
             }
