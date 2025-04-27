@@ -7,7 +7,7 @@
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/SensorsReportMQTT-to-Orion/SensorsReportMQTT-toOrion.csproj",
+        "${workspaceFolder}/SensorsReportMQTT-to-Orion/SensorsReportMQTT-to-Orion.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
