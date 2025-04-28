@@ -1,6 +1,7 @@
 {
   "version": "0.2.0",
   "configurations": [
+    
     {
       "type": "coreclr",
       "request": "launch",
@@ -13,7 +14,8 @@
       "preLaunchTask": "build-sensorsreportmqtt-to-orion",
       "env": {
         "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
-      }
+      },
+      "justMyCode": false
     },
     {
       "type": "coreclr",
@@ -39,6 +41,20 @@
       },
       "logging": {
         "moduleLoad": false
+      },
+      "justMyCode": false
+    },
+    {
+      "name": "Docker: SensorsReportBusinessBroker.API",
+      "type": "docker",
+      "request": "launch",
+      "preLaunchTask": "docker-run: debug",
+      "netCore": {
+        "appProject": "${workspaceFolder}/SensorsReportBusinessBroker.API/SensorsReportBusinessBroker.API.csproj",
+        "enableDebugging": true,
+        "debuggerOptions": {
+          "justMyCode": false
+        }
       }
     }
   ],

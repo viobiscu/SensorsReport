@@ -47,7 +47,23 @@ try
     builder.Services.AddSingleton<IOrionService, OrionService>();
     builder.Services.AddSingleton<IAuditService, AuditService>();
     builder.Services.AddSingleton<RulesEngine.RulesEngine>(sp => {
-        var workflow = new Workflow { WorkflowName = "BusinessRules" };
+        // Create a workflow with at least one default rule to pass validation
+        var workflow = new Workflow 
+        { 
+            WorkflowName = "BusinessRules",
+            Rules = new Rule[]
+            {
+                new Rule
+                {
+                    RuleName = "DefaultRule",
+                    RuleExpressionType = RuleExpressionType.LambdaExpression,
+                    Expression = "true",
+                    Enabled = true,
+                    SuccessEvent = "Success",
+                    ErrorMessage = "Error"
+                }
+            }
+        };
         return new RulesEngine.RulesEngine(new Workflow[] { workflow });
     });
     logger.Info("Services registered");
@@ -104,6 +120,10 @@ try
     // Configure controllers
     app.MapControllers();
     logger.Info("Controllers mapped");
+
+    // Log the URLs the application is listening on
+    var urls = builder.Configuration["ASPNETCORE_URLS"] ?? "http://+:80";
+    logger.Info($"Application listening on: {urls}");
 
     logger.Info("Application started");
     app.Run();
