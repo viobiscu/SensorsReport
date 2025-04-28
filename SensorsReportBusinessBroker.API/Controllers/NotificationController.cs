@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 using RulesEngine.Models;
 using SensorsReportBusinessBroker.API.Models;
 using SensorsReportBusinessBroker.API.Services;
@@ -18,6 +19,7 @@ namespace SensorsReportBusinessBroker.API.Controllers
         private readonly IAuditService _auditService;
         private readonly RulesEngine.RulesEngine _rulesEngine;
         private readonly JsonSerializerOptions _jsonOptions;
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public NotificationController(
             IOrionService orionService,
@@ -45,14 +47,14 @@ namespace SensorsReportBusinessBroker.API.Controllers
                 string location = Request.Headers.TryGetValue("Fiware-ServicePath", out var path) ? path.ToString() : string.Empty;
 
                 // Log the notification
-                Console.WriteLine($"Received notification: {JsonSerializer.Serialize(notification, _jsonOptions)}");
+                _logger.Info($"Received notification: {JsonSerializer.Serialize(notification, _jsonOptions)}");
 
                 // Get business rules from Orion-LD
                 var businessRules = await _orionService.GetBusinessRulesAsync(tenantId);
                 
                 if (businessRules.Entities.Length == 0)
                 {
-                    Console.WriteLine("No business rules found");
+                    _logger.Info("No business rules found");
                     return Ok();
                 }
 
@@ -70,7 +72,7 @@ namespace SensorsReportBusinessBroker.API.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error processing notification: {ex.Message}");
+                _logger.Error(ex, $"Error processing notification: {ex.Message}");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -165,13 +167,13 @@ namespace SensorsReportBusinessBroker.API.Controllers
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Error processing rule result: {ex.Message}");
+                            _logger.Error(ex, $"Error processing rule result: {ex.Message}");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error executing rule {rule.Id}: {ex.Message}");
+                    _logger.Error(ex, $"Error executing rule {rule.Id}: {ex.Message}");
                     // Continue with other rules even if one fails
                 }
             }

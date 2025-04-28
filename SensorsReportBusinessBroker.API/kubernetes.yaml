@@ -18,8 +18,8 @@ metadata:
 type: Opaque
 data:
   # These are placeholders. In a real environment, replace with actual base64-encoded values
-  SR_BB_KEYCLOAK_CLIENTID: YnVzaW5lc3MtYnJva2Vy  # business-broker
-  SR_BB_KEYCLOAK_CLIENTSECRET: c2VjcmV0  # secret
+  SR_BB_KEYCLOAK_CLIENTID: Q29udGV4dEJyb2tlcg==  # business-broker
+  SR_BB_KEYCLOAK_CLIENTSECRET: QUVMWUs0dHVzWWF6dklESXZ3MG1lUVppU25HTW5WSlA=  # secret
 ---
 apiVersion: apps/v1
 kind: Deployment

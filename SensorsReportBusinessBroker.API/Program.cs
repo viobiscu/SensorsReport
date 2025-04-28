@@ -194,10 +194,10 @@ static void LogCommandLine(Logger logger, string[] args)
     }
     
     // Log environment variables
-    logger.Trace("Environment variables starting with SENSORSREPORT_BUSINESSBROKER_:");
+    logger.Trace("Environment variables starting with SR_BB_:");
     foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>().OrderBy(entry => entry.Key))
     {
-        if (env.Key.ToString()?.StartsWith("SENSORSREPORT_BUSINESSBROKER_") == true)
+        if (env.Key.ToString()?.StartsWith("SR_BB_") == true)
         {
             logger.Trace($"{env.Key}={env.Value}");
         }
