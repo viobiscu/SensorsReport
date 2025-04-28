@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: sensors-report-business-broker-config
 data:
-  SR_BB_ORION_HOST: "orion-ld.default.svc.cluster.local"
+  SR_BB_ORION_HOST: "orion.sensorsreport.net"
   SR_BB_ORION_PORT: "1026"
   SR_BB_AUDIT_URL: "sensors-report-audit.default.svc.cluster.local"
   SR_BB_AUDIT_PORT: "80"
