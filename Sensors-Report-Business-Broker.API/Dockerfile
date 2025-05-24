@@ -11,12 +11,11 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy and restore project files
-COPY ["Sensors-Report-Business-Broker.API.csproj", "Sensors-Report-Business-Broker.API/"]
-RUN dotnet restore "Sensors-Report-Business-Broker.API/Sensors-Report-Business-Broker.API.csproj"
+COPY Sensors-Report-Business-Broker.API/Sensors-Report-Business-Broker.API.csproj ./
+RUN dotnet restore Sensors-Report-Business-Broker.API.csproj
 
 # Copy source code
-COPY . ./Sensors-Report-Business-Broker.API/
-WORKDIR "/src/Sensors-Report-Business-Broker.API"
+COPY Sensors-Report-Business-Broker.API/ ./
 RUN dotnet build "Sensors-Report-Business-Broker.API.csproj" -c Release -o /app/build
 
 FROM build AS publish
