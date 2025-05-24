@@ -41,9 +41,9 @@ spec:
             - name: QUANTUM_LEAP_URL
               value: "http://quantum.sensorsreport.net:8668"
             - name: DATA_PRODUCT_URL
-              value: "http://localhost:31483"
+              value: "http://dpm-data-product-manager:8000"
             - name: CONTEXT_BROKER_URL
-              value: "http://orion.sensorsreport.net:31026"
+              value: "http://update-orion-ld-broker:1026"
             - name: SECURE_COOKIES
               value: "false"
             - name: HOST
