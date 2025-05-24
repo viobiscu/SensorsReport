@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-audit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-audit
+  template:
+    metadata:
+      labels:
+        app: sensors-report-audit
+    spec:
+      containers:
+        - name: sensors-report-audit
+          image: viobiscu/sensors-report-audit:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
