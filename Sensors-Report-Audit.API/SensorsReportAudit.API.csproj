@@ -29,4 +29,27 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="version.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="IncrementVersion" AfterTargets="Build">
+    <Exec Command="bash increment_version.sh" WorkingDirectory="$(ProjectDir)" />
+  </Target>
+
+  <PropertyGroup>
+    <AppVersion>1.0.0.0</AppVersion>
+  </PropertyGroup>
+  <Target Name="ReadVersionTxt" BeforeTargets="GenerateAssemblyInfo">
+    <ReadLinesFromFile File="version.txt">
+      <Output TaskParameter="Lines" PropertyName="AppVersion"/>
+    </ReadLinesFromFile>
+  </Target>
+  <PropertyGroup>
+    <Version>$(AppVersion)</Version>
+    <FileVersion>$(AppVersion)</FileVersion>
+    <AssemblyVersion>$(AppVersion)</AssemblyVersion>
+  </PropertyGroup>
 </Project>

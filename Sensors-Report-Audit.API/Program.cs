@@ -20,6 +20,24 @@ var logger = LogManager.GetCurrentClassLogger();
 try
 {
     logger.Info("Application starting...");
+    // Log version from version.txt
+    try
+    {
+        string versionFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.txt");
+        if (File.Exists(versionFile))
+        {
+            string version = File.ReadAllText(versionFile).Trim();
+            logger.Info($"Build Version: {version}");
+        }
+        else
+        {
+            logger.Warn("version.txt not found");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.Warn($"Could not read version.txt: {ex.Message}");
+    }
     LogProgramInfo(logger);
 
     // Process command-line arguments and environment variables
@@ -266,17 +284,6 @@ void LogProgramInfo(Logger log)
     try
     {
         version = assembly.GetName().Version?.ToString() ?? "1.0.0.0";
-        
-        // Get the informational version (typically used for SemVer)
-        var infoVersion = assembly
-            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false)
-            .OfType<AssemblyInformationalVersionAttribute>()
-            .FirstOrDefault()?.InformationalVersion;
-            
-        if (!string.IsNullOrEmpty(infoVersion))
-        {
-            log.Debug($"Informational version: {infoVersion}");
-        }
     }
     catch (Exception ex)
     {
@@ -303,7 +310,6 @@ void LogProgramInfo(Logger log)
             .FirstOrDefault()?.Title ?? "SensorsReportAudit.API";
         
         log.Info($"Application: {title}");
-        log.Info($"Version: {version}");
         log.Info($"Description: {description}");
         log.Info($"Copyright: {copyright}");
     }
@@ -311,7 +317,6 @@ void LogProgramInfo(Logger log)
     {
         log.Warn($"Error retrieving assembly attributes: {ex.Message}");
         log.Info("Application: SensorsReportAudit.API");
-        log.Info($"Version: {version}");
     }
 }
 

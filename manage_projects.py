@@ -190,42 +190,116 @@ def main():
         print_error("No .csproj files found.")
         return
 
+    # Custom menu order and names
+    MENU_PROJECTS = [
+        ("Audit.API", "Sensors-Report-Audit.API"),
+        ("Business-Broker.API", "Sensors-Report-Business-Broker.API"),
+        ("Audit", "Sensors-Report-Audit"),
+        ("MQTT-to-Orion", "Sensors-Report-MQTT-to-Orion"),
+        ("Explorer", "Sensors-Report-Explorer")
+    ]
     while True:
-        for idx, proj in enumerate(projects):
-            proj_dir = os.path.basename(os.path.dirname(proj))
-            abbr = PROJECT_ABBREVIATIONS.get(proj_dir, proj_dir)
-            print(f"{CYAN}{idx+1}. {abbr}{RESET}")
-
-        choice = input(f"{YELLOW}Select a project by number (or 'q' to quit): {RESET}")
+        for idx, (menu_name, proj_dir) in enumerate(MENU_PROJECTS):
+            print(f"{CYAN}{idx+1}. {menu_name}{RESET}")
+        print(f"{CYAN}Q. Quit Program{RESET}")
+        choice = input(f"{YELLOW}Select a project by number (or 'Q' to quit): {RESET}")
         if choice.lower() == 'q':
             break
         try:
             idx = int(choice) - 1
-            if idx < 0 or idx >= len(projects):
+            if idx < 0 or idx >= len(MENU_PROJECTS):
                 print_warning("Invalid selection.")
                 continue
-            csproj = projects[idx]
-            proj_dir = os.path.basename(os.path.dirname(csproj))
-            abbr = PROJECT_ABBREVIATIONS.get(proj_dir, proj_dir)
-            dockerfile = os.path.join(os.path.dirname(csproj), 'Dockerfile')
-            print_info(f"Options for {abbr}:")
-            if csproj.endswith('.csproj'):
-                print(f"{CYAN}1. Build{RESET}")
-            if os.path.exists(dockerfile) or csproj.endswith('Dockerfile'):
-                print(f"{CYAN}2. Create Docker image{RESET}")
-                if csproj.endswith('.csproj'):
-                    print(f"{CYAN}3. Start debug{RESET}")
-            action = input(f"{YELLOW}Choose action (1/2/3, or 'b' to go back): {RESET}")
-            if action == '1' and csproj.endswith('.csproj'):
-                build_project(csproj)
-            elif action == '2' and (os.path.exists(dockerfile) or csproj.endswith('Dockerfile')):
-                docker_build(csproj)
-            elif action == '3' and csproj.endswith('.csproj') and os.path.exists(dockerfile):
-                start_debug(csproj)
-            elif action.lower() == 'b':
+            menu_name, proj_dir = MENU_PROJECTS[idx]
+            # Find the project file or Dockerfile for this menu entry
+            csproj = None
+            for proj in projects:
+                if proj_dir in proj:
+                    csproj = proj
+                    break
+            if not csproj:
+                print_error(f"Project files for {menu_name} not found.")
                 continue
-            else:
-                print_warning("Invalid action.")
+            dockerfile = os.path.join(os.path.dirname(csproj), 'Dockerfile')
+            print_info(f"Options for {menu_name}:")
+            if csproj.endswith('.csproj'):
+                print(f"{CYAN}1. Build Debug{RESET}")
+                print(f"{CYAN}2. Build Production{RESET}")
+                print(f"{CYAN}3. Start Debug{RESET}")
+                print(f"{CYAN}4. Start Production{RESET}")
+                print(f"{CYAN}5. Create Docker image{RESET}")
+                print(f"{CYAN}B. Back to Main Menu{RESET}")
+                action = input(f"{YELLOW}Choose action (1-5, or 'B' to go back): {RESET}")
+                if action == '1':
+                    print_info("Building Debug...")
+                    result = subprocess.run(['dotnet', 'build', csproj, '--configuration', 'Debug'])
+                    if result.returncode == 0:
+                        print_success("Build Debug succeeded.")
+                    else:
+                        print_error("Build Debug failed.")
+                elif action == '2':
+                    print_info("Cleaning previous build artifacts...")
+                    clean_result = subprocess.run(['dotnet', 'clean', csproj, '--configuration', 'Release'])
+                    if clean_result.returncode == 0:
+                        print_success("Clean succeeded.")
+                    else:
+                        print_error("Clean failed.")
+                    # Read and display version
+                    version_file = os.path.join(os.path.dirname(csproj), 'version.txt')
+                    version = None
+                    if os.path.exists(version_file):
+                        with open(version_file) as vf:
+                            version = vf.read().strip()
+                        print_info(f"Build Version: {version}")
+                    else:
+                        print_warning("version.txt not found!")
+                    print_info("Building Production (Release)...")
+                    build_result = subprocess.run(['dotnet', 'build', csproj, '--configuration', 'Release'])
+                    if build_result.returncode == 0:
+                        print_success("Build Production succeeded.")
+                        # Optionally, verify version in output (if needed, add logic here)
+                    else:
+                        print_error("Build Production failed.")
+                elif action == '3':
+                    print_info("Starting Debug...")
+                    try:
+                        proc = subprocess.Popen(['dotnet', 'run', '--project', csproj, '--configuration', 'Debug'])
+                        input(f"{YELLOW}Press Enter to stop debugging and return to the menu...\n{RESET}")
+                        proc.terminate()
+                        proc.wait()
+                        print_success("Debugging stopped.")
+                    except KeyboardInterrupt:
+                        print_warning("\nDebugging stopped by user.")
+                    except Exception as e:
+                        print_error(f"Error during debug: {e}")
+                elif action == '4':
+                    print_info("Starting Production (Release)...")
+                    try:
+                        proc = subprocess.Popen(['dotnet', 'run', '--project', csproj, '--configuration', 'Release'])
+                        input(f"{YELLOW}Press Enter to stop and return to the menu...\n{RESET}")
+                        proc.terminate()
+                        proc.wait()
+                        print_success("Production run stopped.")
+                    except KeyboardInterrupt:
+                        print_warning("\nProduction run stopped by user.")
+                    except Exception as e:
+                        print_error(f"Error during production run: {e}")
+                elif action == '5':
+                    docker_build(csproj)
+                elif action.lower() == 'b':
+                    continue
+                else:
+                    print_warning("Invalid action.")
+            elif os.path.exists(dockerfile) or csproj.endswith('Dockerfile'):
+                print(f"{CYAN}5. Create Docker image{RESET}")
+                print(f"{CYAN}B. Back to Main Menu{RESET}")
+                action = input(f"{YELLOW}Choose action (5, or 'B' to go back): {RESET}")
+                if action == '5':
+                    docker_build(csproj)
+                elif action.lower() == 'b':
+                    continue
+                else:
+                    print_warning("Invalid action.")
             # After a command, return to main menu
             print_info("\nReturning to main menu...\n")
         except ValueError:

@@ -18,6 +18,24 @@ try
     LogManager.LoadConfiguration(configPath);
     
     logger.Info("Application starting...");
+    // Log version from version.txt
+    try
+    {
+        string versionFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.txt");
+        if (File.Exists(versionFile))
+        {
+            string version = File.ReadAllText(versionFile).Trim();
+            logger.Info($"Build Version: {version}");
+        }
+        else
+        {
+            logger.Warn("version.txt not found");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.Warn($"Could not read version.txt: {ex.Message}");
+    }
     LogProgramInfo(logger);
     
     logger.Info("Initializing application...");
@@ -190,7 +208,6 @@ static void LogProgramInfo(Logger logger)
             .FirstOrDefault()?.Title ?? "SensorsReportBusinessBroker.API";
         
         logger.Info($"Application: {title}");
-        logger.Info($"Version: {version}");
         logger.Info($"Description: {description}");
         logger.Info($"Copyright: {copyright}");
     }
@@ -198,7 +215,6 @@ static void LogProgramInfo(Logger logger)
     {
         logger.Warn($"Error retrieving assembly attributes: {ex.Message}");
         logger.Info($"Application: SensorsReportBusinessBroker.API");
-        logger.Info($"Version: {version}");
     }
 }
 

@@ -42,6 +42,24 @@ public static class Program
             LogManager.LoadConfiguration(configPath);
             
             logger.Info("Application starting...");
+            // Log version from version.txt
+            try
+            {
+                string versionFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.txt");
+                if (File.Exists(versionFile))
+                {
+                    string version = File.ReadAllText(versionFile).Trim();
+                    logger.Info($"Build Version: {version}");
+                }
+                else
+                {
+                    logger.Warn("version.txt not found");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"Could not read version.txt: {ex.Message}");
+            }
             LogProgramInfo(logger);
             logger.Debug("init main run 3");
             ProcessArguments(args);
@@ -266,7 +284,6 @@ public static class Program
                 .FirstOrDefault()?.Title ?? "SensorsReportMQTT-toOrion";
             
             logger.Info($"Application: {title}");
-            logger.Info($"Version: {version}");
             logger.Info($"Description: {description}");
             logger.Info($"Copyright: {copyright}");
         }
@@ -274,7 +291,6 @@ public static class Program
         {
             logger.Warn($"Error retrieving assembly attributes: {ex.Message}");
             logger.Info($"Application: SensorsReportMQTT-toOrion");
-            logger.Info($"Version: {version}");
         }
     }
 
