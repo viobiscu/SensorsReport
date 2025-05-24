@@ -14,11 +14,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.txt /app/
+COPY Sensors-Report-Explorer/requirements.txt /app/
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Copy project files
-COPY . /app/
+COPY Sensors-Report-Explorer/ /app/
 
 # Expose port (Flask default)
 EXPOSE 5000
