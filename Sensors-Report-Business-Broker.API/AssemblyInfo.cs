@@ -3,11 +3,11 @@ using System.Reflection;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SensorsReportBusinessBroker.API")]
+[assembly: AssemblyTitle("Sensors-Report-Business-Broker.API")]
 [assembly: AssemblyDescription("Business Rules Broker API for SensorsReport")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Synchro SRL")]
-[assembly: AssemblyProduct("SensorsReportBusinessBroker")]
+[assembly: AssemblyProduct("Sensors-Report-Business-Broker")]
 [assembly: AssemblyCopyright("Copyright © 2024-2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
