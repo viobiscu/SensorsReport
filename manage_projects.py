@@ -113,18 +113,37 @@ def docker_build(csproj):
         ], cwd=workspace_root)
         if result.returncode == 0:
             print_success("Docker build succeeded.")
-            choice = input(f"{CYAN}Update (1) local k8s, (2) production (Flux), or (b) back to menu? {RESET}")
+            print(f"{CYAN}Options for update:{RESET}")
+            print(f"{CYAN}1. Update local k8s{RESET}")
+            print(f"{CYAN}2. Update production via Flux{RESET}")
+            print(f"{CYAN}b. Back to menu.{RESET}")
+            choice = input(f"{YELLOW}Select an update option: {RESET}")
             if choice == "1":
                 # Try to find the deployment YAML for this project
                 flux_dir = os.path.join(workspace_root, 'flux')
                 deployment_yaml = None
+                service_yaml = None
                 for subdir in os.listdir(flux_dir):
                     subdir_path = os.path.join(flux_dir, subdir)
                     if os.path.isdir(subdir_path):
-                        candidate = os.path.join(subdir_path, 'deployment-test.yaml')
-                        if os.path.exists(candidate) and proj_dir.replace('.', '-').lower() in candidate:
-                            deployment_yaml = candidate
-                            break
+                        candidate_deploy = os.path.join(subdir_path, 'deployment-test.yaml')
+                        candidate_service = os.path.join(subdir_path, 'service.yaml')
+                        if os.path.exists(candidate_deploy) and proj_dir.replace('.', '-').lower() in candidate_deploy:
+                            deployment_yaml = candidate_deploy
+                        if os.path.exists(candidate_service) and proj_dir.replace('.', '-').lower() in candidate_service:
+                            service_yaml = candidate_service
+                # Apply deployment and service YAMLs if found
+                if deployment_yaml:
+                    print_info(f"Applying {deployment_yaml} ...")
+                    subprocess.run(["kubectl", "apply", "-f", deployment_yaml])
+                else:
+                    print_warning("Could not find deployment-test.yaml for this project in flux directory.")
+                if service_yaml:
+                    print_info(f"Applying {service_yaml} ...")
+                    subprocess.run(["kubectl", "apply", "-f", service_yaml])
+                else:
+                    print_warning("Could not find service.yaml for this project in flux directory.")
+                # Extract container and deployment name for patching
                 if deployment_yaml:
                     container_name = extract_container_name_from_deployment(deployment_yaml)
                     deployment_name = None
@@ -138,13 +157,13 @@ def docker_build(csproj):
                         update_local_k8s(deployment_name, container_name, image_name)
                     else:
                         print_error("Could not determine deployment or container name from YAML.")
-                else:
-                    print_error("Could not find deployment-test.yaml for this project in flux directory.")
             elif choice == "2":
                 manifest_path = input(f"{CYAN}Enter path to flux deployment manifest: {RESET}")
                 update_flux_manifest(manifest_path, image_name)
-            else:
+            elif choice.lower() == 'b':
                 print_info("Returning to menu.")
+            else:
+                print_warning("Invalid action.")
         else:
             print_error("Docker build failed.")
     else:
