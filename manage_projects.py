@@ -15,7 +15,8 @@ PROJECT_ABBREVIATIONS = {
     "Sensors-Report-Audit": "Audit",
     "Sensors-Report-Audit.API": "Audit.API",
     "Sensors-Report-Business-Broker.API": "Business-Broker.API",
-    "Sensors-Report-MQTT-to-Orion": "MQTT-to-Orion"
+    "Sensors-Report-MQTT-to-Orion": "MQTT-to-Orion",
+    "Sensors-Report-Explorer": "Explorer"
 }
 
 # Docker image names for each project
@@ -23,7 +24,8 @@ DOCKER_IMAGE_NAMES = {
     "Sensors-Report-Audit": "viobiscu/sensors-report-audit:latest",
     "Sensors-Report-Audit.API": "viobiscu/sensors-report-audit:latest",
     "Sensors-Report-Business-Broker.API": "viobiscu/sensors-report-business-broker:latest",
-    "Sensors-Report-MQTT-to-Orion": "viobiscu/sensors-report-mqtt-to-orion:latest"
+    "Sensors-Report-MQTT-to-Orion": "viobiscu/sensors-report-mqtt-to-orion:latest",
+    "Sensors-Report-Explorer": "viobiscu/sensors-report-explorer:latest"
 }
 
 # List all .csproj files in the workspace
@@ -34,6 +36,11 @@ def find_projects(root):
         for file in files:
             if file.endswith('.csproj'):
                 projects.append(os.path.join(dirpath, file))
+    # Add static Explorer project (no .csproj, but has Dockerfile)
+    explorer_path = os.path.join(root, 'Sensors-Report-Explorer')
+    explorer_dockerfile = os.path.join(explorer_path, 'Dockerfile')
+    if os.path.exists(explorer_dockerfile):
+        projects.append(os.path.join(explorer_path, 'Dockerfile'))
     return projects
 
 def print_error(msg):
@@ -183,16 +190,18 @@ def main():
             abbr = PROJECT_ABBREVIATIONS.get(proj_dir, proj_dir)
             dockerfile = os.path.join(os.path.dirname(csproj), 'Dockerfile')
             print_info(f"Options for {abbr}:")
-            print(f"{CYAN}1. Build{RESET}")
-            if os.path.exists(dockerfile):
+            if csproj.endswith('.csproj'):
+                print(f"{CYAN}1. Build{RESET}")
+            if os.path.exists(dockerfile) or csproj.endswith('Dockerfile'):
                 print(f"{CYAN}2. Create Docker image{RESET}")
-                print(f"{CYAN}3. Start debug{RESET}")
+                if csproj.endswith('.csproj'):
+                    print(f"{CYAN}3. Start debug{RESET}")
             action = input(f"{YELLOW}Choose action (1/2/3, or 'b' to go back): {RESET}")
-            if action == '1':
+            if action == '1' and csproj.endswith('.csproj'):
                 build_project(csproj)
-            elif action == '2' and os.path.exists(dockerfile):
+            elif action == '2' and (os.path.exists(dockerfile) or csproj.endswith('Dockerfile')):
                 docker_build(csproj)
-            elif action == '3' and os.path.exists(dockerfile):
+            elif action == '3' and csproj.endswith('.csproj') and os.path.exists(dockerfile):
                 start_debug(csproj)
             elif action.lower() == 'b':
                 continue
