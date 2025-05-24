@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sensors-report-audit-api
+  name: sensors-report-audit-api-test
   labels:
     app: sensors-report-audit-api
 spec:
@@ -16,14 +16,12 @@ spec:
     spec:
       containers:
         - name: sensors-report-audit-api
-          image: viobiscu/sensors-report-audit:latest
+          image: viobiscu/sensors-report-audit:dev
           ports:
             - containerPort: 80
           env:
-            - name: ASPNETCORE_ENVIRONMENT
-              value: "Production"
             - name: SR_BB_ORION_HOST
-              value: "orion.sensorsreport.net"
+              value: "localhost"
             - name: SR_BB_ORION_PORT
               value: "31026"
             - name: SR_BB_AUDIT_URL
@@ -35,4 +33,4 @@ spec:
             - name: SR_BB_KEYCLOAK_CLIENTID
               value: "ContextBroker"
             - name: SR_BB_KEYCLOAK_CLIENTSECRET
-              value: "AELYK4tusYazvIDIvw0meQZiSnGMnVJP"
+              value: "dev-secret"
