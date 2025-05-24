@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SensorsReportAudit\SensorsReportAudit.csproj" />
+    <ProjectReference Include="..\Sensors-Report-Audit\SensorsReportAudit.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,4 +9,8 @@ resources:
   - sensors-report-business-broker-api/deployment.yaml
   - sensors-report-business-broker-api/service.yaml
   - sensors-report-mqtt-to-orion/deployment.yaml
-  - sensors-report-mqtt-to-orion/service.yaml
+  - sensors-report-mqtt-to-orion/service.yaml  git credential reject <<EOF
+  protocol=https
+  host=github.com
+  EOF  git pull
+  git push
