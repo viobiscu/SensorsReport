@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sensors-report-mqtt-to-orion
+  name: sensors-report-mqtt-to-orion-test
   labels:
     app: sensors-report-mqtt-to-orion
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: sensors-report-mqtt-to-orion
@@ -16,10 +16,10 @@ spec:
     spec:
       containers:
         - name: sensors-report-mqtt-to-orion
-          image: viobiscu/srmqtt-orion:latest
+          image: viobiscu/srmqtt-orion:dev
           ports:
             - containerPort: 80
           env:
             - name: ASPNETCORE_ENVIRONMENT
-              value: "Production"
-            # Add other production environment variables here
+              value: "Development"
+            # Add other dev/test environment variables here
