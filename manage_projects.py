@@ -16,7 +16,9 @@ PROJECT_ABBREVIATIONS = {
     "Sensors-Report-Audit.API": "Audit.API",
     "Sensors-Report-Business-Broker.API": "Business-Broker.API",
     "Sensors-Report-MQTT-to-Orion": "MQTT-to-Orion",
-    "Sensors-Report-Explorer": "Explorer"
+    "Sensors-Report-Explorer": "Explorer",
+    "Sensors-Report-Provision.API": "Provision.API",
+    "Sensors-Report-Workflow.API": "Workflow.API"
 }
 
 # Docker image names for each project
@@ -25,7 +27,9 @@ DOCKER_IMAGE_NAMES = {
     "Sensors-Report-Audit.API": "viobiscu/sensors-report-audit:latest",
     "Sensors-Report-Business-Broker.API": "viobiscu/sensors-report-business-broker:latest",
     "Sensors-Report-MQTT-to-Orion": "viobiscu/sensors-report-mqtt-to-orion:latest",
-    "Sensors-Report-Explorer": "viobiscu/sensors-report-explorer:latest"
+    "Sensors-Report-Explorer": "viobiscu/sensors-report-explorer:latest",
+    "Sensors-Report-Provision.API": "viobiscu/sensors-report-provision-api:latest",
+    "Sensors-Report-Workflow.API": "viobiscu/sensors-report-workflow-api:latest"
 }
 
 # List all .csproj files in the workspace
@@ -114,12 +118,21 @@ def docker_build(csproj):
         if result.returncode == 0:
             print_success("Docker build succeeded.")
             print(f"{CYAN}Options for update:{RESET}")
-            print(f"{CYAN}1. Update local k8s{RESET}")
-            print(f"{CYAN}2. Update production via Flux{RESET}")
+            print(f"{CYAN}1. Push image to repo{RESET}")
+            print(f"{CYAN}2. Update local k8s{RESET}")
+            print(f"{CYAN}3. Update production via Flux{RESET}")
             print(f"{CYAN}b. Back to menu.{RESET}")
             choice = input(f"{YELLOW}Select an update option: {RESET}")
             if choice == "1":
-                # Try to find the deployment YAML for this project
+                # Push image to repo
+                print_info(f"Pushing Docker image {image_name} to repository ...")
+                result = subprocess.run(["docker", "push", image_name])
+                if result.returncode == 0:
+                    print_success("Docker image pushed successfully.")
+                else:
+                    print_error("Failed to push Docker image.")
+            elif choice == "2":
+                # Update local k8s
                 flux_dir = os.path.join(workspace_root, 'flux')
                 deployment_yaml = None
                 service_yaml = None
@@ -137,12 +150,12 @@ def docker_build(csproj):
                     print_info(f"Applying {deployment_yaml} ...")
                     subprocess.run(["kubectl", "apply", "-f", deployment_yaml])
                 else:
-                    print_warning("Could not find deployment-test.yaml for this project in flux directory.")
+                    print_warning(f"Could not find *-deployment.yaml for this project in flux directory. Looked in: {flux_dir} and subfolders for files matching '*-deployment.yaml' and project name '{proj_dir.replace('.', '-').lower()}'.")
                 if service_yaml:
                     print_info(f"Applying {service_yaml} ...")
                     subprocess.run(["kubectl", "apply", "-f", service_yaml])
                 else:
-                    print_warning("Could not find service.yaml for this project in flux directory.")
+                    print_warning(f"Could not find *-service.yaml for this project in flux directory. Looked in: {flux_dir} and subfolders for files matching '*-service.yaml' and project name '{proj_dir.replace('.', '-').lower()}'.")
                 # Extract container and deployment name for patching
                 if deployment_yaml:
                     container_name = extract_container_name_from_deployment(deployment_yaml)
@@ -157,7 +170,7 @@ def docker_build(csproj):
                         update_local_k8s(deployment_name, container_name, image_name)
                     else:
                         print_error("Could not determine deployment or container name from YAML.")
-            elif choice == "2":
+            elif choice == "3":
                 manifest_path = input(f"{CYAN}Enter path to flux deployment manifest: {RESET}")
                 update_flux_manifest(manifest_path, image_name)
             elif choice.lower() == 'b':
@@ -196,7 +209,11 @@ def main():
         ("Business-Broker.API", "Sensors-Report-Business-Broker.API"),
         ("Audit", "Sensors-Report-Audit"),
         ("MQTT-to-Orion", "Sensors-Report-MQTT-to-Orion"),
-        ("Explorer", "Sensors-Report-Explorer")
+        ("Provision.API", "Sensors-Report-Provision.API"),
+        ("Email.API", "Sensors-Report-Email.API"),
+        ("SMS.API", "Sensors-Report-SMS.API"),
+        ("Explorer", "Sensors-Report-Explorer"),
+        ("Workflow.API", "Sensors-Report-Workflow.API")
     ]
     while True:
         for idx, (menu_name, proj_dir) in enumerate(MENU_PROJECTS):
