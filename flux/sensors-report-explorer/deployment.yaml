@@ -31,13 +31,13 @@ spec:
             - name: CORS_ORIGINS
               value: "*"
             - name: KEYCLOAK_AUTH_URL
-              value: "https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/auth"
+              value: "http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/auth"
             - name: KEYCLOAK_TOKEN_URL
-              value: "https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/token"
+              value: "http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/token"
             - name: KEYCLOAK_USERINFO_URL
-              value: "https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/userinfo"
+              value: "http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/userinfo"
             - name: KEYCLOAK_LOGOUT_URL
-              value: "https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/logout"
+              value: "http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/logout"
             - name: KEYCLOAK_CLIENT_ID
               value: "ContextBroker"
             - name: KEYCLOAK_CLIENT_SECRET
@@ -47,7 +47,7 @@ spec:
             - name: DATA_PRODUCT_URL
               value: "http://localhost:31483"
             - name: CONTEXT_BROKER_URL
-              value: "http://orion.sensorsreport.net:31026"
+              value: "http://orion-ld-broker:1026"
             - name: SECURE_COOKIES
               value: "true"
             - name: HOST
