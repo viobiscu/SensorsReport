@@ -857,6 +857,15 @@ class SubscriptionClient {
 
     async makeRequest(endpoint, method, body = null) {
         this.updateTenantHeaders();
+        // Check if body has @context or context property
+        if (body && (body['@context'] || body.context)) {
+            this.headers["Content-Type"] = "application/ld+json";
+        } else {
+            this.headers["Content-Type"] = "application/json";
+        }
+        console.log(`Making ${method} request to: ${endpoint}`);
+        console.log("Request headers:", this.headers);
+        appendToLogs(`Subscription Request: ${method} ${endpoint}`);
         const response = await fetch(endpoint, {
             method,
             headers: this.headers,
@@ -985,90 +994,6 @@ class DataProductClient {
     }
 }
 
-/**
- * User-facing API functions for UI integration
- */
-// GET data with user prompt
-// export async function __DELETE_processGetData(endpoint, defaultId) {
-//     try {
-//         let entityId = prompt('Enter the Entity ID:', localStorage.getItem('GetEntityID') || defaultId);
-//         if (!entityId) return;
-
-//         // Store the entity ID for future use
-//         if (entityId !== defaultId) {
-//             localStorage.setItem('GetEntityID', entityId);
-//         }
-
-//         const client = new OrionLDClient();
-//         let data;
-
-//         // Check if we're getting an attribute
-//         if (endpoint.includes('attributes')) {
-//             const attributeName = prompt('Enter the Attribute Name:');
-//             if (!attributeName) return;
-
-//             data = await client.getAttribute(entityId, attributeName);
-//             appendToLogs(`Successfully retrieved attribute "${attributeName}" from entity ${entityId}`);
-//         } else {
-//             data = await client.getEntity(entityId);
-//             appendToLogs(`Successfully retrieved entity ${entityId}`);
-//         }
-
-//         // Use the main JSON editor to display results if available
-//         if (window.mainEditor) {
-//             window.mainEditor.setValue(JSON.stringify(data, null, 2));
-//             console.log('Updated main editor with GET response data');
-//         } else {
-//             // Fallback to displayJSON if mainEditor is not available
-//             displayJSON(data);
-//             console.warn('mainEditor not available, using fallback displayJSON function');
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//         appendToLogs(`Error: ${error.message}`);
-        
-//         // Display error in main editor if available
-//         if (window.mainEditor) {
-//             window.mainEditor.setValue(JSON.stringify({
-//                 error: error.message,
-//                 timestamp: new Date().toISOString()
-//             }, null, 2));
-//         }
-//     }
-// }
-
-// DELETE data with user prompt
-// export async function __DELETE_processDeleteData(endpoint, defaultId) {
-//     try {
-//         let entityId = prompt('Enter the Entity ID:', localStorage.getItem('DeleteEntityID') || defaultId);
-//         if (!entityId) return;
-
-//         // Store the entity ID for future use
-//         if (entityId !== defaultId) {
-//             localStorage.setItem('DeleteEntityID', entityId);
-//         }
-
-//         const client = new OrionLDClient();
-//         let data;
-
-//         // Check if we're deleting an attribute
-//         if (endpoint.includes('attributes')) {
-//             const attributeName = prompt('Enter the Attribute Name:');
-//             if (!attributeName) return;
-
-//             data = await client.deleteAttribute(entityId, attributeName);
-//             appendToLogs(`Successfully deleted attribute "${attributeName}" from entity ${entityId}`);
-//         } else {
-//             data = await client.deleteEntity(entityId);
-//             appendToLogs(`Successfully deleted entity ${entityId}`);
-//         }
-
-//         displayJSON(data);
-//     } catch (error) {
-//         console.error('Error:', error);
-//         appendToLogs(`Error: ${error.message}`);
-//     }
-// }
 
 // POST data from form
 export async function processPostQuery(dataPost) {
@@ -1314,22 +1239,6 @@ if (typeof window !== 'undefined') {
         };
     }
 }
-
-// function displayEntitiesInNewTab(data, type) {
-//     // Use JsonTableEditor instead of JsonEditor for better tabular display
-//     const editorOptions = {
-//         initialValue: JSON.stringify(data, null, 2),
-//         readOnly: true,
-//         mode: 'get',
-//         height: 500
-//     };
-    
-//     const tabTitle = type ? `Entities (${type})` : 'Entities';
-//     const tabId = window.tabManager.createEditorTab(tabTitle, {
-//         ...editorOptions,
-//         editorClass: JsonTableEditor // Specify to use JsonTableEditor
-//     });
-// }
 
 export { OrionLDClient, OrionLDSearchClient, QuantumLeapClient, SubscriptionClient, DataProductClient };
 export default OrionLDClient;
