@@ -291,8 +291,9 @@ def main():
                 print(f"{CYAN}2. Apply Service{RESET}")
                 print(f"{CYAN}3. Get Pod Status{RESET}")
                 print(f"{CYAN}4. Get Logs{RESET}")
+                print(f"{CYAN}5. Build and Push Docker Image{RESET}")
                 print(f"{CYAN}B. Back to Main Menu{RESET}")
-                action = input(f"{YELLOW}Choose action (1-4, or 'B' to go back): {RESET}")
+                action = input(f"{YELLOW}Choose action (1-5, or 'B' to go back): {RESET}")
                 if action == '1':
                     if os.path.exists(deployment_yaml):
                         print_info(f"Applying {deployment_yaml} ...")
@@ -317,6 +318,26 @@ def main():
                         subprocess.run(["kubectl", "logs", pods])
                     else:
                         print_error(f"No pod found for {label}")
+                elif action == '5':
+                    # Build and push Docker image for backend/frontend
+                    if proj_dir.endswith("Backend"):
+                        dockerfile = os.path.join(root, "Sensors-Report-Explorer", "Dockerfile.backend")
+                        image_name = "viobiscu/sensors-report-explorer-backend:latest"
+                    else:
+                        dockerfile = os.path.join(root, "Sensors-Report-Explorer", "Dockerfile.frontend")
+                        image_name = "viobiscu/sensors-report-explorer-frontend:latest"
+                    print_info(f"Building Docker image {image_name} ...")
+                    result = subprocess.run(["docker", "build", "-f", dockerfile, "-t", image_name, os.path.join(root, "Sensors-Report-Explorer")])
+                    if result.returncode == 0:
+                        print_success(f"Docker build succeeded for {image_name}.")
+                        print_info(f"Pushing Docker image {image_name} to repository ...")
+                        push_result = subprocess.run(["docker", "push", image_name])
+                        if push_result.returncode == 0:
+                            print_success(f"Docker image {image_name} pushed successfully.")
+                        else:
+                            print_error(f"Failed to push Docker image {image_name}.")
+                    else:
+                        print_error(f"Docker build failed for {image_name}.")
                 elif action.lower() == 'b':
                     continue
                 else:
