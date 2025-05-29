@@ -35,6 +35,9 @@ HOST = os.environ.get('HOST', '0.0.0.0')
 PORT = int(os.environ.get('PORT', '5000'))
 DEBUG_MODE = os.environ.get('DEBUG', 'false').lower() in ('true', 't', '1', 'yes')
 
+# Redirect URI for Keycloak
+REDIRECT_URI = os.environ.get('REDIRECT_URI')
+
 # Constants
 DEFAULT_TOKEN_SCOPE = 'openid profile email'
 DEFAULT_TOKEN_RESPONSE_TYPE = 'code'
@@ -702,16 +705,16 @@ def login():
     logger.debug("Starting login flow")
     state = str(uuid.uuid4())
     session['oauth_state'] = state
-    
-    # Build the authorization URL
+
+    # Use REDIRECT_URI from env if set, else default
+    redirect_uri = REDIRECT_URI or (request.url_root.rstrip('/') + '/api/auth/callback')
     auth_params = {
         'client_id': KEYCLOAK_CONFIG['client_id'],
-        'redirect_uri': request.url_root.rstrip('/') + '/api/auth/callback',
+        'redirect_uri': redirect_uri,
         'response_type': 'code',
         'scope': 'openid profile email',
         'state': state
     }
-    
     auth_url = f"{KEYCLOAK_CONFIG['auth_url']}?{urlencode(auth_params)}"
     logger.debug(f"Redirecting to auth URL: {auth_url}")
     return redirect(auth_url)
@@ -722,29 +725,24 @@ def callback():
     Handle the callback from Keycloak after authentication
     """
     logger.debug("Auth callback received")
-    # Verify state to prevent CSRF
     state = request.args.get('state')
     stored_state = session.get('oauth_state')
-    
     if not state or state != stored_state:
         logger.error(f"State mismatch: received {state}, stored {stored_state}")
         return jsonify({'error': 'Invalid state parameter'}), 400
-    
-    # Exchange code for tokens
     code = request.args.get('code')
     if not code:
         logger.error("No authorization code provided")
         return jsonify({'error': 'No authorization code provided'}), 400
-    
-    # Prepare token request
+    # Use REDIRECT_URI from env if set, else default
+    redirect_uri = REDIRECT_URI or (request.url_root.rstrip('/') + '/api/auth/callback')
     token_data = {
         'grant_type': 'authorization_code',
         'client_id': KEYCLOAK_CONFIG['client_id'],
         'client_secret': KEYCLOAK_CONFIG['client_secret'],
         'code': code,
-        'redirect_uri': request.url_root.rstrip('/') + '/api/auth/callback'
+        'redirect_uri': redirect_uri
     }
-    
     try:
         # Get tokens from Keycloak
         logger.debug(f"Exchanging code for token at: {KEYCLOAK_CONFIG['token_url']}")
@@ -1062,6 +1060,15 @@ def delete_data_product(data_product_id):
 @app.route('/health')
 def health_check():
     return jsonify({"status": "ok", "version": "1.0.0"})
+
+# Add endpoint to return redirect_uri
+@app.route('/api/auth/redirect-uri', methods=['GET'])
+def get_redirect_uri():
+    """
+    Return the redirect_uri used for Keycloak authentication
+    """
+    redirect_uri = REDIRECT_URI or (request.url_root.rstrip('/') + '/api/auth/callback')
+    return jsonify({'redirect_uri': redirect_uri})
 
 if __name__ == '__main__':
     # Get configuration from environment variables
