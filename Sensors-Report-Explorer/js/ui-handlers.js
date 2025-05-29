@@ -642,7 +642,20 @@ export function openFormQuantumLeapTableView() {
                 length: Array.isArray(entities) ? entities.length : 'N/A',
                 firstEntity: Array.isArray(entities) && entities.length > 0 ? entities[0] : null
             });
-            
+            // Update editor options with fetched data
+            if (Array.isArray(entities)) {
+                editorOptions.initialValue = JSON.stringify(entities, null, 2);
+                appendToLogs(`Successfully fetched ${entities.length} entities from Quantum Leap`);
+            } else {
+                appendToLogs(`Successfully fetched entity data from Quantum Leap (not an array)`);
+            }
+
+            // Create a new tab with the table editor
+            const tabId = window.tabManager.createEditorTab(tabTitle, editorOptions);
+            console.log(`Created QuantumLeap table tab with ID: ${tabId}`);
+
+            // Log the operation
+            appendToLogs('Opened QuantumLeap table view in a new tab');
             appendToLogs(`Successfully fetched entities from Quantum Leap`);
 
             // Update editor with fetched data

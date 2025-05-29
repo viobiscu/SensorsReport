@@ -20,14 +20,14 @@ class FormDataProductTableToolbarEditor extends TableToolbarEditorModular {
         try {
             if (typeof value === 'string') {
                 this.data = JSON.parse(value);
-            } else if (Array.isArray(value)) {
+            } else if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
                 this.data = value;
             } else {
-                throw new Error('setValue expects a JSON string or array');
+                throw new Error('setValue expects a JSON string, array, or object');
             }
         } catch (e) {
             console.error('[FormDataProductTableToolbarEditor] setValue error:', e);
-            this.data = [];
+            this.data = { error: e.message };
         }
         this.updateDisplay();
         console.debug('[FormDataProductTableToolbarEditor] setValue after update, this.data:', this.data);
@@ -56,9 +56,21 @@ class FormDataProductTableToolbarEditor extends TableToolbarEditorModular {
         const data = this.getValue(true);
         try {
             const dp = await this.dataProductClient.create(data);
-            this.setValue(dp);
+            // Always show the raw backend response, even for non-JSON or empty responses
+            if (typeof dp === 'object') {
+                this.setValue(dp);
+            } else {
+                // Show as string if not JSON
+                this.setValue({ raw: dp });
+            }
+            if (dp && dp.error) {
+                appendToLogs('DataProduct POST error: ' + dp.error);
+            } else {
+                appendToLogs('DataProduct POST success: ' + (typeof dp === 'string' ? dp : JSON.stringify(dp)));
+            }
         } catch (e) {
             this.setValue({ error: e.message, timestamp: new Date().toISOString() });
+            appendToLogs('DataProduct POST exception: ' + e.message);
         }
     }
     async handlePut() {
