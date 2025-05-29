@@ -80,7 +80,9 @@ def update_local_k8s(deployment_name, container_name, image_name, namespace="def
 
 def update_flux_manifest(manifest_path, new_image):
     import re
+    import os
     print_info(f"Updating Flux manifest {manifest_path} with image {new_image} ...")
+    manifest_path = os.path.expanduser(manifest_path)
     with open(manifest_path, "r") as f:
         content = f.read()
     # Replace the image line
@@ -103,7 +105,7 @@ def extract_container_name_from_deployment(deployment_yaml_path):
         print(f"Could not extract container name from {deployment_yaml_path}: {e}")
     return None
 
-def docker_build(csproj):
+def docker_build(csproj, skip_menu=False, only_push=False, only_k8s=False, only_flux=False):
     project_dir = os.path.dirname(csproj)
     dockerfile = os.path.join(project_dir, 'Dockerfile')
     proj_dir = os.path.basename(project_dir)
@@ -117,13 +119,9 @@ def docker_build(csproj):
         ], cwd=workspace_root)
         if result.returncode == 0:
             print_success("Docker build succeeded.")
-            print(f"{CYAN}Options for update:{RESET}")
-            print(f"{CYAN}1. Push image to repo{RESET}")
-            print(f"{CYAN}2. Update local k8s{RESET}")
-            print(f"{CYAN}3. Update production via Flux{RESET}")
-            print(f"{CYAN}b. Back to menu.{RESET}")
-            choice = input(f"{YELLOW}Select an update option: {RESET}")
-            if choice == "1":
+            if skip_menu:
+                return
+            if only_push:
                 # Push image to repo
                 print_info(f"Pushing Docker image {image_name} to repository ...")
                 result = subprocess.run(["docker", "push", image_name])
@@ -131,7 +129,8 @@ def docker_build(csproj):
                     print_success("Docker image pushed successfully.")
                 else:
                     print_error("Failed to push Docker image.")
-            elif choice == "2":
+                return
+            if only_k8s:
                 # Update local k8s
                 flux_dir = os.path.join(workspace_root, 'flux')
                 deployment_yaml = None
@@ -170,13 +169,12 @@ def docker_build(csproj):
                         update_local_k8s(deployment_name, container_name, image_name)
                     else:
                         print_error("Could not determine deployment or container name from YAML.")
-            elif choice == "3":
+            elif only_flux:
+                # Update production via Flux
                 manifest_path = input(f"{CYAN}Enter path to flux deployment manifest: {RESET}")
                 update_flux_manifest(manifest_path, image_name)
-            elif choice.lower() == 'b':
-                print_info("Returning to menu.")
-            else:
-                print_warning("Invalid action.")
+                return
+            # ...no menu here, handled by deployment submenu...
         else:
             print_error("Docker build failed.")
     else:
@@ -239,12 +237,12 @@ def main():
                 continue
             dockerfile = os.path.join(os.path.dirname(csproj), 'Dockerfile')
             print_info(f"Options for {menu_name}:")
-            if csproj.endswith('.csproj'):
+            if csproj.endswith('.csproj') or (os.path.exists(dockerfile) or csproj.endswith('Dockerfile')):
                 print(f"{CYAN}1. Build Debug{RESET}")
                 print(f"{CYAN}2. Build Production{RESET}")
                 print(f"{CYAN}3. Start Debug{RESET}")
                 print(f"{CYAN}4. Start Production{RESET}")
-                print(f"{CYAN}5. Create Docker image{RESET}")
+                print(f"{CYAN}5. Deployment{RESET}")
                 print(f"{CYAN}B. Back to Main Menu{RESET}")
                 action = input(f"{YELLOW}Choose action (1-5, or 'B' to go back): {RESET}")
                 if action == '1':
@@ -302,17 +300,49 @@ def main():
                     except Exception as e:
                         print_error(f"Error during production run: {e}")
                 elif action == '5':
-                    docker_build(csproj)
-                elif action.lower() == 'b':
-                    continue
-                else:
-                    print_warning("Invalid action.")
-            elif os.path.exists(dockerfile) or csproj.endswith('Dockerfile'):
-                print(f"{CYAN}5. Create Docker image{RESET}")
-                print(f"{CYAN}B. Back to Main Menu{RESET}")
-                action = input(f"{YELLOW}Choose action (5, or 'B' to go back): {RESET}")
-                if action == '5':
-                    docker_build(csproj)
+                    # Deployment submenu
+                    while True:
+                        print(f"{CYAN}Options for deployment:{RESET}")
+                        print(f"{CYAN}1. Create Docker image{RESET}")
+                        print(f"{CYAN}2. Push image to repo{RESET}")
+                        print(f"{CYAN}3. Update local k8s{RESET}")
+                        print(f"{CYAN}4. Remove from local k8s{RESET}")
+                        print(f"{CYAN}5. Update production via Flux{RESET}")
+                        print(f"{CYAN}b. Back to menu.{RESET}")
+                        dep_action = input(f"{YELLOW}Select a deployment option: {RESET}")
+                        if dep_action == '1':
+                            docker_build(csproj, skip_menu=True)
+                        elif dep_action == '2':
+                            docker_build(csproj, only_push=True)
+                        elif dep_action == '3':
+                            docker_build(csproj, only_k8s=True)
+                        elif dep_action == '4':
+                            # Remove from local k8s
+                            workspace_root = os.path.dirname(os.path.abspath(__file__))
+                            flux_dir = os.path.join(workspace_root, 'flux')
+                            proj_dir = os.path.basename(os.path.dirname(csproj))
+                            deployment_yaml = None
+                            for subdir in os.listdir(flux_dir):
+                                subdir_path = os.path.join(flux_dir, subdir)
+                                if os.path.isdir(subdir_path):
+                                    candidate_deploy = os.path.join(subdir_path, 'deployment-test.yaml')
+                                    if os.path.exists(candidate_deploy) and proj_dir.replace('.', '-').lower() in candidate_deploy:
+                                        deployment_yaml = candidate_deploy
+                            if deployment_yaml:
+                                import yaml as pyyaml
+                                with open(deployment_yaml, 'r') as f:
+                                    deployment = pyyaml.safe_load(f)
+                                deployment_name = deployment['metadata']['name']
+                                print_info(f"Removing deployment {deployment_name} from local k8s ...")
+                                subprocess.run(["kubectl", "delete", "deployment", deployment_name])
+                            else:
+                                print_warning(f"Could not find deployment-test.yaml for this project in flux directory. Looked in: {flux_dir} and subfolders for files matching 'deployment-test.yaml' and project name '{proj_dir.replace('.', '-').lower()}'.")
+                        elif dep_action == '5':
+                            docker_build(csproj, only_flux=True)
+                        elif dep_action.lower() == 'b':
+                            break
+                        else:
+                            print_warning("Invalid action.")
                 elif action.lower() == 'b':
                     continue
                 else:
