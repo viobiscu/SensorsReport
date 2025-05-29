@@ -5,7 +5,7 @@ metadata:
   labels:
     app: sensors-report-explorer-frontend
 data:
-  nginx.conf: |
+  default.conf: |
     # Nginx configuration for Sensors-Report-Explorer frontend
     # Proxies all /api/ requests to backend service
     server {
