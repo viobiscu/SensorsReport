@@ -170,8 +170,28 @@ def docker_build(csproj, skip_menu=False, only_push=False, only_k8s=False, only_
                     else:
                         print_error("Could not determine deployment or container name from YAML.")
             elif only_flux:
-                # Update production via Flux
-                manifest_path = input(f"{CYAN}Enter path to flux deployment manifest: {RESET}")
+                # Update production via Flux (interactive, persistent path)
+                config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".flux_manifest_path")
+                last_path = None
+                if os.path.exists(config_file):
+                    with open(config_file, "r") as f:
+                        last_path = f.read().strip()
+                while True:
+                    prompt = f"{CYAN}Enter path to flux deployment manifest"
+                    if last_path:
+                        prompt += f" [{last_path}]"
+                    prompt += f": {RESET}"
+                    manifest_path = input(prompt).strip()
+                    if not manifest_path and last_path:
+                        manifest_path = last_path
+                    manifest_path_expanded = os.path.expanduser(manifest_path)
+                    if os.path.isfile(manifest_path_expanded):
+                        # Save for next time
+                        with open(config_file, "w") as f:
+                            f.write(manifest_path)
+                        break
+                    else:
+                        print_error(f"File not found: {manifest_path_expanded}. Please enter a valid path.")
                 update_flux_manifest(manifest_path, image_name)
                 return
             # ...no menu here, handled by deployment submenu...
