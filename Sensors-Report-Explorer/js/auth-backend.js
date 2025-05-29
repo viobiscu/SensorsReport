@@ -10,8 +10,8 @@ class AuthManager {
     constructor() {
         // User state
         this.isUserAuthenticated = false;
-        // Update this to match your actual backend URL (where the Python app is running)
-        this.backendBaseUrl = window.location.origin;  // Use the same origin as the current page instead of hardcoded localhost
+        // Use BACKEND_BASE_URL from config.js if available, otherwise fallback to window.location.origin
+        this.backendBaseUrl = (window.__SR_EXPLORER_CONFIG__ && window.__SR_EXPLORER_CONFIG__.BACKEND_BASE_URL) || window.location.origin;  // Use the same origin as the current page instead of hardcoded localhost
         
         // Keycloak configuration - same as backend config
         this.keycloakConfig = {

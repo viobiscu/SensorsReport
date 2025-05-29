@@ -1,3 +1,17 @@
 # Dockerfile for Sensors-Report-Explorer frontend (Nginx)
 FROM nginx:alpine
+
+# Install envsubst for runtime variable substitution
+RUN apk add --no-cache gettext
+
+# Copy static files
 COPY . /usr/share/nginx/html
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Set entrypoint to generate config.js from env at container start
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+CMD ["nginx", "-g", "daemon off;"]

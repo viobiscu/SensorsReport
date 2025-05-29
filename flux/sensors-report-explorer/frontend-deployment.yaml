@@ -19,3 +19,6 @@ spec:
           image: viobiscu/sensors-report-explorer-frontend:latest
           ports:
             - containerPort: 80
+          env:
+            - name: BACKEND_BASE_URL
+              value: "http://sensors-report-explorer-backend:5000"
