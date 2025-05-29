@@ -22,3 +22,11 @@ spec:
           env:
             - name: BACKEND_BASE_URL
               value: "http://sensors-report-explorer-backend:5000"
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: sensors-report-explorer-nginx-config
