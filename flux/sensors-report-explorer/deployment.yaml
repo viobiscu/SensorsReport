@@ -43,9 +43,9 @@ spec:
             - name: KEYCLOAK_CLIENT_SECRET
               value: ""
             - name: QUANTUM_LEAP_URL
-              value: "http://quantum.sensorsreport.net:8668"
+              value: "http://quantumleap:8668"
             - name: DATA_PRODUCT_URL
-              value: "http://DATA_PRODUCT_URL:8000"
+              value: "http://data-product-manager:8000"
             - name: CONTEXT_BROKER_URL
               value: "http://orion-ld-broker:1026"
             - name: SECURE_COOKIES
