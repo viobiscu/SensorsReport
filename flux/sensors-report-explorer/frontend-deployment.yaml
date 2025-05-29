@@ -19,11 +19,3 @@ spec:
           image: nginx:alpine
           ports:
             - containerPort: 80
-          volumeMounts:
-            - name: frontend-files
-              mountPath: /usr/share/nginx/html
-      volumes:
-        - name: frontend-files
-          hostPath:
-            path: /home/vio/Documents/SensorsReport/Sensors-Report-Explorer/frontend
-            type: Directory
