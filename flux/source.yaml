@@ -1,10 +1,10 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
-  name: sensors-report-audit
+  name: sensors-report
   namespace: flux-system
 spec:
   interval: 1m
-  url: file:///home/vio/Documents/SensorsReport
+  url: https://github.com/viobiscu/SensorsReport
   ref:
     branch: main
