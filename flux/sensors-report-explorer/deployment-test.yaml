@@ -43,7 +43,7 @@ spec:
             - name: DATA_PRODUCT_URL
               value: "http://dpm-data-product-manager:8000"
             - name: CONTEXT_BROKER_URL
-              value: "http://update-orion-ld-broker:1026"
+              value: "http://orion-ld-broker:1026"
             - name: SECURE_COOKIES
               value: "false"
             - name: HOST
