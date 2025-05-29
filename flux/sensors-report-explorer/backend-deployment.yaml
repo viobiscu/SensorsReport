@@ -15,7 +15,7 @@ spec:
         app: sensors-report-explorer-backend
     spec:
       containers:
-        - name: sensors-report-explorer
+        - name: sensors-report-explorer-backend
           image: viobiscu/sensors-report-explorer-backend:latest
           ports:
             - containerPort: 5000
