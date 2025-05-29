@@ -94,6 +94,76 @@
             }
         }
 
+        // --- Tenant Combo Box Logic ---
+        const TENANT_STORAGE_KEY = 'sr_tenants';
+        const TENANT_MAX = 10;
+        const tenantInput = document.getElementById('tenantname');
+        const tenantCombo = document.getElementById('tenantCombo');
+
+        function getTenantsFromStorage() {
+            try {
+                const tenants = JSON.parse(localStorage.getItem(TENANT_STORAGE_KEY));
+                return Array.isArray(tenants) ? tenants : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveTenantsToStorage(tenants) {
+            localStorage.setItem(TENANT_STORAGE_KEY, JSON.stringify(tenants.slice(0, TENANT_MAX)));
+        }
+
+        function addTenant(tenant) {
+            if (!tenant) return;
+            let tenants = getTenantsFromStorage();
+            tenants = tenants.filter(t => t !== tenant);
+            tenants.unshift(tenant);
+            if (tenants.length > TENANT_MAX) tenants = tenants.slice(0, TENANT_MAX);
+            saveTenantsToStorage(tenants);
+            populateTenantCombo(tenants);
+        }
+
+        function populateTenantCombo(tenants) {
+            tenantCombo.innerHTML = '';
+            tenants.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                tenantCombo.appendChild(opt);
+            });
+        }
+
+        // When a tenant is selected from combo, update input
+        tenantCombo.addEventListener('change', () => {
+            tenantInput.value = tenantCombo.value;
+        });
+
+        // When input changes, add to storage if new
+        tenantInput.addEventListener('change', () => {
+            const val = tenantInput.value.trim();
+            if (val) addTenant(val);
+        });
+
+        // On authentication, call this with new tenantId and username
+        window.setTenantFromAuth = function(tenantId, username) {
+            if (tenantId) {
+                tenantInput.value = tenantId;
+                addTenant(tenantId);
+            }
+            // Optionally set username somewhere if needed
+            // document.getElementById('loginUser').textContent = 'User: ' + username;
+        };
+
+        // On page load, fill combo and input from storage
+        (function initTenantCombo() {
+            const tenants = getTenantsFromStorage();
+            populateTenantCombo(tenants);
+            if (tenants.length > 0) {
+                tenantCombo.value = tenants[0];
+                tenantInput.value = tenants[0];
+            }
+        })();
+
         // Initialize when DOM is loaded and modules are ready
         document.addEventListener('DOMContentLoaded', async function() {
             const buttonEditor = new ButtonEditor();
@@ -155,6 +225,11 @@
                     isOperation: false
                 });
                 newClearLogsButton.id = 'clearLogsBtn';
+                // Attach event handler to clear logs
+                newClearLogsButton.addEventListener('click', () => {
+                    const logs = document.getElementById('request-logs');
+                    if (logs) logs.innerHTML = '<p class="log-placeholder">Logs will appear here...</p>';
+                });
                 originalClearLogsButton.parentNode.replaceChild(newClearLogsButton, originalClearLogsButton);
                 // The event listener for clearLogsBtn is in js/ui.js and should still work
             }
@@ -218,7 +293,8 @@
         <div class="user-info">
             <span id="loginUser" class="info-label">User: Not logged in</span>
             <div class="tenant-container">
-                <span id="tenantName" class="info-label">Tenant:</span>
+                <span id="tenantLabel" class="info-label">Tenant:</span>
+                <select id="tenantCombo" style="margin-right: 5px;"></select>
                 <input id="tenantname" placeholder="tenantname" type="text"/>
             </div>
             <button id="showTokenButton"></button>
