@@ -57,4 +57,4 @@ spec:
             - name: DEBUG
               value: "false"
             - name: REDIRECT_URI
-              value: "https://explorer.sensorsreport.net/api/auth/callback"
+              value: "http://explorer.sensorsreport.net/api/auth/callback"
