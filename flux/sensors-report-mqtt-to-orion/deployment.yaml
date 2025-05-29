@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: sensors-report-mqtt-to-orion
-          image: viobiscu/sensors-report-mqtt-to-orion:latest
+          image: viobiscu/sensors-report-explorer:latest
           ports:
             - containerPort: 80
           env:
