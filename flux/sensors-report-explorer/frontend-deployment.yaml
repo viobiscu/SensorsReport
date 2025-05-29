@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: sensors-report-explorer-frontend
-          image: nginx:alpine
+          image: viobiscu/sensors-report-explorer-frontend:latest
           ports:
             - containerPort: 80
