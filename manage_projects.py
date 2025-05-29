@@ -32,6 +32,16 @@ DOCKER_IMAGE_NAMES = {
     "Sensors-Report-Workflow.API": "viobiscu/sensors-report-workflow-api:latest"
 }
 
+# Add new project abbreviations and docker image names for frontend/backend
+PROJECT_ABBREVIATIONS.update({
+    "Sensors-Report-Explorer-Backend": "Explorer.Backend",
+    "Sensors-Report-Explorer-Frontend": "Explorer.Frontend"
+})
+DOCKER_IMAGE_NAMES.update({
+    "Sensors-Report-Explorer-Backend": "viobiscu/sensors-report-explorer:latest",
+    "Sensors-Report-Explorer-Frontend": "nginx:alpine"
+})
+
 # List all .csproj files in the workspace
 
 def find_projects(root):
@@ -230,7 +240,8 @@ def main():
         ("Provision.API", "Sensors-Report-Provision.API"),
         ("Email.API", "Sensors-Report-Email.API"),
         ("SMS.API", "Sensors-Report-SMS.API"),
-        ("Explorer", "Sensors-Report-Explorer"),
+        ("Explorer Backend", "Sensors-Report-Explorer-Backend"),
+        ("Explorer Frontend", "Sensors-Report-Explorer-Frontend"),
         ("Workflow.API", "Sensors-Report-Workflow.API")
     ]
     while True:
@@ -246,16 +257,73 @@ def main():
                 print_warning("Invalid selection.")
                 continue
             menu_name, proj_dir = MENU_PROJECTS[idx]
-            # Find the project file or Dockerfile for this menu entry
-            csproj = None
-            for proj in projects:
-                if proj_dir in proj:
-                    csproj = proj
-                    break
-            if not csproj:
-                print_error(f"Project files for {menu_name} not found.")
+            # Special handling for Explorer Backend/Frontend
+            if proj_dir == "Sensors-Report-Explorer-Backend":
+                backend_yaml_dir = os.path.join(root, "flux", "sensors-report-explorer")
+                deployment_yaml = os.path.join(backend_yaml_dir, "backend-deployment.yaml")
+                service_yaml = os.path.join(backend_yaml_dir, "backend-service.yaml")
+                dockerfile = os.path.join(root, "Sensors-Report-Explorer", "Dockerfile")
+                csproj = dockerfile  # Use Dockerfile as project marker
+                print_info("Options for Explorer Backend:")
+            elif proj_dir == "Sensors-Report-Explorer-Frontend":
+                frontend_yaml_dir = os.path.join(root, "flux", "sensors-report-explorer")
+                deployment_yaml = os.path.join(frontend_yaml_dir, "frontend-deployment.yaml")
+                service_yaml = os.path.join(frontend_yaml_dir, "frontend-service.yaml")
+                dockerfile = None  # Nginx image, no Dockerfile
+                csproj = None
+                print_info("Options for Explorer Frontend:")
+            else:
+                # Find the project file or Dockerfile for this menu entry
+                csproj = None
+                for proj in projects:
+                    if proj_dir in proj:
+                        csproj = proj
+                        break
+                if not csproj:
+                    print_error(f"Project files for {menu_name} not found.")
+                    continue
+                dockerfile = os.path.join(os.path.dirname(csproj), 'Dockerfile')
+                deployment_yaml = None
+                service_yaml = None
+            # Menu for backend/frontend
+            if proj_dir.startswith("Sensors-Report-Explorer-"):
+                print(f"{CYAN}1. Apply Deployment{RESET}")
+                print(f"{CYAN}2. Apply Service{RESET}")
+                print(f"{CYAN}3. Get Pod Status{RESET}")
+                print(f"{CYAN}4. Get Logs{RESET}")
+                print(f"{CYAN}B. Back to Main Menu{RESET}")
+                action = input(f"{YELLOW}Choose action (1-4, or 'B' to go back): {RESET}")
+                if action == '1':
+                    if os.path.exists(deployment_yaml):
+                        print_info(f"Applying {deployment_yaml} ...")
+                        subprocess.run(["kubectl", "apply", "-f", deployment_yaml])
+                    else:
+                        print_error(f"Deployment YAML not found: {deployment_yaml}")
+                elif action == '2':
+                    if os.path.exists(service_yaml):
+                        print_info(f"Applying {service_yaml} ...")
+                        subprocess.run(["kubectl", "apply", "-f", service_yaml])
+                    else:
+                        print_error(f"Service YAML not found: {service_yaml}")
+                elif action == '3':
+                    label = "sensors-report-explorer-backend" if proj_dir.endswith("Backend") else "sensors-report-explorer-frontend"
+                    print_info(f"Getting pod status for {label} ...")
+                    subprocess.run(["kubectl", "get", "pods", "-l", f"app={label}"])
+                elif action == '4':
+                    label = "sensors-report-explorer-backend" if proj_dir.endswith("Backend") else "sensors-report-explorer-frontend"
+                    print_info(f"Getting logs for {label} ...")
+                    pods = subprocess.check_output(["kubectl", "get", "pods", "-l", f"app={label}", "-o", "jsonpath={.items[0].metadata.name}"]).decode().strip()
+                    if pods:
+                        subprocess.run(["kubectl", "logs", pods])
+                    else:
+                        print_error(f"No pod found for {label}")
+                elif action.lower() == 'b':
+                    continue
+                else:
+                    print_warning("Invalid action.")
+                print_info("\nReturning to main menu...\n")
                 continue
-            dockerfile = os.path.join(os.path.dirname(csproj), 'Dockerfile')
+            # ...existing code for other projects...
             print_info(f"Options for {menu_name}:")
             if csproj.endswith('.csproj') or (os.path.exists(dockerfile) or csproj.endswith('Dockerfile')):
                 print(f"{CYAN}1. Build Debug{RESET}")

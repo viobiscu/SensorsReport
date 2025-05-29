@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sensors-report-explorer
+  name: sensors-report-explorer-backend
   labels:
-    app: sensors-report-explorer
+    app: sensors-report-explorer-backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sensors-report-explorer
+      app: sensors-report-explorer-backend
   template:
     metadata:
       labels:
-        app: sensors-report-explorer
+        app: sensors-report-explorer-backend
     spec:
       containers:
         - name: sensors-report-explorer

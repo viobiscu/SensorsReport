@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-explorer-frontend
+  labels:
+    app: sensors-report-explorer-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-explorer-frontend
+  template:
+    metadata:
+      labels:
+        app: sensors-report-explorer-frontend
+    spec:
+      containers:
+        - name: sensors-report-explorer-frontend
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: frontend-files
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: frontend-files
+          hostPath:
+            path: /home/vio/Documents/SensorsReport/Sensors-Report-Explorer/frontend
+            type: Directory
