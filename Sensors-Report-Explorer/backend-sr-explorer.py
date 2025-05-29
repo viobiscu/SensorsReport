@@ -20,15 +20,16 @@ import jwt
 LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG').upper()
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')  # Change in production
 CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*')
-KEYCLOAK_AUTH_URL = os.environ.get('KEYCLOAK_AUTH_URL', 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/auth')
-KEYCLOAK_TOKEN_URL = os.environ.get('KEYCLOAK_TOKEN_URL', 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/token')
-KEYCLOAK_USERINFO_URL = os.environ.get('KEYCLOAK_USERINFO_URL', 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/userinfo')
-KEYCLOAK_LOGOUT_URL = os.environ.get('KEYCLOAK_LOGOUT_URL', 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/logout')
+KEYCLOAK_AUTH_URL = os.environ.get('KEYCLOAK_AUTH_URL', 'http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/auth')
+KEYCLOAK_TOKEN_URL = os.environ.get('KEYCLOAK_TOKEN_URL', 'http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/token')
+KEYCLOAK_USERINFO_URL = os.environ.get('KEYCLOAK_USERINFO_URL', 'http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/userinfo')
+KEYCLOAK_LOGOUT_URL = os.environ.get('KEYCLOAK_LOGOUT_URL', 'http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/logout')
 KEYCLOAK_CLIENT_ID = os.environ.get('KEYCLOAK_CLIENT_ID', 'ContextBroker')
 KEYCLOAK_CLIENT_SECRET = os.environ.get('KEYCLOAK_CLIENT_SECRET', '')  # Set this if your Keycloak client has a secret
 QUANTUM_LEAP_URL = os.environ.get('QUANTUM_LEAP_URL', 'http://quantum.sensorsreport.net:8668')
-DATA_PRODUCT_URL = os.environ.get('DATA_PRODUCT_URL', 'http://localhost:31483')
-CONTEXT_BROKER_URL = os.environ.get('CONTEXT_BROKER_URL', 'http://orion.sensorsreport.net:31026')
+#DATA_PRODUCT_URL = os.environ.get('DATA_PRODUCT_URL', 'http://localhost:31483')
+DATA_PRODUCT_URL = os.environ.get('DATA_PRODUCT_URL', 'http://data-product-manager:8000')
+CONTEXT_BROKER_URL = os.environ.get('CONTEXT_BROKER_URL', 'http://orion-ld-broker:1026')
 SECURE_COOKIES = os.environ.get('SECURE_COOKIES', 'false').lower() in ('true', 't', '1', 'yes')
 HOST = os.environ.get('HOST', '0.0.0.0')
 PORT = int(os.environ.get('PORT', '5000'))
@@ -86,21 +87,19 @@ def get_frontend_url():
 
 # Keycloak configuration from environment variables
 KEYCLOAK_CONFIG = {
-    'auth_url': os.environ.get('KEYCLOAK_AUTH_URL', 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/auth'),
-    'token_url': os.environ.get('KEYCLOAK_TOKEN_URL', 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/token'),
-    'userinfo_url': os.environ.get('KEYCLOAK_USERINFO_URL', 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/userinfo'),
-    'logout_url': os.environ.get('KEYCLOAK_LOGOUT_URL', 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/logout'),
+    'auth_url': os.environ.get('KEYCLOAK_AUTH_URL', 'http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/auth'),
+    'token_url': os.environ.get('KEYCLOAK_TOKEN_URL', 'http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/token'),
+    'userinfo_url': os.environ.get('KEYCLOAK_USERINFO_URL', 'http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/userinfo'),
+    'logout_url': os.environ.get('KEYCLOAK_LOGOUT_URL', 'http://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/logout'),
     'client_id': os.environ.get('KEYCLOAK_CLIENT_ID', 'ContextBroker'),
     'client_secret': os.environ.get('KEYCLOAK_CLIENT_SECRET', ''),  # Set this if your Keycloak client has a secret
 }
 
 # Quantum Lead configuration from environment variables
 QUANTUM_LEAP_CONFIG = {
-    'base_url': os.environ.get('QUANTUM_LEAP_URL', 'http://quantum.sensorsreport.net:8668')
+    'base_url': os.environ.get('QUANTUM_LEAP_URL', 'http://quantumleap:8668')
 }
 
-# Data Product Manager configuration from environment variables
-DATA_PRODUCT_URL = os.environ.get('DATA_PRODUCT_URL', 'http://localhost:31483')
 
 # Queue to store notifications
 notification_queue = Queue()
@@ -220,12 +219,15 @@ def create_subscription():
             
         context_broker_url = os.environ.get('CONTEXT_BROKER_URL', 'http://orion.sensorsreport.net:31026')
         target_url = f"{context_broker_url}/ngsi-ld/v1/subscriptions"
-        
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }
-        
+        # Prepare headers from incoming request
+        headers = {}
+        # If the payload has @context, use application/ld+json, else application/json
+        if payload and ('@context' in payload or "@context" in payload):
+            headers['Content-Type'] = 'application/ld+json'
+        else:
+            headers['Content-Type'] = 'application/json'
+        headers['Accept'] = 'application/json'
+        # Forward NGSILD-Tenant header if present
         tenant_id = request.headers.get('NGSILD-Tenant')
         if tenant_id and tenant_id.lower() != 'default' and tenant_id != 'Synchro':
             headers['NGSILD-Tenant'] = tenant_id
@@ -442,13 +444,20 @@ def patch_ngsi_ld_entity(entity_id):
         payload = request.json
         context_broker_url = os.environ.get('CONTEXT_BROKER_URL', 'http://orion.sensorsreport.net:31026')
         target_url = f"{context_broker_url}/ngsi-ld/v1/entities/{entity_id}"
+        # Set Content-Type based on presence of @context
+        if payload and ('@context' in payload or "@context" in payload):
+            content_type = 'application/ld+json'
+        else:
+            content_type = 'application/merge-patch+json'
         headers = {
-            'Content-Type': 'application/merge-patch+json',
+            'Content-Type': content_type,
             'Accept': 'application/json',
         }
         tenant_id = request.headers.get('NGSILD-Tenant')
         if tenant_id:
             headers['NGSILD-Tenant'] = tenant_id
+        logger.debug(f"Patching NGSI-LD entity {entity_id} at {target_url} with payload: {payload}")    
+        logger.debug(f"Headers: {headers}")
         response = requests.patch(target_url, headers=headers, json=payload)
         return make_response(response.content, response.status_code)
     except Exception as e:
@@ -504,7 +513,7 @@ def quantum_entities():
         headers = {}
         
         # Handle tenant headers
-        tenant_id = request.headers.get('NGSILD-Tenant')
+        tenant_id = request.headers.get('Fiware-Service')
         if tenant_id and tenant_id.lower() != 'default' and tenant_id != 'Synchro':
             headers['Fiware-Service'] = tenant_id
             headers['Fiware-ServicePath'] = request.headers.get('Fiware-ServicePath', '/')
@@ -558,7 +567,7 @@ def quantum_types():
         headers = {}
         
         # Handle tenant headers
-        tenant_id = request.headers.get('NGSILD-Tenant')
+        tenant_id = request.headers.get('Fiware-Service')
         if tenant_id and tenant_id.lower() != 'default' and tenant_id != 'Synchro':
             headers['Fiware-Service'] = tenant_id
             headers['Fiware-ServicePath'] = request.headers.get('Fiware-ServicePath', '/')
@@ -577,7 +586,7 @@ def quantum_type_attrs(entity_type):
         headers = {}
         
         # Handle tenant headers
-        tenant_id = request.headers.get('NGSILD-Tenant')
+        tenant_id = request.headers.get('Fiware-Service')
         if tenant_id and tenant_id.lower() != 'default' and tenant_id != 'Synchro':
             headers['Fiware-Service'] = tenant_id
             headers['Fiware-ServicePath'] = request.headers.get('Fiware-ServicePath', '/')
@@ -596,7 +605,7 @@ def quantum_entity_attr_values(entity_id, attr_name):
         headers = {}
         
         # Handle tenant headers
-        tenant_id = request.headers.get('NGSILD-Tenant')
+        tenant_id = request.headers.get('Fiware-Service')
         if tenant_id and tenant_id.lower() != 'default' and tenant_id != 'Synchro':
             headers['Fiware-Service'] = tenant_id
             headers['Fiware-ServicePath'] = request.headers.get('Fiware-ServicePath', '/')
@@ -618,7 +627,7 @@ def quantum_entity_attr_last_value(entity_id, attr_name):
         headers = {}
         
         # Handle tenant headers
-        tenant_id = request.headers.get('NGSILD-Tenant')
+        tenant_id = request.headers.get('Fiware-Service')
         if tenant_id and tenant_id.lower() != 'default' and tenant_id != 'Synchro':
             headers['Fiware-Service'] = tenant_id
             headers['Fiware-ServicePath'] = request.headers.get('Fiware-ServicePath', '/')
@@ -637,7 +646,7 @@ def quantum_entity_attrs(entity_id):
         headers = {}
         
         # Handle tenant headers
-        tenant_id = request.headers.get('NGSILD-Tenant')
+        tenant_id = request.headers.get('Fiware-Service')
         if tenant_id and tenant_id.lower() != 'default' and tenant_id != 'Synchro':
             headers['Fiware-Service'] = tenant_id
             headers['Fiware-ServicePath'] = request.headers.get('Fiware-ServicePath', '/')
@@ -658,7 +667,7 @@ def quantum_entity_values(entity_id):
         headers = {}
         
         # Handle tenant headers
-        tenant_id = request.headers.get('NGSILD-Tenant')
+        tenant_id = request.headers.get('Fiware-Service')
         if tenant_id and tenant_id.lower() != 'default' and tenant_id != 'Synchro':
             headers['Fiware-Service'] = tenant_id
             headers['Fiware-ServicePath'] = request.headers.get('Fiware-ServicePath', '/')
