@@ -5,7 +5,7 @@ metadata:
   labels:
     app: sensors-report-mqtt-to-orion
 spec:
-  replicas: 2
+  replicas: 1 
   selector:
     matchLabels:
       app: sensors-report-mqtt-to-orion
