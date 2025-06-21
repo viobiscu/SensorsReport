@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: default
+resources:
+  - sensors-report-audit/deployment.yaml
+  - sensors-report-audit/service.yaml
+  - sensors-report-audit-api/deployment.yaml
+  - sensors-report-audit-api/service.yaml
+  - sensors-report-business-broker-api/deployment.yaml
+  - sensors-report-business-broker-api/service.yaml
+  - sensors-report-mqtt-to-orion/deployment.yaml
+  - sensors-report-mqtt-to-orion/service.yaml
+  - sensors-report-explorer/deployment.yaml
+  - sensors-report-explorer/service.yaml

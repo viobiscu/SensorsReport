@@ -1,0 +1,396 @@
+/* UI Components styling */
+
+/* Tab close button */
+.tab-close-btn {
+  margin-left: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 50%;
+  color: #666;
+}
+
+.tab-close-btn:hover {
+  background-color: #ddd;
+  color: #333;
+}
+
+/* Toolbar styling */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 10px;
+}
+
+.toolbar button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.toolbar button:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toolbar button i {
+  font-size: 16px;
+  color: #333; /* Ensure consistent color for all icons */
+}
+
+.toolbar button.delete-action i {
+  color: #333; /* Match the color intensity of other icons */
+}
+
+.toolbar .search-input {
+    border: none;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+.toolbar .search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: #fff;
+}
+
+/* Info labels and tenant container */
+.info-label {
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+.tenant-container {
+  display: flex;
+  align-items: center;
+  margin: 0 15px;
+}
+
+/* Loading indicator */
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2em;
+  color: #666;
+}
+
+.loading-indicator::after {
+  content: '';
+  width: 1em;
+  height: 1em;
+  border: 0.2em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  margin-left: 0.5em;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error message styling */
+.network-error {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ffeeba;
+}
+
+/* Hide Subscriptions section */
+.hide-subscriptions {
+  display: none !important;
+}
+
+/* Fallback for Font Awesome icons */
+.icon-fallback-text {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+/* Tab Manager Styling */
+.editor-tabs-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-color);
+}
+
+.editor-tabs-bar {
+  display: flex;
+  background-color: var(--header-bg); /* Use header background for tab bar */
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  flex-shrink: 0; /* Prevent tab bar from shrinking */
+}
+
+.editor-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-right: 1px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+  max-width: 200px;
+  position: relative;
+  color: var(--header-text); /* Use header text color for tabs */
+  background-color: transparent; /* Default tab background */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.editor-tab:hover {
+  background-color: var(--sidebar-hover); /* Use sidebar hover for consistency */
+  color: var(--sidebar-text);
+}
+
+.editor-tab.active {
+  background-color: var(--content-bg); /* Use content background for active tab */
+  color: var(--text-color); /* Use main text color for active tab */
+  border-bottom-color: transparent; /* Remove bottom border for active tab to merge with content */
+}
+
+.editor-tab.welcome-tab {
+  /* Optional: Special styling for the welcome tab if needed */
+  /* e.g., font-style: italic; */
+}
+
+.tab-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 8px; /* Space between title and close button */
+}
+
+.tab-close-btn {
+  margin-left: auto; /* Push to the right if tab title is short */
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 50%;
+  color: var(--header-text); /* Match tab text color */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.editor-tab:hover .tab-close-btn {
+  color: var(--sidebar-text); /* Match tab hover text color */
+}
+
+.editor-tab.active .tab-close-btn {
+  color: var(--text-color); /* Match active tab text color */
+}
+
+.tab-close-btn:hover {
+  background-color: var(--border-color); /* Subtle background on hover */
+  color: var(--bg-color); /* Contrasting color for icon on hover */
+}
+
+.editor-tabs-content {
+  flex-grow: 1;
+  overflow: auto; /* Allow content to scroll if needed */
+  position: relative;
+  background-color: var(--content-bg);
+}
+
+/* Individual tab content panels (if needed for specific styling) */
+.editor-tab-content {
+  height: 100%;
+  /* display: none; is handled by JS */
+}
+
+/* TableToolbarEditorModular Styling */
+
+/* Main container for the toolbar */
+.tte-modular-toolbar-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap to the next line */
+  align-items: center;
+  padding: 10px; /* Increased padding for the container itself */
+  background-color: var(--header-bg); /* Consistent with other headers */
+  border-bottom: 1px solid var(--border-color);
+  gap: 10px; /* Increased spacing between direct children (button groups, inputs) */
+}
+
+/* Styling for individual buttons in the TTE toolbar */
+.tte-toolbar-button {
+  background-color: var(--button-bg);
+  color: var(--button-icon-color); /* Use specific icon color variable */
+  border: 1px solid var(--button-border);
+  border-radius: 4px;
+  padding: 8px 12px; /* Increased padding within buttons */
+  cursor: pointer;
+  display: inline-flex; /* Align icon and label */
+  align-items: center;
+  justify-content: center; /* Center icon if no label */
+  min-width: 36px; /* Ensure a minimum width for icon-only buttons */
+  min-height: 36px; /* Ensure a minimum height for icon-only buttons */
+  gap: 6px; /* Space between icon and label if label were present */
+  font-size: 14px; /* Slightly larger icon if font-size affects it */
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.tte-toolbar-button:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--button-hover-text); /* Icon color can also use button-hover-text */
+  border-color: var(--button-hover-border);
+}
+
+.tte-toolbar-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--button-bg); /* Ensure disabled keeps theme bg */
+  color: var(--button-icon-color); /* Ensure disabled keeps theme icon color */
+  border-color: var(--button-border); /* Ensure disabled keeps theme border */
+}
+
+.tte-toolbar-button i {
+  font-size: 1.1em; /* Slightly larger icons within buttons */
+  margin: 0; /* Remove any default margins if icon-only */
+}
+
+.tte-button-label {
+  /* Styles for text part of the button, if any */
+}
+
+/* Specific button types */
+.tte-ngsi-button {
+  /* Specific styles for NGSI buttons if needed */
+}
+.tte-operation-button {
+  /* Specific styles for GET/POST/PUT etc. buttons */
+  text-transform: uppercase;
+}
+
+/* Entity ID input field */
+.tte-entity-input {
+  padding: 8px 10px; /* Adjusted padding for consistency */
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-size: 13px;
+  min-width: 200px;
+}
+
+.tte-entity-input:focus {
+  outline: none;
+  border-color: var(--icon-color); /* Highlight focus like other inputs */
+}
+
+/* Search input field */
+.tte-search-input {
+  padding: 8px 10px; /* Adjusted padding for consistency */
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-size: 13px;
+  min-width: 180px;
+}
+
+.tte-search-input:focus {
+  outline: none;
+  border-color: var(--icon-color);
+}
+
+/* Column selection popup */
+.tte-column-popup {
+  position: absolute;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 0;
+  z-index: 1050; /* Ensure it's above other elements */
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tte-column-popup-header {
+  padding: 10px 12px;
+  font-weight: bold;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  font-size: 14px;
+}
+
+.tte-column-popup-list {
+  list-style: none;
+  padding: 8px 0;
+  margin: 0;
+}
+
+.tte-column-popup-list li {
+  padding: 0;
+}
+
+.tte-column-popup-list label {
+  display: block;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: background-color 0.2s ease;
+}
+
+.tte-column-popup-list label:hover {
+  background-color: var(--sidebar-hover);
+}
+
+.tte-column-popup-list input[type="checkbox"] {
+  margin-right: 8px;
+  vertical-align: middle;
+  accent-color: var(--icon-color);
+}
+
+/* Content and Pagination areas (basic styling, can be expanded) */
+.tte-modular-content {
+  /* Styles for the main content area where table/JSON editor goes */
+  padding: 10px;
+  background-color: var(--content-bg);
+  height: 100%; /* Ensure it can take height if parent is flexed */
+  overflow: auto; /* If content overflows */
+}
+
+.tte-modular-pagination {
+  padding: 8px;
+  background-color: var(--header-bg);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ensure ToolbarManager's own toolbar div takes up available space and aligns items */
+.toolbar.tte-modular-toolbar {
+    display: inline-flex; /* Changed from flex to inline-flex */
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    /* padding: 0; /* Remove padding if tte-modular-toolbar-container handles it */
+    /* background-color: transparent; /* Inherit from parent */
+}

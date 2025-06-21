@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-audit-api
+  labels:
+    app: sensors-report-audit-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-audit-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-audit-api
+    spec:
+      containers:
+        - name: sensors-report-audit-api
+          image: viobiscu/sensors-report-audit-api:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: SR_AUDIT_QUANTUMLEAP_HOST
+              value: "quantum.sensorsreport.net"
+            - name: SR_AUDIT_QUANTUMLEAP_PORT
+              value: "8668"
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -1,0 +1,15 @@
+<Project>
+  <!-- Define properties that affect all projects -->
+  <PropertyGroup>
+    <!-- Disable automatic generation of assembly attributes -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_VersionFile>$(MSBuildThisFileDirectory)version.txt</_VersionFile>
+    <AppVersion Condition="Exists('$(_VersionFile)')">$([System.IO.File]::ReadAllText('$(_VersionFile)').Trim())</AppVersion>
+    <Version Condition=" '$(AppVersion)' != '' ">$(AppVersion)</Version>
+    <FileVersion Condition=" '$(AppVersion)' != '' ">$(AppVersion)</FileVersion>
+    <AssemblyVersion Condition=" '$(AppVersion)' != '' ">$(AppVersion)</AssemblyVersion>
+  </PropertyGroup>
+</Project>

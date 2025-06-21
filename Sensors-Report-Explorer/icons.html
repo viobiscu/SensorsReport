@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Status with Connection Icons</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .status {
+      font-size: 1em;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .status i {
+      margin-right: 10px;
+    }
+
+    .low        { color: #007bff; }  /* Blue flag */
+    .prelow     { color: #17a2b8; }  /* Teal flag */
+    .normal     { color: #28a745; }  /* Green flag */
+    .prehigh    { color: #ffc107; }  /* Yellow flag */
+    .high       { color: #dc3545; }  /* Red flag */
+    .connect    { color: #28a745; }  /* green */
+    .disconnect { color: #dc3545; }  /* red */
+    .warning    { color: #fd7e14; }
+    .information{ color: #17a2b8; }
+
+    /* Asset section styles */
+    #assetSection {
+      margin-top: 30px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
+
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .asset-item {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .asset-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .asset-icon {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .asset-name {
+      font-size: 0.9em;
+      color: #666;
+      margin: 8px 0;
+      word-break: break-word;
+    }
+
+    .asset-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 0.9em;
+    }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      padding: 20px;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Status Levels with Flags</h2>
+
+  <div class="status low"><i class="fas fa-flag"></i>Low</div>
+  <div class="status prelow"><i class="fas fa-flag"></i>Pre-Low</div>
+  <div class="status normal"><i class="fas fa-flag"></i>Normal</div>
+  <div class="status prehigh"><i class="fas fa-flag"></i>Pre-High</div>
+  <div class="status high"><i class="fas fa-flag"></i>High</div>
+  
+  <h2>Internet Connection Status</h2>
+
+  <div class="status connect"><i class="fas fa-wifi"></i>Connected</div>
+  <div class="status disconnect"><i class="fas fa-wifi"></i>Disconnected</div>
+  <div class="status warning"><i class="fas fa-exclamation-triangle"></i>Warning</div>
+  <div class="status information"><i class="fas fa-info-circle"></i>Information</div>
+
+  <div id="assetSection">
+    <h2>Assets Status</h2>
+    <div id="assetList" class="asset-grid">
+      <div class="loading">Loading assets...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { OrionLDSearchClient } from './js/api.js';
+
+    async function loadAssets() {
+      try {
+        const client = new OrionLDSearchClient();
+        console.log('Fetching assets...');
+        const assets = await client.getEntitiesByType('Assets');
+        console.log('Received assets:', assets);
+        
+        if (assets && assets.length > 0) {
+          console.log('Sample asset structure:', {
+            id: assets[0].id,
+            type: assets[0].type,
+            style: assets[0].style,
+            styleType: assets[0].style?.type,
+            styleValue: assets[0].style?.value,
+            allProps: Object.keys(assets[0])
+          });
+        }
+        
+        displayAssets(assets);
+      } catch (error) {
+        console.error('Error loading assets:', error);
+        document.getElementById('assetList').innerHTML = `
+          <div class="error">Error loading assets: ${error.message}</div>
+        `;
+      }
+    }
+
+    function getStatusClass(status) {
+      if (!status?.value) return 'information';
+      
+      switch(status.value.toLowerCase()) {
+        case 'low': return 'low';
+        case 'prelow': return 'prelow';
+        case 'normal': return 'normal';
+        case 'prehigh': return 'prehigh';
+        case 'high': return 'high';
+        case 'online': return 'connect';
+        case 'offline': return 'disconnect';
+        case 'warning': return 'warning';
+        default: return 'information';
+      }
+    }
+
+    function getStatusIcon(status) {
+      if (!status?.value) return 'fa-info-circle';
+      
+      switch(status.value.toLowerCase()) {
+        case 'low':
+        case 'prelow':
+        case 'normal':
+        case 'prehigh':
+        case 'high':
+          return 'fa-flag';
+        case 'online':
+        case 'offline':
+          return 'fa-wifi';
+        case 'warning':
+          return 'fa-exclamation-triangle';
+        default:
+          return 'fa-info-circle';
+      }
+    }
+
+    function parseStyle(styleStr) {
+      if (!styleStr) return { className: 'fas fa-cube' };
+      
+      // Handle multiple levels of escaping
+      const unescaped = styleStr
+        .replace(/\\\\\\\"/g, '"')  // Unescape \"
+        .replace(/\\\\\\/g, '\\')   // Unescape \\
+        .replace(/\\"/g, '"');      // Unescape remaining \"
+      
+      // Extract class names from the unescaped style string
+      const classMatch = unescaped.match(/class="([^"]+)"/);
+      if (classMatch && classMatch[1]) {
+        return { className: classMatch[1].trim() };
+      }
+      
+      return { className: 'fas fa-cube' }; // Default
+    }
+
+    function displayAssets(assets) {
+      const assetList = document.getElementById('assetList');
+      if (!assets || assets.length === 0) {
+        assetList.innerHTML = '<div class="information">No assets found</div>';
+        return;
+      }
+
+      console.log('Displaying assets:', assets.map(a => ({
+        id: a.id,
+        type: a.type,
+        style: a.style?.value,
+        parsedStyle: parseStyle(a.style?.value),
+        name: a.name?.value
+      })));
+
+      assetList.innerHTML = assets.map(asset => {
+        const statusClass = getStatusClass(asset.status);
+        const statusIcon = getStatusIcon(asset.status);
+        
+        // Parse the style value to get icon classes
+        const { className } = parseStyle(asset.style?.value);
+        
+        return `
+          <div class="asset-item">
+            <div class="asset-icon ${statusClass}">
+              <i class="${className}"></i>
+            </div>
+            <div class="asset-name">${asset.name?.value || asset.id}</div>
+            <div class="asset-status ${statusClass}">
+              <i class="fas ${statusIcon}"></i>
+              <span>${asset.status?.value || 'Unknown'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Load assets when the page loads
+    document.addEventListener('DOMContentLoaded', loadAssets);
+
+    // Refresh assets every 30 seconds
+    setInterval(loadAssets, 30000);
+  </script>
+</body>
+</html>
+

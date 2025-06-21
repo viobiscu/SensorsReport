@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensors-report-business-broker-config
+data:
+  SR_BB_ORION_HOST: "orion-ld-broker"
+  SR_BB_ORION_PORT: "1026"
+  SR_BB_AUDIT_URL: "sensors-report-audit.default.svc.cluster.local"
+  SR_BB_AUDIT_PORT: "80"
+  SR_BB_KEYCLOAK_RELM: "sr"
+  DOTNET_USE_POLLING_FILE_WATCHER: "false"
+  ASPNETCORE_URLS: "http://+:80"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sensors-report-business-broker-secrets
+type: Opaque
+data:
+  # These are placeholders. In a real environment, replace with actual base64-encoded values
+  SR_BB_KEYCLOAK_CLIENTID: Q29udGV4dEJyb2tlcg==  # business-broker
+  SR_BB_KEYCLOAK_CLIENTSECRET: QUVMWUs0dHVzWWF6dklESXZ3MG1lUVppU25HTW5WSlA=  # secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-business-broker
+  labels:
+    app: sensors-report-business-broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-business-broker
+  template:
+    metadata:
+      labels:
+        app: sensors-report-business-broker
+    spec:
+      containers:
+      - name: sensors-report-business-broker
+        image: viobiscu/sensorsreportbusinessbroker:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: sensors-report-business-broker-config
+        - secretRef:
+            name: sensors-report-business-broker-secrets
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensors-report-business-broker
+  labels:
+    app: sensors-report-business-broker
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: sensors-report-business-broker

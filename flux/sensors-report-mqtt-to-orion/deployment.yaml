@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-mqtt-to-orion
+  labels:
+    app: sensors-report-mqtt-to-orion
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: sensors-report-mqtt-to-orion
+  template:
+    metadata:
+      labels:
+        app: sensors-report-mqtt-to-orion
+    spec:
+      containers:
+        - name: sensors-report-mqtt-to-orion
+          image: viobiscu/sensors-report-mqtt-to-orion:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: SENSORSREPORTMQTT_TO_ORION_ORIONURL
+              value: "http://orion-ld-broker:1026"
+            - name: SENSORSREPORTMQTT_TO_ORION_JSONLD
+              value: "http://ngsi-ld.sensorsreport.net/synchro-context.jsonld"
+            - name: SENSORSREPORTMQTT_TO_ORION_MQTTHOST
+              value: "mqtt.sensorsreport.com"
+            - name: SENSORSREPORTMQTT_TO_ORION_MQTTPORT
+              value: "1883"
+            - name: SENSORSREPORTMQTT_TO_ORION_MQTTTOPIC
+              value: "Synchro/#"
+            - name: SENSORSREPORTMQTT_TO_ORION_MQTTUSER
+              value: ""
+            - name: SENSORSREPORTMQTT_TO_ORION_MQTTPASSWORD
+              value: ""
+            - name: SENSORSREPORTMQTT_TO_ORION_MQTTCLIENTID
+              value: "MQTTCLIENTID"
+            - name: SENSORSREPORTMQTT_TO_ORION_MQTTCLEANSESSION
+              value: "true"
+            - name: SENSORSREPORTMQTT_TO_ORION_MQTTKEEPALIVEPERIOD
+              value: "30"
+            # Add other production environment variables here

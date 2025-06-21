@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sensors-report-explorer-frontend
+  name: sensors-report-explorer-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-explorer-frontend
+  template:
+    metadata:
+      annotations:
+        frontend-image-version: '115'
+      labels:
+        app: sensors-report-explorer-frontend
+    spec:
+      containers:
+      - env:
+        - name: BACKEND_BASE_URL
+          value: http://sensors-report-explorer-backend:5000
+        - name: FRONTEND_IMAGE_VERSION
+          value: '115'
+        image: viobiscu/sensors-report-explorer-frontend:115
+        name: sensors-report-explorer-frontend
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d/default.conf
+          name: nginx-config
+          subPath: default.conf
+      volumes:
+      - configMap:
+          name: sensors-report-explorer-nginx-config
+        name: nginx-config

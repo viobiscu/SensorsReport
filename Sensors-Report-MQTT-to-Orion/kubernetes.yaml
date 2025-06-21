@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensorsreportmqtt-to-orion-config
+data:
+  SENSORSREPORTMQTT_TO_ORION_MQTTHOST: "mqtt.sensorsreport.com"
+  SENSORSREPORTMQTT_TO_ORION_MQTTPORT: "1883"
+  SENSORSREPORTMQTT_TO_ORION_MQTTTOPIC: "Synchro/#"
+  SENSORSREPORTMQTT_TO_ORION_ORIONURL: "http://192.168.0.77:1026"
+  SENSORSREPORTMQTT_TO_ORION_JSONLD: "http://ngsi-ld.sensorsreport.net/synchro-context.jsonld"
+  DOTNET_USE_POLLING_FILE_WATCHER: "false"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sensorsreportmqtt-to-orion-secrets
+type: Opaque
+data:
+  # These are placeholders. In a real environment, replace with actual base64-encoded values
+  SENSORSREPORTMQTT_TO_ORION_MQTTUSER: ""  # Optional, base64 encoded
+  SENSORSREPORTMQTT_TO_ORION_MQTTPASSWORD: ""  # Optional, base64 encoded
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensorsreportmqtt-to-orion
+  labels:
+    app: sensorsreportmqtt-to-orion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensorsreportmqtt-to-orion
+  template:
+    metadata:
+      labels:
+        app: sensorsreportmqtt-to-orion
+    spec:
+      containers:
+      - name: sensorsreportmqtt-to-orion
+        image: viobiscu/sensorsreport-mqtt-to-orion:latest
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: sensorsreportmqtt-to-orion-config
+        - secretRef:
+            name: sensorsreportmqtt-to-orion-secrets
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+        # No health probes since this is a background service, not an API

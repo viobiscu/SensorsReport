@@ -1,0 +1,4 @@
+{
+  "auditApiUrl": "http://localhost:5000/api/audit",
+  "businessBrokerApiUrl": "http://localhost:5001/api/business-broker"
+}

@@ -1,0 +1,43 @@
+# Dockerfile for Sensors-Report-Explorer backend (Flask)
+FROM python:3.12-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt /app/
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Copy backend source code
+COPY backend-sr-explorer.py /app/
+COPY keycloak_auth.py /app/
+# Copy the endpoints file
+COPY endpoints.py /app/
+
+# Copy any other backend files needed (adjust as necessary)
+COPY complete_data_product.json /app/
+COPY test_data_product.json /app/
+# Copy version.txt for version display
+COPY version.txt /app/
+
+# Expose port for Flask
+EXPOSE 5000
+
+# Set environment variables for Flask
+ENV FLASK_APP=backend-sr-explorer.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+# Add the Sensors-Report-Explorer directory to the Python path
+ENV PYTHONPATH="/app:/app/Sensors-Report-Explorer"
+
+# Run the Flask app
+CMD ["flask", "run"]

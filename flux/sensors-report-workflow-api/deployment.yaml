@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-workflow-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-workflow-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-workflow-api
+    spec:
+      containers:
+      - name: sensors-report-workflow-api
+        image: viobiscu/sensors-report-workflow-api:latest
+        ports:
+        - containerPort: 80

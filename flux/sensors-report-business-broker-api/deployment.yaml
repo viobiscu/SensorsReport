@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-business-broker-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-business-broker-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-business-broker-api
+    spec:
+      containers:
+        - name: sensors-report-business-broker-api
+          image: viobiscu/sensors-report-business-broker:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: SR_BB_ORION_HOST
+              value: "orion.sensorsreport.net"
+            - name: SR_BB_ORION_PORT
+              value: "31026"
+            - name: SR_BB_AUDIT_URL
+              value: "localhost"
+            - name: SR_BB_AUDIT_PORT
+              value: "80"
+            - name: SR_BB_KEYCLOAK_RELM
+              value: "sr"
+            - name: SR_BB_KEYCLOAK_CLIENTID
+              value: "ContextBroker"
+            - name: SR_BB_KEYCLOAK_CLIENTSECRET
+              value: "AELYK4tusYazvIDIvw0meQZiSnGMnVJP"

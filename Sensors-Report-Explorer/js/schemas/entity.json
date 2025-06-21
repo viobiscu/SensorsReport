@@ -1,0 +1,480 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "NGSI-LD Entity Schema",
+    "description": "Schema for validating NGSI-LD entities",
+    "required": ["id", "type"],
+    "properties": {
+        "id": {
+            "type": "string",
+            "title": "Entity ID",
+            "description": "Unique identifier of the entity following NGSI-LD URN pattern",
+            "pattern": "^urn:ngsi-ld:[a-zA-Z0-9]+:[a-zA-Z0-9_-]+$"
+        },
+        "type": {
+            "type": "string",
+            "title": "Entity Type",
+            "description": "Type of the NGSI-LD entity"
+        },
+        "@context": {
+            "oneOf": [
+                {
+                    "type": "string",
+                    "format": "uri"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                }
+            ],
+            "description": "JSON-LD @context definition"
+        },
+        "Status": {
+            "type": "object",
+            "required": ["type", "value"],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["Property"]
+                },
+                "value": {
+                    "type": "string",
+                    "enum": ["online", "offline"],
+                    "description": "Status can only be 'online' or 'offline'"
+                },
+                "observedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            }
+        },
+        "t0": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["Property"]
+                },
+                "value": {
+                    "type": "number",
+                    "description": "Value of t0"
+                },
+                "unitCode": {
+                    "type": "string",
+                    "description": "Unit code for t0 value"
+                },
+                "Alarm": {
+                    "type": "object",
+                    "required": ["type", "object"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["Relationship"]
+                        },
+                        "object": {
+                            "type": "string",
+                            "pattern": "^urn:ngsi-ld:Device:[a-zA-Z0-9_-]+$"
+                        }
+                    }
+                },
+                "AlarmRuleBy": {
+                    "type": "object",
+                    "required": ["type", "object"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["Relationship"]
+                        },
+                        "object": {
+                            "type": "string",
+                            "pattern": "^urn:ngsi-ld:AlarmRule:[a-zA-Z0-9_-]+$"
+                        }
+                    }
+                },
+                "LogRuleBy": {
+                    "type": "object",
+                    "required": ["type", "object"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["Relationship"]
+                        },
+                        "object": {
+                            "type": "string",
+                            "pattern": "^urn:ngsi-ld:Device:[a-zA-Z0-9_-]+$"
+                        }
+                    }
+                },
+                "NotificationRuleBy": {
+                    "type": "object",
+                    "required": ["type", "object"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["Relationship"]
+                        },
+                        "object": {
+                            "oneOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^urn:ngsi-ld:NotificationRule:[^:]+$"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "pattern": "^urn:ngsi-ld:NotificationRule:[^:]+$"
+                                    },
+                                    "minItems": 1
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "required": ["type", "value"]
+        },
+        "rh0": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["Property"]
+                },
+                "value": {
+                    "type": "number",
+                    "description": "Value of rh0"
+                },
+                "unitCode": {
+                    "type": "string",
+                    "description": "Unit code for rh0 value"
+                },
+                "Alarm": {
+                    "type": "object",
+                    "required": ["type", "object"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["Relationship"]
+                        },
+                        "object": {
+                            "type": "string",
+                            "pattern": "^urn:ngsi-ld:Device:[a-zA-Z0-9_-]+$"
+                        }
+                    }
+                },
+                "AlarmRuleBy": {
+                    "type": "object",
+                    "required": ["type", "object"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["Relationship"]
+                        },
+                        "object": {
+                            "type": "string",
+                            "pattern": "^urn:ngsi-ld:AlarmRule:[a-zA-Z0-9_-]+$"
+                        }
+                    }
+                },
+                "LogRuleBy": {
+                    "type": "object",
+                    "required": ["type", "object"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["Relationship"]
+                        },
+                        "object": {
+                            "type": "string",
+                            "pattern": "^urn:ngsi-ld:Device:[a-zA-Z0-9_-]+$"
+                        }
+                    }
+                },
+                "NotificationRuleBy": {
+                    "type": "object",
+                    "required": ["type", "object"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["Relationship"]
+                        },
+                        "object": {
+                            "oneOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^urn:ngsi-ld:NotificationRule:[^:]+$"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "pattern": "^urn:ngsi-ld:NotificationRule:[^:]+$"
+                                    },
+                                    "minItems": 1
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "required": ["type", "value"]
+        },
+        "AlarmRule": {
+            "type": "object",
+            "if": {
+                "properties": {
+                    "type": { "const": "AlarmRule" }
+                }
+            },
+            "then": {
+                "required": ["id", "type", "name", "unit", "low", "prelow", "prehigh", "high"],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "pattern": "^urn:ngsi-ld:AlarmRule:[^:]+$"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": ["AlarmRule"]
+                    },
+                    "name": {
+                        "type": "object",
+                        "required": ["type", "value"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["Property"]
+                            },
+                            "value": {
+                                "type": "string"
+                            },
+                            "attributeDetails": {
+                                "type": "object",
+                                "required": ["type", "value"],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": ["Property"]
+                                    },
+                                    "value": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "unit": {
+                        "type": "object",
+                        "required": ["type", "value"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["Property"]
+                            },
+                            "value": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "low": {
+                        "type": "object",
+                        "required": ["type", "value"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["Property"]
+                            },
+                            "value": {
+                                "type": "number",
+                                "minimum": -55,
+                                "maximum": 125
+                            }
+                        }
+                    },
+                    "prelow": {
+                        "type": "object",
+                        "required": ["type", "value"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["Property"]
+                            },
+                            "value": {
+                                "type": "number",
+                                "minimum": -55,
+                                "maximum": 125
+                            }
+                        }
+                    },
+                    "prehigh": {
+                        "type": "object",
+                        "required": ["type", "value"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["Property"]
+                            },
+                            "value": {
+                                "type": "number",
+                                "minimum": -55,
+                                "maximum": 125
+                            }
+                        }
+                    },
+                    "high": {
+                        "type": "object",
+                        "required": ["type", "value"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["Property"]
+                            },
+                            "value": {
+                                "type": "number",
+                                "minimum": -55,
+                                "maximum": 125
+                            }
+                        }
+                    }
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "low": {
+                                    "properties": {
+                                        "value": { "type": "number" }
+                                    }
+                                },
+                                "prelow": {
+                                    "properties": {
+                                        "value": { "type": "number" }
+                                    }
+                                }
+                            }
+                        },
+                        "then": {
+                            "dependencies": {
+                                "low": ["prelow"],
+                                "prelow": ["low"]
+                            },
+                            "assert": {
+                                "properties": {
+                                    "low": {
+                                        "properties": {
+                                            "value": {
+                                                "exclusiveMaximum": { "$data": "2/prelow/value" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "high": {
+                                    "properties": {
+                                        "value": { "type": "number" }
+                                    }
+                                },
+                                "prehigh": {
+                                    "properties": {
+                                        "value": { "type": "number" }
+                                    }
+                                }
+                            }
+                        },
+                        "then": {
+                            "dependencies": {
+                                "high": ["prehigh"],
+                                "prehigh": ["high"]
+                            },
+                            "assert": {
+                                "properties": {
+                                    "high": {
+                                        "properties": {
+                                            "value": {
+                                                "exclusiveMinimum": { "$data": "2/prehigh/value" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": {
+        "oneOf": [
+            {
+                "type": "object",
+                "required": ["type", "value"],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": ["Property"]
+                    },
+                    "value": {
+                        "description": "Value of the property"
+                    },
+                    "observedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "unitCode": {
+                        "type": "string"
+                    }
+                }
+            },
+            {
+                "type": "object",
+                "required": ["type", "object"],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": ["Relationship"]
+                    },
+                    "object": {
+                        "type": "string",
+                        "pattern": "^urn:ngsi-ld:[a-zA-Z0-9]+:[a-zA-Z0-9_-]+$"
+                    },
+                    "observedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            {
+                "type": "object",
+                "required": ["type", "coordinates"],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": ["GeoProperty"]
+                    },
+                    "value": {
+                        "type": "object",
+                        "required": ["type", "coordinates"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon"]
+                            },
+                            "coordinates": {
+                                "type": "array"
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

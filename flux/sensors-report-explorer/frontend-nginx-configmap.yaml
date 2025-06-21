@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensors-report-explorer-nginx-config
+  labels:
+    app: sensors-report-explorer-frontend
+data:
+  default.conf: |
+    # Nginx configuration for Sensors-Report-Explorer frontend
+    # Proxies all /api/ requests to backend service
+    server {
+        listen 80;
+        server_name _;
+
+        # Serve static files
+        root   /usr/share/nginx/html;
+        index  index.html;
+
+        # Proxy /api/ to backend
+        location /api/ {
+            proxy_pass http://sensors-report-explorer-backend:5000/api/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+        }
+
+        # Fallback for SPA (serves index.html for all non-API requests)
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
