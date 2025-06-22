@@ -1,0 +1,25 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.status {
+  font-size: 1em;
+  margin: 10px 0;
+}
+
+.status i {
+  margin-right: 10px;
+}
+
+/* Icon colors as standalone classes */
+.icon-low        { color: #007bff; }   /* Blue */
+.icon-prelow     { color: #17a2b8; }   /* Teal */
+.icon-normal     { color: #28a745; }   /* Green */
+.icon-prehigh    { color: #ffc107; }   /* Yellow */
+.icon-high       { color: #dc3545; }   /* Red */
+.icon-connect    { color: #28a745; }   /* Green */
+.icon-disconnect { color: #dc3545; }   /* Red */
+.icon-warning    { color: #fd7e14; }   /* Orange */
+.icon-info       { color: #17a2b8; }   /* Cyan */
+

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Keycloak Login Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    #result { margin-top: 1em; color: #333; }
+    label { display: block; margin-top: 1em; }
+    input[type=text] { width: 400px; }
+    button { margin-top: 1em; }
+  </style>
+</head>
+<body>
+  <h1>Keycloak Login Test Page</h1>
+  <form id="loginForm" onsubmit="return false;">
+    <label>
+      Keycloak Auth URL:
+      <input type="text" id="authUrl" value="https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/auth">
+    </label>
+    <label>
+      Client ID:
+      <input type="text" id="clientId" value="ContextBroker">
+    </label>
+    <label>
+      Redirect URI:
+      <input type="text" id="redirectUri" value="https://explorer.sensorsreport.net/">
+    </label>
+    <label>
+      Scope:
+      <input type="text" id="scope" value="openid profile email">
+    </label>
+    <label>
+      Response Type:
+      <input type="text" id="responseType" value="code">
+    </label>
+    <button id="loginBtn">Login with Keycloak</button>
+  </form>
+  <div id="result"></div>
+  <script>
+    document.getElementById('loginBtn').onclick = function() {
+      const authUrl = document.getElementById('authUrl').value.trim();
+      const clientId = document.getElementById('clientId').value.trim();
+      const redirectUri = document.getElementById('redirectUri').value.trim();
+      const scope = document.getElementById('scope').value.trim();
+      const responseType = document.getElementById('responseType').value.trim();
+      const state = Math.random().toString(36).substring(2, 15);
+      const url = `${authUrl}?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${encodeURIComponent(responseType)}&scope=${encodeURIComponent(scope)}&state=${state}`;
+      document.getElementById('result').innerHTML = `<b>Redirecting to:</b><br><code>${url}</code>`;
+      setTimeout(() => { window.location.href = url; }, 1000);
+    };
+    // Show code or error in URL after redirect
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('code')) {
+        document.getElementById('result').innerHTML = `<b>Authorization code:</b> <code>${params.get('code')}</code>`;
+      } else if (params.has('error')) {
+        document.getElementById('result').innerHTML = `<b>Error:</b> <code>${params.get('error')}</code> - ${params.get('error_description') || ''}`;
+      }
+    };
+  </script>
+</body>
+</html>

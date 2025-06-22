@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-provisioning-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-provisioning-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-provisioning-api
+    spec:
+      containers:
+      - name: sensors-report-provisioning-api
+        image: viobiscu/sensors-report-provision-api:latest
+        ports:
+        - containerPort: 80

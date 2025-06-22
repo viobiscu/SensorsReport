@@ -1,0 +1,92 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "coreclr",
+      "request": "launch",
+      "name": "Debug SensorsReportMQTT-toOrion",
+      "program": "${workspaceFolder}/SensorsReportMQTT-to-Orion/bin/Debug/net8.0/SensorsReportMQTT-toOrion.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/SensorsReportMQTT-to-Orion",
+      "stopAtEntry": false,
+      "console": "internalConsole",
+      "preLaunchTask": "build-sensorsreportmqtt-to-orion",
+      "env": {
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      },
+      "justMyCode": false
+    },
+    {
+      "type": "coreclr",
+      "request": "launch",
+      "name": "Debug SensorsReportAudit.API",
+      "program": "${workspaceFolder}/SensorsReportAudit.API/bin/Debug/net8.0/SensorsReportAudit.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/SensorsReportAudit.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "preLaunchTask": "build-sensorsreportaudit-api",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SR_AUDIT_QUANTUMLEAP_HOST": "quantum.sensorsreport.net",
+        "SR_AUDIT_QUANTUMLEAP_PORT": "8668",
+        "SR_AUDIT_KEYCLOAK_URL": "keycloak.sensorsreport.net",
+        "SR_AUDIT_KEYCLOAK_PORT": "30100",
+        "SR_AUDIT_KEYCLOAK_REALM": "sr",
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      },
+      "logging": {
+        "moduleLoad": false
+      },
+      "justMyCode": false
+    },
+    {
+      "name": "Docker: SensorsReportBusinessBroker.API",
+      "type": "docker",
+      "request": "launch",
+      "preLaunchTask": "docker-run: debug",
+      "netCore": {
+        "appProject": "${workspaceFolder}/SensorsReportBusinessBroker.API/SensorsReportBusinessBroker.API.csproj",
+        "enableDebugging": true,
+        "debuggerOptions": {
+          "justMyCode": false
+        }
+      }
+    },
+    {
+      "name": ".NET Core Launch (Sensors-Report-Audit.API)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/Sensors-Report-Audit.API/bin/Debug/net8.0/SensorsReportAudit.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/Sensors-Report-Audit.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Now listening on: (https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Sensors-Report-Audit.API/Views"
+      },
+      "justMyCode": false,
+      "console": "integratedTerminal"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "targetFramework",
+      "type": "pickString",
+      "description": "Select the target framework for SensorsReportMQTT-toOrion",
+      "options": [
+        "net8.0"
+      ]
+    }
+  ]
+}

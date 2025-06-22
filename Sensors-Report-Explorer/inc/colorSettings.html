@@ -1,0 +1,179 @@
+<div id="colorSettingsMenu" class="color-settings-menu attribute-editor-modal">
+    <div class="color-settings-header attribute-editor-modal-content" style="position:relative;">
+        <button class="attribute-editor-close" id="colorSettingsCloseBtn" title="Close" style="position:absolute;top:10px;right:10px;font-size:20px;border:none;background:none;cursor:pointer;">&times;</button>
+        <h3>JSON Color Settings</h3>
+        <div class="color-settings-body">
+            <div class="color-setting-group">
+                <label for="jsonProperty">Property Names:</label>
+                <input type="color" id="jsonProperty" data-target="--json-property">
+            </div>
+            <div class="color-setting-group">
+                <label for="jsonString">String Values:</label>
+                <input type="color" id="jsonString" data-target="--json-string">
+            </div>
+            <div class="color-setting-group">
+                <label for="jsonNumber">Numbers:</label>
+                <input type="color" id="jsonNumber" data-target="--json-number">
+            </div>
+            <div class="color-setting-group">
+                <label for="jsonBoolean">Booleans:</label>
+                <input type="color" id="jsonBoolean" data-target="--json-boolean">
+            </div>
+            <div class="color-setting-group">
+                <label for="jsonNull">Null Values:</label>
+                <input type="color" id="jsonNull" data-target="--json-null">
+            </div>
+            <div class="color-setting-group">
+                <label for="jsonPunctuation">Punctuation:</label>
+                <input type="color" id="jsonPunctuation" data-target="--json-punctuation">
+            </div>
+        </div>
+        <div class="color-settings-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+            <div id="colorSettingsButtons"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Wait for DOM and ButtonEditor to be available before initializing
+    function initColorSettingsModal() {
+        const menu = document.getElementById('colorSettingsMenu');
+        const closeBtn = document.getElementById('colorSettingsCloseBtn');
+        const footer = document.getElementById('colorSettingsButtons');
+
+        if (!menu) {
+            console.error('Color settings menu element (#colorSettingsMenu) not found.');
+            return;
+        }
+
+        // Define ESC key handler. It needs to be a stable reference to be removed correctly.
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                // Check if the modal is currently considered visible by its inline style
+                if (menu.style.display === 'flex') {
+                    hideMenu();
+                }
+            }
+        };
+
+        function showMenu() {
+            if (menu.style.display !== 'flex') {
+                menu.style.display = 'flex';
+                document.addEventListener('keydown', escHandler);
+            }
+        }
+
+        function hideMenu() {
+            if (menu.style.display !== 'none') {
+                menu.style.display = 'none';
+                document.removeEventListener('keydown', escHandler);
+            }
+        }
+
+        // Setup close button
+        if (closeBtn) {
+            closeBtn.onclick = hideMenu;
+        } else {
+            console.error('Close button (#colorSettingsCloseBtn) not found.');
+        }
+
+        // Setup close on outside click (click on the menu backdrop itself)
+        menu.addEventListener('click', function(e) {
+            if (e.target === menu) { // Ensures the click is on the modal background, not its content
+                hideMenu();
+            }
+        });
+
+        // Call existing color settings logic if available
+        if (typeof window.initColorSettings === 'function') {
+            try {
+                window.initColorSettings();
+            } catch (error) {
+                console.error('Error in window.initColorSettings:', error);
+            }
+        }
+
+        // Create and append footer buttons
+        if (footer) {
+            footer.innerHTML = ''; // Clear any existing content
+            if (window.ButtonEditor) {
+                try {
+                    const buttonEditor = new window.ButtonEditor();
+                    // Reset button (trash icon)
+                    const resetBtn = buttonEditor.createButton({
+                        title: 'Reset to Default',
+                        icon: 'fas fa-trash',
+                        isOperation: false
+                    });
+                    resetBtn.id = 'resetColors';
+                    footer.appendChild(resetBtn);
+                    // Save button (save icon)
+                    const saveBtn = buttonEditor.createButton({
+                        title: 'Save Colors',
+                        icon: 'fas fa-save',
+                        isOperation: false
+                    });
+                    saveBtn.id = 'saveColors';
+                    footer.appendChild(saveBtn);
+                } catch (error) {
+                    console.error('Error using ButtonEditor, falling back to simple buttons:', error);
+                    createFallbackButtons(footer);
+                }
+            } else {
+                console.warn('ButtonEditor not loaded: using fallback buttons.');
+                createFallbackButtons(footer);
+            }
+        } else {
+            console.error('Footer element (#colorSettingsButtons) not found.');
+        }
+
+        function createFallbackButtons(container) {
+            const resetBtn = document.createElement('button');
+            resetBtn.textContent = 'Reset';
+            resetBtn.id = 'resetColors';
+            container.appendChild(resetBtn);
+
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Save';
+            saveBtn.id = 'saveColors';
+            container.appendChild(saveBtn);
+
+            const warn = document.createElement('div');
+            warn.textContent = 'ButtonEditor not loaded or failed: using fallback buttons.';
+            warn.style.color = 'orange';
+            warn.style.fontSize = '11px';
+            warn.style.marginRight = 'auto';
+            container.prepend(warn);
+        }
+
+        // Attempt to show the modal initially
+        showMenu();
+    }
+
+    // Wait for DOMContentLoaded and potentially for ButtonEditor to be available
+    function waitForButtonEditorAndInit() {
+        // Check for ButtonEditor, but proceed even if it's not there after a short delay,
+        // as the fallback buttons can be used.
+        let attempts = 0;
+        const maxAttempts = 10; // Try for 1 second (10 * 100ms)
+
+        function checkAndInit() {
+            if (window.ButtonEditor || attempts >= maxAttempts) {
+                initColorSettingsModal();
+            } else {
+                attempts++;
+                setTimeout(checkAndInit, 100);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAndInit);
+        } else {
+            // DOMContentLoaded has already fired
+            checkAndInit();
+        }
+    }
+
+    waitForButtonEditorAndInit();
+
+</script>

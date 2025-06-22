@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensors-report-audit-config
+data:
+  SR_AUDIT_QUANTUMLEAP_HOST: "quantum.sensorsreport.net"
+  SR_AUDIT_QUANTUMLEAP_PORT: "8668"
+  SR_AUDIT_KEYCLOAK_URL: "keycloak.sensorsreport.net"
+  SR_AUDIT_KEYCLOAK_PORT: "30100"
+  SR_AUDIT_KEYCLOAK_RELM: "sr"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sensors-report-audit-secrets
+type: Opaque
+data:
+  # These are placeholders. In a real environment, replace with actual base64-encoded values
+  SR_AUDIT_KEYCLOAK_CLIENTID: Q29udGV4dEJyb2tlcg==  # clientId
+  SR_AUDIT_KEYCLOAK_CLIENTSECRET: QUVMWUs0dHVzWWF6dklESXZ3MG1lUVppU25HTW5WSlA=  # clientSecret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-audit
+  labels:
+    app: sensors-report-audit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-audit
+  template:
+    metadata:
+      labels:
+        app: sensors-report-audit
+    spec:
+      containers:
+      - name: sensors-report-audit
+        image: viobiscu/sensorsreportaudit:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: sensors-report-audit-config
+        - secretRef:
+            name: sensors-report-audit-secrets
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensors-report-audit
+  labels:
+    app: sensors-report-audit
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: sensors-report-audit

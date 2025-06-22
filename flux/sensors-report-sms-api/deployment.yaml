@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-sms-api
+  labels:
+    app: sensors-report-sms-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-sms-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-sms-api
+    spec:
+      containers:
+      - name: sensors-report-sms-api
+        image: sensors-report-sms-api:dev
+        ports:
+        - containerPort: 80
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Development
+        - name: Keycloak__Authority
+          value: http://keycloak:8080/realms/sr
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: logs
+        emptyDir: {}

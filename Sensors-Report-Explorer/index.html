@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Orion-LD Explorer - SensorsReport</title>
+    <link href="favicon.ico" type="image/x-icon" rel="icon"/>
+    <link href="css/style.css" rel="stylesheet"/>
+    <link href="css/theme.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/editor.css">
+    
+    <!-- Use locally hosted Font Awesome instead of CDN -->
+    <link href="fonts/fontawesome/css/all.min.css" rel="stylesheet"/>
+    
+    <!-- Add highlight.js CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/json.min.js"></script>
+    
+    <link href="css/custom-highlight.css" rel="stylesheet"/>
+    
+    <!-- Load all scripts as modules
+    <script src="js/jsonEditor.js" type="module"></script> -->
+    <!-- <script src="js/jsonEditorSubscription.js" type="module"></script> -->
+    <script src="js/TabManager.js" type="module"></script>
+    
+    <!-- Main module initialization -->
+    <script type="module">
+        import ButtonEditor from './js/ButtonEditor.js';
+        import { setupTokenButton } from './js/token-utils.js';
+        import { appendToLogs } from './js/logging.js';
+        import {  openFormQuantumLeapTableView, openFormQuantumLeapEntityView } from './js/ui-handlers.js';
+        import { clearAuthData, clearAllData } from './js/auth-utils.js';
+        
+        // Make functions available globally
+        window.setupTokenButton = setupTokenButton;
+        window.openFormQuantumLeapTableView = openFormQuantumLeapTableView;
+        window.openFormQuantumLeapEntityView = openFormQuantumLeapEntityView;
+        
+        // Create functions that will be needed by modules before they load
+        window.passwordVisibility = {
+            togglePasswordVisibility: function(fieldId) {
+                const input = document.getElementById(fieldId);
+                if (input) {
+                    input.type = input.type === "password" ? "text" : "password";
+                }
+            }
+        };
+        
+        // window.authChecker = {
+        //     checkAuthentication: function() {
+        //         // This will be replaced by the proper implementation once modules load
+        //         return true;
+        //     }
+        // };
+
+        // Setup notification handling
+        async function setupNotificationListener() {
+            try {
+                // Create EventSource for Server-Sent Events
+                const eventSource = new EventSource('/api/notifications/stream');
+                
+                eventSource.onmessage = (event) => {
+                    try {
+                        const notification = JSON.parse(event.data);
+                        appendToLogs('Received notification:');
+                        
+                        // Log entity updates
+                        if (notification.data) {
+                            notification.data.forEach(entity => {
+                                const entityId = entity.id;
+                                const entityType = entity.type;
+                                appendToLogs(`Entity Update - ID: ${entityId}, Type: ${entityType}`);
+                                
+                                // Log changed attributes
+                                Object.entries(entity).forEach(([key, value]) => {
+                                    if (key !== 'id' && key !== 'type') {
+                                        appendToLogs(`  Changed attribute: ${key} = ${JSON.stringify(value)}`);
+                                    }
+                                });
+                            });
+                        }
+                    } catch (error) {
+                        appendToLogs(`Error processing notification: ${error.message}`);
+                    }
+                };
+
+                eventSource.onerror = (error) => {
+                    appendToLogs(`Notification connection error. Reconnecting...`);
+                };
+                
+                appendToLogs('Notification listener connected');
+            } catch (error) {
+                appendToLogs(`Failed to setup notification listener: ${error.message}`);
+            }
+        }
+
+        // --- Tenant Combo Box Logic ---
+        const TENANT_STORAGE_KEY = 'sr_tenants';
+        const TENANT_MAX = 10;
+        const tenantInput = document.getElementById('tenantname');
+        const tenantCombo = document.getElementById('tenantCombo');
+
+        function getTenantsFromStorage() {
+            try {
+                const tenants = JSON.parse(localStorage.getItem(TENANT_STORAGE_KEY));
+                return Array.isArray(tenants) ? tenants : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveTenantsToStorage(tenants) {
+            localStorage.setItem(TENANT_STORAGE_KEY, JSON.stringify(tenants.slice(0, TENANT_MAX)));
+        }
+
+        function addTenant(tenant) {
+            if (!tenant) return;
+            let tenants = getTenantsFromStorage();
+            tenants = tenants.filter(t => t !== tenant);
+            tenants.unshift(tenant);
+            if (tenants.length > TENANT_MAX) tenants = tenants.slice(0, TENANT_MAX);
+            saveTenantsToStorage(tenants);
+            populateTenantCombo(tenants);
+        }
+
+        function populateTenantCombo(tenants) {
+            tenantCombo.innerHTML = '';
+            tenants.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                tenantCombo.appendChild(opt);
+            });
+        }
+
+        // When a tenant is selected from combo, update input
+        tenantCombo.addEventListener('change', () => {
+            tenantInput.value = tenantCombo.value;
+        });
+
+        // When input changes, add to storage if new
+        tenantInput.addEventListener('change', () => {
+            const val = tenantInput.value.trim();
+            if (val) addTenant(val);
+        });
+
+        // On authentication, call this with new tenantId and username
+        window.setTenantFromAuth = function(tenantId, username) {
+            if (tenantId) {
+                tenantInput.value = tenantId;
+                addTenant(tenantId);
+            }
+            // Optionally set username somewhere if needed
+            // document.getElementById('loginUser').textContent = 'User: ' + username;
+        };
+
+        // On page load, fill combo and input from storage
+        (function initTenantCombo() {
+            const tenants = getTenantsFromStorage();
+            populateTenantCombo(tenants);
+            if (tenants.length > 0) {
+                tenantCombo.value = tenants[0];
+                tenantInput.value = tenants[0];
+            }
+        })();
+
+        // Initialize when DOM is loaded and modules are ready
+        document.addEventListener('DOMContentLoaded', async function() {
+            const buttonEditor = new ButtonEditor();
+
+            // Setup Show Token button using ButtonEditor
+            const originalShowTokenButton = document.getElementById('showTokenButton');
+            if (originalShowTokenButton) {
+                console.debug('Replacing Show Token button with ButtonEditor version');
+                const newShowTokenButton = buttonEditor.createButton({
+                    title: 'Show Token',
+                    icon: 'fas fa-key',
+                    isOperation: false
+                });
+                newShowTokenButton.id = 'showTokenButton';
+                originalShowTokenButton.parentNode.replaceChild(newShowTokenButton, originalShowTokenButton);
+                
+                if (typeof setupTokenButton === 'function') {
+                    setupTokenButton();
+                } else {
+                    console.error('setupTokenButton not available for Show Token button.');
+                }
+            }
+
+            // Setup Clear Auth button using ButtonEditor
+            const originalClearAuthButton = document.getElementById('clearAuthButton');
+            if (originalClearAuthButton) {
+                console.debug('Replacing Clear Auth button with ButtonEditor version');
+                const newClearAuthButton = buttonEditor.createButton({
+                    title: 'Clear Auth Data',
+                    icon: 'fas fa-user-slash',
+                    isOperation: false
+                });
+                newClearAuthButton.id = 'clearAuthButton';
+                newClearAuthButton.addEventListener('click', clearAuthData);
+                originalClearAuthButton.parentNode.replaceChild(newClearAuthButton, originalClearAuthButton);
+            }
+            
+            // Setup Clear All button using ButtonEditor
+            const originalClearAllButton = document.getElementById('clearAllButton');
+            if (originalClearAllButton) {
+                console.debug('Replacing Clear All button with ButtonEditor version');
+                const newClearAllButton = buttonEditor.createButton({
+                    title: 'Clear All Data',
+                    icon: 'fas fa-trash-alt',
+                    isOperation: false
+                });
+                newClearAllButton.id = 'clearAllButton';
+                newClearAllButton.addEventListener('click', clearAllData);
+                originalClearAllButton.parentNode.replaceChild(newClearAllButton, originalClearAllButton);
+            }
+
+            // Setup Clear Logs button using ButtonEditor
+            const originalClearLogsButton = document.getElementById('clearLogsBtn');
+            if (originalClearLogsButton) {
+                console.debug('Replacing Clear Logs button with ButtonEditor version');
+                const newClearLogsButton = buttonEditor.createButton({
+                    title: 'Clear Logs',
+                    icon: 'fas fa-trash', // Example icon, replace if needed
+                    isOperation: false
+                });
+                newClearLogsButton.id = 'clearLogsBtn';
+                // Attach event handler to clear logs
+                newClearLogsButton.addEventListener('click', () => {
+                    const logs = document.getElementById('request-logs');
+                    if (logs) logs.innerHTML = '<p class="log-placeholder">Logs will appear here...</p>';
+                });
+                originalClearLogsButton.parentNode.replaceChild(newClearLogsButton, originalClearLogsButton);
+                // The event listener for clearLogsBtn is in js/ui.js and should still work
+            }
+
+            // Setup Logout button using ButtonEditor
+            const originalLogoutButton = document.getElementById('logoutButton');
+            if (originalLogoutButton) {
+                console.debug('Replacing Logout button with ButtonEditor version');
+                const newLogoutButton = buttonEditor.createButton({
+                    title: 'Logout',
+                    icon: 'fas fa-sign-out-alt', // Example icon, replace if needed
+                    isOperation: false
+                });
+                newLogoutButton.id = 'logoutButton';
+                // Attach logout event handler
+                newLogoutButton.addEventListener('click', () => {
+                    // if (typeof window.doLogout === 'function') {
+                    //     window.doLogout();
+                    // } else {
+                        // Fallback: try to call AuthBackend.logout if available
+                        //if (window.AuthBackend && typeof window.AuthBackend.logout === 'function') {
+                            window.AuthBackend.logout();
+                        // } else {
+                        //     alert('Logout function not available.');
+                        // }
+                    //}
+                });
+                originalLogoutButton.parentNode.replaceChild(newLogoutButton, originalLogoutButton);
+            }
+
+            // Setup notification listener
+            await setupNotificationListener();
+
+            // Initialize TabManager
+            const { TabManager } = await import('./js/TabManager.js');
+            window.tabManager = await TabManager.initialize();
+        });
+    </script>
+    <script src="js/auth-backend.js" type="module" defer></script>
+    
+    <!-- Load other module scripts with defer attribute -->
+    <script src="js/logging.js" type="module" defer></script>
+    <script src="js/auth-utils.js" type="module" defer></script>
+    <script src="js/ui.js" type="module" defer></script>
+    <script src="js/api.js" type="module" defer></script>
+    <script src="js/AppInitializer.js" type="module" defer></script>
+    <script src="js/colorSettings.js" type="module" defer></script>
+</head>
+<body>
+    <!-- Header Section -->
+    <header id="top-header">
+        <div class="branding">
+            <button id="sidebarToggle" class="sidebar-toggle" title="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <img alt="SensorsReport Logo" id="brandLogo" src="images/SensorsReport.jpg" loading="lazy"/>
+            <button id="themeToggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+        <div class="user-info">
+            <!-- Disable login display in index.html -->
+            <!-- Commenting out loginUser span -->
+            <!-- <span id="loginUser" class="info-label">User: Not logged in</span> -->
+            <div class="tenant-container">
+                <span id="tenantLabel" class="info-label">Tenant:</span>
+                <select id="tenantCombo" style="margin-right: 5px;"></select>
+                <input id="tenantname" placeholder="tenantname" type="text"/>
+            </div>
+            <button id="showTokenButton"></button>
+            <button id="clearAuthButton"></button>
+            <button id="clearAllButton"></button>
+            <button id="logoutButton"></button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div id="main-container">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar">
+            <ul class="treeview">
+                <li class="treeview-item expandable">
+                    <i class="fa-regular fa-folder-closed custom-icon"></i><span>Entities</span>
+                    <ul class="nested">
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>Entities</span>
+                            <button class="method-button get-button" onclick="openFormEntityTableView()">GET</button>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>Entities</span>
+                            <button class="method-button post-button" onclick="openFormEntityPostTableView()">POST</button>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>By Type</span>
+                            <button class="method-button get-button" onclick="openFormEntityAllByTypeTableView()">GET</button>
+                        </li>
+                    </ul>
+                </li>
+                <!-- <li class="treeview-item expandable">
+                    <i class="fa-regular fa-folder-closed custom-icon"></i><span>Attributes</span>
+                    <ul class="nested">
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>Attributes</span>
+                            <button class="method-button get-button" onclick="">GET</button>
+                        </li>
+                    </ul>
+                </li> -->
+                <li class="treeview-item expandable">
+                    <i class="fa-regular fa-folder-closed custom-icon"></i><span>Subscriptions</span>
+                    <ul class="nested">
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>Subscription</span>
+                            <button class="method-button get-button" onclick="openFormSubscriptionTableView()">GET</button>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>Subscription</span>
+                            <button class="method-button post-button" onclick="openFormSubscriptionPostTableView()">POST</button>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>List All</span>
+                            <button class="method-button get-button" onclick="openFormSubscriptionAllOfTypeTableView()">GET</button>
+                        </li>
+                    </ul>
+                </li>
+                <li class="treeview-item expandable">
+                    <i class="fa-regular fa-folder-closed custom-icon"></i><span>Data Products</span>
+                    <ul class="nested">
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>Data Products</span>
+                            <button class="method-button get-button" onclick="openFormDataProductTableView()">GET</button>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>Data Products</span>
+                            <button class="method-button post-button" onclick="openFormDataProductPostTableView()">POST</button>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>List All</span>
+                            <button class="method-button get-button" onclick="openFormDataProductAllOfTypeTableView()">GET</button>
+                        </li>
+                    </ul>
+                </li>
+                <li class="treeview-item expandable">
+                    <i class="fa-regular fa-folder-closed custom-icon"></i><span>Quantum Leap</span>
+                    <ul class="nested">
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>List All</span>
+                            <button class="method-button get-button" onclick="openFormQuantumLeapTableView()">GET</button>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-file custom-icon"></i><span>Entity Get</span>
+                            <button class="method-button get-button" onclick="openFormQuantumLeapEntityView()">GET</button>
+                        </li>
+                    </ul>
+                </li>
+                <li class="treeview-item">
+                    <i class="fa-regular fa-file custom-icon"></i>
+                    <span onclick="handleEntityGet('inc/queue.html')">Queues</span>
+                </li>
+                <li class="treeview-item">
+                    <i class="fa-regular fa-file custom-icon"></i>
+                    <span onclick="handleEntityGet('inc/resources.html')">Reference</span>
+                </li>
+                <li class="treeview-item">
+                    <i class="fa-regular fa-palette custom-icon"></i>
+                    <span onclick="handleEntityGet('inc/colorSettings.html')">Color Settings</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Resizer bar -->
+        <div id="resizer"></div>
+
+        <!-- Content Area -->
+        <main id="contentArea">
+            <div id="displayArea">
+                <div id="mainJsonEditorContainer"></div>
+            </div>
+            <div id="fallbackUI"></div>
+            <!-- Logs Section -->
+            <div id="logs-container" class="expanded">
+                <div class="logs-header">
+                    <button id="clearLogsBtn"></button>
+                    <button class="json-editor-toolbar-btn" id="toggleLogsBtn" title="Minimize Logs">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div id="request-logs">
+                    <p class="log-placeholder">Logs will appear here...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+  function applyFooterTheme(footer) {
+    // Try to detect dark mode from body or html class, or CSS variable
+    const isDark = document.body.classList.contains('dark') ||
+                   document.documentElement.classList.contains('dark') ||
+                   (getComputedStyle(document.documentElement).getPropertyValue('--theme') === 'dark') ||
+                   (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (isDark) {
+      footer.style.background = 'rgba(30,30,30,0.85)';
+      footer.style.color = '#fff';
+      footer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+      footer.style.border = '1px solid #444';
+    } else {
+      footer.style.background = 'rgba(255,255,255,0.8)';
+      footer.style.color = '#222';
+      footer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+      footer.style.border = '1px solid #ccc';
+    }
+  }
+  window.addEventListener('DOMContentLoaded', function() {
+    fetch('version.txt')
+      .then(response => response.text())
+      .then(version => {
+        let footer = document.getElementById('footer-version');
+        if (!footer) {
+          footer = document.createElement('div');
+          footer.id = 'footer-version';
+          footer.style.position = 'fixed';
+          footer.style.right = '10px';
+          footer.style.bottom = '10px';
+          footer.style.padding = '4px 12px';
+          footer.style.borderRadius = '4px';
+          footer.style.fontSize = '12px';
+          footer.style.zIndex = 1000;
+          document.body.appendChild(footer);
+        }
+        applyFooterTheme(footer);
+        footer.textContent = 'Frontend Version: ' + version.trim();
+      })
+      .catch(() => {
+        let footer = document.getElementById('footer-version');
+        if (!footer) {
+          footer = document.createElement('div');
+          footer.id = 'footer-version';
+          footer.style.position = 'fixed';
+          footer.style.right = '10px';
+          footer.style.bottom = '10px';
+          footer.style.padding = '4px 12px';
+          footer.style.borderRadius = '4px';
+          footer.style.fontSize = '12px';
+          footer.style.zIndex = 1000;
+          document.body.appendChild(footer);
+        }
+        applyFooterTheme(footer);
+        footer.textContent = 'Frontend Version: unknown';
+      });
+    // Listen for theme changes if your app supports toggling
+    const observer = new MutationObserver(() => {
+      const footer = document.getElementById('footer-version');
+      if (footer) applyFooterTheme(footer);
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  });
+    </script>
+</body>
+</html>
