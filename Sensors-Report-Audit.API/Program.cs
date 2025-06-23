@@ -13,6 +13,8 @@ var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "nlog.confi
 LogManager.Setup().LoadConfigurationFromFile(configPath);
 var logger = LogManager.GetCurrentClassLogger();
 
+string version = string.Empty;
+
 try
 {
     logger.Info("Application starting...");
@@ -22,7 +24,7 @@ try
         string versionFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.txt");
         if (File.Exists(versionFile))
         {
-            string version = File.ReadAllText(versionFile).Trim();
+            version = File.ReadAllText(versionFile).Trim();
             logger.Info($"Build Version: {version}");
         }
         else
@@ -116,7 +118,7 @@ try
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true
         };
-        
+
         // Enable token introspection for online validation
         options.Events = new JwtBearerEvents
         {
@@ -128,7 +130,7 @@ try
                     var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
                     var authLogger = loggerFactory.CreateLogger<KeycloakAuthService>();
                     var authService = new KeycloakAuthService(auditConfig, authLogger);
-                    
+
                     var isValid = await authService.ValidateTokenAsync(token.RawData);
                     if (!isValid)
                     {
@@ -144,7 +146,7 @@ try
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "SensorsReportAudit API", Version = "v1" });
-        
+
         // Configure Swagger to use JWT Bearer Authentication
         c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
@@ -154,7 +156,7 @@ try
             Type = SecuritySchemeType.ApiKey,
             Scheme = "Bearer"
         });
-        
+
         c.AddSecurityRequirement(new OpenApiSecurityRequirement
         {
             {
@@ -183,7 +185,8 @@ try
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SensorsReportAudit API v1"));
 
     // Health/liveness probe endpoint
-    app.MapGet("/health", () => "OK");
+    app.MapGet("/audit/health", () => "OK");
+    app.MapGet("/audit/version", () => version);
 
     app.UseRouting();
 
@@ -278,18 +281,6 @@ void LogProgramInfo(Logger log)
 {
     var assembly = Assembly.GetExecutingAssembly();
     
-    // Get version with better fallback handling
-    string version;
-    try
-    {
-        version = assembly.GetName().Version?.ToString() ?? "1.0.0.0";
-    }
-    catch (Exception ex)
-    {
-        log.Warn($"Error retrieving version: {ex.Message}");
-        version = "1.0.0.0";
-    }
-    
     try
     {
         // Get other assembly attributes
@@ -309,6 +300,7 @@ void LogProgramInfo(Logger log)
             .FirstOrDefault()?.Title ?? "SensorsReportAudit.API";
         
         log.Info($"Application: {title}");
+        log.Info($"Version: {version}");
         log.Info($"Description: {description}");
         log.Info($"Copyright: {copyright}");
     }

@@ -1,0 +1,9 @@
+@hostname = https://api.sensorsreport.net
+
+### Health Check
+GET {{hostname}}/audit/health
+Authorization: Bearer {{$access_token}}
+
+### Version
+GET {{hostname}}/audit/version
+Authorization: Bearer {{$access_token}}

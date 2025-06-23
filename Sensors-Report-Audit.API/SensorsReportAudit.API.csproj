@@ -35,6 +35,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties/" />
+  </ItemGroup>
+
   <Target Name="IncrementVersion" AfterTargets="Build">
     <Exec Command="bash increment_version.sh" WorkingDirectory="$(ProjectDir)" />
   </Target>
@@ -44,7 +48,7 @@
   </PropertyGroup>
   <Target Name="ReadVersionTxt" BeforeTargets="GenerateAssemblyInfo">
     <ReadLinesFromFile File="version.txt">
-      <Output TaskParameter="Lines" PropertyName="AppVersion"/>
+      <Output TaskParameter="Lines" PropertyName="AppVersion" />
     </ReadLinesFromFile>
   </Target>
   <PropertyGroup>
