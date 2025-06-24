@@ -2,8 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: default
 resources:
-  - sensors-report-audit/deployment.yaml
-  - sensors-report-audit/service.yaml
   - sensors-report-audit-api/deployment.yaml
   - sensors-report-audit-api/service.yaml
   - sensors-report-business-broker-api/deployment.yaml
