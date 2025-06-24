@@ -1,9 +1,29 @@
 @hostname = https://api.sensorsreport.net
 
+### Get client token
+# @name GetClientToken
+curl -X POST 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/token' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'client_id=audit-api-client' \
+  -d 'client_secret={{$client_secret}}' \
+  -d 'grant_type=client_credentials'
+
+### Validate Access Token
+
+@access_token = {{GetClientToken.response.body.access_token}}
+
+curl -X POST 'https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/token/introspect' \
+  -u 'audit-api-client:{{$client_secret}}' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'token={{access_token}}'
+
 ### Health Check
+
+@access_token = {{GetClientToken.response.body.access_token}}
 GET {{hostname}}/audit/health
-Authorization: Bearer {{$access_token}}
+Authorization: Bearer {{access_token}}
 
 ### Version
+@access_token = {{GetClientToken.response.body.access_token}}
 GET {{hostname}}/audit/version
-Authorization: Bearer {{$access_token}}
+Authorization: Bearer {{access_token}}

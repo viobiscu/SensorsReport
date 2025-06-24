@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+spec:
+  containers:
+    - name: test-pod
+      image: python:3.10-slim
+      command: ["/bin/bash", "-c"]
+      args:
+        - apt update && apt install -y curl && pip install requests pyjwt && tail -f /dev/null
+      volumeMounts:
+        - name: host-volume
+          mountPath: /xxx
+  volumes:
+    - name: host-volume
+      hostPath:
+        path: "/mnt"
+        type: Directory
+  restartPolicy: Never

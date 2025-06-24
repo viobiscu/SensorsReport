@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: krakend
+  labels:
+    app: krakend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: krakend
+  template:
+    metadata:
+      labels:
+        app: krakend
+    spec:
+      containers:
+        - name: krakend
+          image: devopsfaith/krakend:2.5
+          args: ["run", "-d", "-c", "/etc/krakend/krakend.json"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: krakend
+              mountPath: /etc/krakend
+      volumes:
+        - name: krakend
+          configMap:
+            name: krakend

@@ -1,0 +1,3111 @@
+{
+  "version": 3,
+  "extra_config": {
+    "auth/validator": {
+      "shared_cache_duration": 900
+    },
+    "telemetry/logging": {
+      "level": "ERROR",
+      "prefix": "[KRAKEND]",
+      "syslog": false,
+      "stdout": true,
+      "format": "default"
+    },
+    "router": {
+      "auto_options": true,
+      "return_error_msg": true
+    },
+    "security/cors": {
+      "allow_origins": [
+        "*"
+      ],
+      "allow_methods": [
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS"
+      ],
+      "expose_headers": [
+        "*"
+      ],
+      "allow_headers": [
+        "*"
+      ],
+      "max_age": "12h",
+      "allow_credentials": false,
+      "debug": true
+    }
+  },
+  "timeout": "6000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+  "name": "test",
+  "read_timeout": "60s",
+  "write_timeout": "60s",
+  "idle_timeout": "60s",
+  "read_header_timeout": "60s",
+  "endpoints": [
+    {
+      "endpoint": "/audit/version",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "audience": [
+            "account"
+          ],
+          "issuer": "https://keycloak.sensorsreport.net/realms/sr"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/audit/version",
+          "host": [
+            "http://sensors-report-audit-api"
+          ],
+          "method": "GET",
+          "encoding": "no-op"
+        }
+      ]
+    },
+    {
+      "endpoint": "/audit/health",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "audience": [
+            "account"
+          ],
+          "issuer": "https://keycloak.sensorsreport.net/realms/sr"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/audit/health",
+          "host": [
+            "http://sensors-report-audit-api"
+          ],
+          "method": "GET",
+          "encoding": "no-op"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orionld/ngsi-ld/v1/entities/{entityId}/attrs/{attrId}",
+      "method": "PATCH",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "attrs",
+        "count",
+        "coordinates",
+        "csf",
+        "format",
+        "geoproperty",
+        "geometry",
+        "geometryProperty",
+        "georel",
+        "id",
+        "idPattern",
+        "lang",
+        "local",
+        "limit",
+        "offset",
+        "onlyIds",
+        "options",
+        "q",
+        "scopeQ",
+        "type",
+        "pick"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}/attrs/{attrId}",
+          "encoding": "no-op",
+          "method": "PATCH",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": false,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via"
+      ]
+    },
+    {
+      "endpoint": "/orionld/ngsi-ld/v1/entities/{entityId}",
+      "method": "PATCH",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "attrs",
+        "count",
+        "coordinates",
+        "csf",
+        "format",
+        "geoproperty",
+        "geometry",
+        "geometryProperty",
+        "georel",
+        "id",
+        "idPattern",
+        "lang",
+        "local",
+        "limit",
+        "offset",
+        "onlyIds",
+        "options",
+        "q",
+        "scopeQ",
+        "type",
+        "pick"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}",
+          "encoding": "no-op",
+          "method": "PATCH",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": false,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via"
+      ]
+    },
+    {
+      "endpoint": "/orionld/ngsi-ld/v1/entities",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "attrs",
+        "count",
+        "coordinates",
+        "csf",
+        "format",
+        "geoproperty",
+        "geometry",
+        "geometryProperty",
+        "georel",
+        "id",
+        "idPattern",
+        "lang",
+        "local",
+        "limit",
+        "offset",
+        "onlyIds",
+        "options",
+        "q",
+        "scopeQ",
+        "type",
+        "pick"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": false,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via",
+        "X-Forwarded-For",
+        "X-Forwarded-Host"
+      ]
+    },
+    {
+      "endpoint": "/orionld/ngsi-ld/v1/entities/{entityId}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "attrs",
+        "format",
+        "geometryProperty",
+        "lang",
+        "local",
+        "options"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via",
+        "X-Forwarded-For",
+        "X-Forwarded-Host"
+      ]
+    },
+    {
+      "endpoint": "/orionld/ngsi-ld/v1/entities/{entityId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local",
+        "type"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via",
+        "X-Forwarded-For",
+        "X-Forwarded-Host"
+      ]
+    },
+    {
+      "endpoint": "/orionld/ngsi-ld/v1/entities/{entityId}/attrs/{attrId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local",
+        "type"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}/attrs/{attrId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via",
+        "X-Forwarded-For",
+        "X-Forwarded-Host"
+      ]
+    },
+    {
+      "endpoint": "/orionld/ngsi-ld/v1/subscriptions/{subscriptionId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/subscriptions/{subscriptionId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via",
+        "X-Forwarded-For",
+        "X-Forwarded-Host"
+      ]
+    },
+    {
+      "endpoint": "/entities",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "attrs",
+        "count",
+        "coordinates",
+        "csf",
+        "format",
+        "geoproperty",
+        "geometry",
+        "geometryProperty",
+        "georel",
+        "id",
+        "idPattern",
+        "lang",
+        "local",
+        "limit",
+        "offset",
+        "onlyIds",
+        "options",
+        "q",
+        "scopeQ",
+        "type",
+        "pick"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": false,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via",
+        "X-Forwarded-For",
+        "X-Forwarded-Host"
+      ]
+    },
+    {
+      "endpoint": "/entityOperations/create",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entityOperations/create",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entityOperations/merge",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entityOperations/merge",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/jsonldContexts",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "details",
+        "kind",
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/jsonldContexts",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/jsonldContexts",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/jsonldContexts",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/entities/{entityId}/attrs/{attrId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "deleteAll",
+        "datasetId",
+        "local",
+        "type"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}/attrs/{attrId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entities/{entityId}/attrs/{attrId}",
+      "method": "PATCH",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local",
+        "type"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}/attrs/{attrId}",
+          "encoding": "no-op",
+          "method": "PATCH",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entities/{entityId}/attrs/{attrId}",
+      "method": "PUT",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}/attrs/{attrId}",
+          "encoding": "no-op",
+          "method": "PUT",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/csourceSubscriptions",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "options",
+        "limit",
+        "count",
+        "local",
+        "format"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceSubscriptions",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/csourceSubscriptions",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceSubscriptions",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entityOperations/upsert",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "options",
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entityOperations/upsert",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/types/{type}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/types/{type}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entityOperations/query",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entityOperations/query",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/csourceSubscriptions/{subscriptionId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceSubscriptions/{subscriptionId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/csourceSubscriptions/{subscriptionId}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceSubscriptions/{subscriptionId}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/csourceSubscriptions/{subscriptionId}",
+      "method": "PATCH",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceSubscriptions/{subscriptionId}",
+          "encoding": "no-op",
+          "method": "PATCH",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entityOperations/delete",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entityOperations/delete",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entityOperations/update",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "options",
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entityOperations/update",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/jsonldContexts/{contextId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "reload",
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/jsonldContexts/{contextId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/jsonldContexts/{contextId}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "details",
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/jsonldContexts/{contextId}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/subscriptions",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/subscriptions",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/subscriptions",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/subscriptions",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": false,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_query_strings": [
+        "*"
+      ],
+      "input_headers": [
+        "aerOS",
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via"
+      ]
+    },
+    {
+      "endpoint": "/csourceRegistrations",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "id",
+        "type",
+        "idPattern",
+        "attrs",
+        "q",
+        "csf",
+        "geometry",
+        "georel",
+        "coordinates",
+        "geoproperty",
+        "timeproperty",
+        "timerel",
+        "timeAt",
+        "endTimeAt",
+        "geometryProperty",
+        "lang",
+        "scopeQ",
+        "options",
+        "limit",
+        "count",
+        "local",
+        "format"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceRegistrations",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/csourceRegistrations",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceRegistrations",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/subscriptions/{subscriptionId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/subscriptions/{subscriptionId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/subscriptions/{subscriptionId}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/subscriptions/{subscriptionId}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/subscriptions/{subscriptionId}",
+      "method": "PATCH",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/subscriptions/{subscriptionId}",
+          "encoding": "no-op",
+          "method": "PATCH",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/attributes/{attrId}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/attributes/{attrId}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entities",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entities/{entityId}",
+      "method": "PATCH",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "lang",
+        "local",
+        "observedAt",
+        "options",
+        "type"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}",
+          "encoding": "no-op",
+          "method": "PATCH",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entities/{entityId}",
+      "method": "PUT",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}",
+          "encoding": "no-op",
+          "method": "PUT",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entities",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local",
+        "type"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entities/{entityId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local",
+        "type"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entities/{entityId}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "attrs",
+        "format",
+        "geometryProperty",
+        "lang",
+        "local",
+        "options"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/entities/{entityId}/attrs",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "options",
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/entities/{entityId}/attrs",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/attributes",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "details",
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/attributes",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/types",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "details",
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/types",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/csourceRegistrations/{registrationId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceRegistrations/{registrationId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/csourceRegistrations/{registrationId}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceRegistrations/{registrationId}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/csourceRegistrations/{registrationId}",
+      "method": "PATCH",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "local"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/v1/csourceRegistrations/{registrationId}",
+          "encoding": "no-op",
+          "method": "PATCH",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/orionld/ex/v1/notify",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/ex/v1/notify",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": false,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via",
+        "X-Forwarded-For",
+        "X-Forwarded-Host"
+      ]
+    },
+    {
+      "endpoint": "/orionld/ex/v1/notify/notifications/{subscriptionId}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "cache": true,
+          "cache_duration": 3600,
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/ngsi-ld/ex/v1/notify/notifications/{subscriptionId}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://orion-ld-broker.default.svc.cluster.local:1026"
+          ],
+          "is_collection": false,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant",
+        "Via",
+        "X-Forwarded-For",
+        "X-Forwarded-Host"
+      ]
+    },
+    {
+      "endpoint": "/iota_api",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Domain administrator",
+            "Continuum administrator",
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "node"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/upload",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://iota-api:6000"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "aerOS",
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/federator/health",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "ContextBroker",
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/health",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://federator.default.svc.cluster.local:8050"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Accept",
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/federator/v1/domains",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "ContextBroker",
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/v1/domains",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://federator.default.svc.cluster.local:8050"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Accept",
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/federator/v1/domains",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [
+        "spread"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/v1/domains",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://federator.default.svc.cluster.local:8050"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Accept",
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/federator/v1/domains/local",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "ContextBroker",
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/v1/domains/local",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://federator.default.svc.cluster.local:8050"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Accept",
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/federator/v1/domains/local",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "ContextBroker",
+            "Domain administrator",
+            "Continuum administrator"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/v1/domains/local",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://federator.default.svc.cluster.local:8050"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Accept",
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/federator/v1/domains/{domainName}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "ContextBroker"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/v1/domains/{domainName}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://federator.default.svc.cluster.local:8050"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Accept",
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/dataProducts",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "Data product owner"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/dataProducts",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://data-fabric-data-product-manager.default.svc.cluster.local:8000"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/dataCatalog",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "Data product owner"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/dataProducts",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://data-fabric-data-catalog-service.default.svc.cluster.local:8080"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization"
+      ]
+    },
+    {
+      "endpoint": "/dataCatalog/{dataProductId}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "Data product owner"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/dataProducts/{dataProductId}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://data-fabric-data-catalog-service.default.svc.cluster.local:8080"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization"
+      ]
+    },
+    {
+      "endpoint": "/dataProducts",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "Data product owner",
+            "Data consumer"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/dataProducts",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://data-fabric-data-product-manager.default.svc.cluster.local:8000"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/dataProducts/{data_product_id}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "Data product owner",
+            "Data consumer"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/dataProducts/{data_product_id}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://data-fabric-data-product-manager.default.svc.cluster.local:8000"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization"
+      ]
+    },
+    {
+      "endpoint": "/dataProducts",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "Data product owner"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/dataProducts",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://data-fabric-data-product-manager.default.svc.cluster.local:8000"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization"
+      ]
+    },
+    {
+      "endpoint": "/dataProducts/{data_product_id}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "Data product owner"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/dataProducts/{data_product_id}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://data-fabric-data-product-manager.default.svc.cluster.local:8000"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization"
+      ]
+    },
+    {
+      "endpoint": "/hlo_fe/services/{service_id}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "IoT service deployer",
+            "HLO"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/hlo_fe/services/{service_id}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://hlo-fe-service.default.svc.cluster.local:8081"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/hlo_fe/services/{service_id}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "IoT service deployer",
+            "HLO"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/hlo_fe/services/{service_id}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://hlo-fe-service.default.svc.cluster.local:8081"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/hlo_fe/services/{service_id}",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "IoT service deployer",
+            "HLO"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/hlo_fe/services/{service_id}",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://hlo-fe-service.default.svc.cluster.local:8081"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/hlo_fe/services/{service_id}",
+      "method": "PUT",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "IoT service deployer",
+            "HLO"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/hlo_fe/services/{service_id}",
+          "encoding": "no-op",
+          "method": "PUT",
+          "host": [
+            "http://hlo-fe-service.default.svc.cluster.local:8081"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "Link",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/hlo_al/services/{service_id}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "IoT service deployer",
+            "HLO"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/hlo_al/services/{service_id}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "http://hlo-allocator-service.default.svc.cluster.local:8082"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/hlo_al/services/{service_id}/overlay",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "IoT service deployer",
+            "HLO"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/hlo_al/services/{service_id}/overlay",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://hlo-allocator-service.default.svc.cluster.local:8082"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "NGSILD-Tenant"
+      ]
+    },
+    {
+      "endpoint": "/hlo_al/services/{service_id}/service_components/{service_component_id}/",
+      "method": "PUT",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "IoT service deployer",
+            "HLO"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/hlo_al/services/{service_id}/service_components/{service_component_id}/",
+          "encoding": "no-op",
+          "method": "PUT",
+          "host": [
+            "http://hlo-allocator-service.default.svc.cluster.local:8082"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization",
+        "Content-Type"
+      ]
+    },
+    {
+      "endpoint": "/hlo_al/services/{service_id}/service_components/{service_component_id}/",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "IoT service deployer",
+            "HLO"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/hlo_al/services/{service_id}/service_components/{service_component_id}/",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://hlo-allocator-service.default.svc.cluster.local:8082"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization"
+      ]
+    },
+    {
+      "endpoint": "/hlo_al/services/{service_id}/service_components/{service_component_id}/",
+      "method": "DELETE",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "roles_key": "realm_access.roles",
+          "roles_key_is_nested": true,
+          "roles": [
+            "Continuum administrator",
+            "IoT service deployer",
+            "HLO"
+          ],
+          "jwk_url": "https://keycloak.sensorsreport.net/auth/realms/sr/protocol/openid-connect/certs",
+          "disable_jwk_security": true
+        }
+      },
+      "input_query_strings": [],
+      "backend": [
+        {
+          "url_pattern": "/hlo_al/services/{service_id}/service_components/{service_component_id}/",
+          "encoding": "no-op",
+          "method": "DELETE",
+          "host": [
+            "http://hlo-allocator-service.default.svc.cluster.local:8082"
+          ],
+          "is_collection": true,
+          "disable_host_sanitize": false
+        }
+      ],
+      "input_headers": [
+        "Authorization"
+      ]
+    }
+  ]
+}
