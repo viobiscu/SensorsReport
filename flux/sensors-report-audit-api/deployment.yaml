@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sensors-report-audit-api
+  name: sensors-report-audit-api-v1
   labels:
-    app: sensors-report-audit-api
+    app: sensors-report-audit-api-v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sensors-report-audit-api
+      app: sensors-report-audit-api-v1
   template:
     metadata:
       labels:
-        app: sensors-report-audit-api
+        app: sensors-report-audit-api-v1
     spec:
       containers:
-        - name: sensors-report-audit-api
+        - name: sensors-report-audit-api-v1
           image: viobiscu/sensors-report-audit-api:latest
           ports:
             - containerPort: 80

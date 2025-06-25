@@ -49,7 +49,7 @@
   "read_header_timeout": "60s",
   "endpoints": [
     {
-      "endpoint": "/audit/version",
+      "endpoint": "/v1/audit/version",
       "method": "GET",
       "output_encoding": "no-op",
       "extra_config": {
@@ -65,9 +65,9 @@
       },
       "backend": [
         {
-          "url_pattern": "/audit/version",
+          "url_pattern": "audit/version",
           "host": [
-            "http://sensors-report-audit-api"
+            "http://sensors-report-audit-api-v1"
           ],
           "method": "GET",
           "encoding": "no-op"
@@ -75,7 +75,7 @@
       ]
     },
     {
-      "endpoint": "/audit/health",
+      "endpoint": "/v1/audit/health",
       "method": "GET",
       "output_encoding": "no-op",
       "extra_config": {
@@ -93,7 +93,7 @@
         {
           "url_pattern": "/audit/health",
           "host": [
-            "http://sensors-report-audit-api"
+            "http://sensors-report-audit-api-v1"
           ],
           "method": "GET",
           "encoding": "no-op"

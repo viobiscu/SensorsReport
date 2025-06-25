@@ -1,4 +1,4 @@
-@hostname = https://api.sensorsreport.net
+@hostname = https://api.sensorsreport.net/v1
 
 ### Get client token
 # @name GetClientToken

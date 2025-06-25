@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: sensors-report-audit-api
+  name: sensors-report-audit-api-v1
 spec:
   selector:
-    app: sensors-report-audit-api
+    app: sensors-report-audit-api-v1
   ports:
     - protocol: TCP
       port: 80
