@@ -33,7 +33,7 @@ spec:
               value: "quantum.sensorsreport.net"
             - name: SR_AUDIT_QUANTUMLEAP_PORT
               value: "8668"
- 
+
  
  
  

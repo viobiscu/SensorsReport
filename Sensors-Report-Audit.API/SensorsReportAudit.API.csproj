@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <Target Name="IncrementVersion" AfterTargets="Build">
-    <Exec Command="bash increment_version.sh" WorkingDirectory="$(ProjectDir)" />
+    <Exec Command="bash increment_version.sh -ver" WorkingDirectory="$(ProjectDir)" />
   </Target>
 
   <PropertyGroup>

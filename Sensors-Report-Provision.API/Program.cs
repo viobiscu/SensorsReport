@@ -1,106 +1,57 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using NLog.Web;
+using Microsoft.Extensions.Options;
+using SensorsReport;
+using Sensors_Report_Provision.API.Services;
 
-var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "nlog.config");
-NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(configPath);
-var logger = NLog.LogManager.GetCurrentClassLogger();
+var logger = SensorsReport.AppConfig.GetLogger();
+logger.Info("Application starting...");
+logger.LogProgramInfo(AppDomain.CurrentDomain, args);
 
-try
+var builder = SensorsReport.AppConfig.GetDefaultWebAppBuilder();
+
+ConfigureConfigs(builder.Configuration, builder.Services);
+ConfigureServices(builder.Services);
+
+var app = builder.Build();
+app.ConfigureAppAndRun();
+
+void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection services)
 {
-    logger.Info("Application starting...");
-    // Log version from version.txt
-    try
-    {
-        string versionFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.txt");
-        if (File.Exists(versionFile))
-        {
-            string version = File.ReadAllText(versionFile).Trim();
-            logger.Info($"Build Version: {version}");
-        }
-        else
-        {
-            logger.Warn("version.txt not found");
-        }
-    }
-    catch (Exception ex)
-    {
-        logger.Warn($"Could not read version.txt: {ex.Message}");
-    }
+    services.Configure<AppConfig>(configuration.GetSection("AppConfig"));
+}
 
-    var builder = WebApplication.CreateBuilder(args);
-    builder.Logging.ClearProviders();
-    builder.Host.UseNLog();
-
-    // JWT/Keycloak authentication setup
-    builder.Services.AddAuthentication(options =>
+void ConfigureServices(IServiceCollection services)
+{
+    services.AddHttpClient("QuantumLeap", (serviceProvider, client) =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        var appConfig = serviceProvider.GetRequiredService<IOptions<AppConfig>>().Value;
+        client.BaseAddress = new Uri(appConfig.QuantumLeapUrl);
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+        client.Timeout = TimeSpan.FromSeconds(30);
     })
-    .AddJwtBearer(options =>
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
     {
-        options.Authority = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/sr";
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
-        };
+        MaxConnectionsPerServer = 10
     });
 
-    builder.Services.AddControllers();
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen(c =>
+    services.AddHttpClient("OrionContextBroker", (serviceProvider, client) =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sensors-Report-Provision API", Version = "v1" });
-        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-        {
-            Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer [token]'",
-            Name = "Authorization",
-            In = ParameterLocation.Header,
-            Type = SecuritySchemeType.ApiKey,
-            Scheme = "Bearer"
-        });
-        c.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-                },
-                Array.Empty<string>()
-            }
-        });
+        var appConfig = serviceProvider.GetRequiredService<IOptions<AppConfig>>().Value;
+        client.BaseAddress = new Uri(appConfig.OrionContextBrokerUrl);
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+        client.Timeout = TimeSpan.FromSeconds(30);
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+    {
+        MaxConnectionsPerServer = 10
     });
 
-    var app = builder.Build();
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
-    app.UseRouting();
-    app.UseAuthentication();
-    app.UseAuthorization();
-    app.MapControllers();
-    app.Run();
+    services.AddScoped<IQuantumLeapService, QuantumLeapService>();
+    services.AddScoped<IOrionContextBrokerService, OrionContextBrokerService>();
 }
-catch (System.IO.IOException ioEx)
+
+public class AppConfig
 {
-    logger.Error(ioEx, $"Failed to bind to the configured address. The port may already be in use. {ioEx.Message}");
-    Console.Error.WriteLine("ERROR: Failed to start server. The configured port may already be in use.\n" + ioEx.Message);
-    Environment.Exit(1);
-}
-catch (Exception ex)
-{
-    logger.Error(ex, "Application startup failed");
-    throw;
-}
-finally
-{
-    NLog.LogManager.Shutdown();
+    public string QuantumLeapUrl { get; set; } = "http://162.244.27.122:8668";
+    public string OrionContextBrokerUrl { get; set; } = "http://orion-ld-broker:1026";
+    public string MainTenant { get; set; } = "synchro";
 }

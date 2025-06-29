@@ -1,46 +1,27 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
+using Sensors_Report_Provision.API.Services;
 
 namespace Sensors_Report_Provision.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
-    public class ProvisionsController : ControllerBase
+    public class ProvisionsController(
+        IQuantumLeapService quantumLeapService,
+        IOrionContextBrokerService orionContextBrokerService,
+        ILogger<ProvisionsController> logger,
+        IOptions<AppConfig> config) : ControllerBase
     {
-        // In-memory store for demonstration
-        private static readonly ConcurrentDictionary<string, Provision> _provisions = new();
+        private readonly IQuantumLeapService _quantumLeapService = quantumLeapService
+            ?? throw new ArgumentNullException(nameof(quantumLeapService));
+        private readonly IOrionContextBrokerService _orionContextBrokerService = orionContextBrokerService
+            ?? throw new ArgumentNullException(nameof(orionContextBrokerService));
+        private readonly ILogger<ProvisionsController> _logger = logger
+            ?? throw new ArgumentNullException(nameof(logger));
+        private readonly AppConfig _config = config?.Value
+            ?? throw new ArgumentNullException(nameof(config));
 
-        // GET /api/Provisions
-        [HttpGet]
-        public IActionResult Get([FromQuery] string? q = null)
-        {
-            // Simulate Quantum Leap style query handling
-            var result = string.IsNullOrEmpty(q)
-                ? _provisions.Values
-                : _provisions.Values.Where(p => p.Name.Contains(q, StringComparison.OrdinalIgnoreCase));
-            return Ok(result);
-        }
 
-        // POST /api/Provisions
-        [HttpPost]
-        public IActionResult Post([FromBody] Provision provision)
-        {
-            if (string.IsNullOrWhiteSpace(provision.Id))
-                provision.Id = Guid.NewGuid().ToString();
-            _provisions[provision.Id] = provision;
-            return CreatedAtAction(nameof(GetById), new { ProvisionsId = provision.Id }, provision);
-        }
-
-        // GET /api/Provisions/{ProvisionsId}
-        [HttpGet("{ProvisionsId}")]
-        public IActionResult GetById(string ProvisionsId)
-        {
-            if (_provisions.TryGetValue(ProvisionsId, out var provision))
-                return Ok(provision);
-            return NotFound();
-        }
     }
 
     public class Provision
@@ -48,6 +29,5 @@ namespace Sensors_Report_Provision.API.Controllers
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        // Add more fields as needed for your domain
     }
 }

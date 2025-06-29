@@ -17,3 +17,10 @@ spec:
         image: viobiscu/sensors-report-provision-api:latest
         ports:
         - containerPort: 80
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
