@@ -1,0 +1,100 @@
+
+@brokerUrl = http://127.0.0.1:1026
+
+### Subscriptions
+GET {{brokerUrl}}/ngsi-ld/v1/subscriptions
+
+### Create Subscription
+POST {{brokerUrl}}/ngsi-ld/v1/subscriptions
+content-type: application/json
+NGSILD-Tenant: GFi2HFPy
+
+{
+    "id": "urn:ngsi-ld:subscription:a08f0714-33d0-11f0-8696-3ef77dd3e7c1",
+    "type": "Subscription",
+    "description": "Log t0 to Quantum Leap",
+    "entities": [
+        {
+            "type": "TG8I"
+        }
+    ],
+    "watchedAttributes": [
+        "t0"
+    ],
+    "status": "paused",
+    "isActive": false,
+    "notification": {
+        "attributes": [
+            "t0"
+        ],
+        "format": "normalized",
+        "endpoint": {
+            "uri": "http://162.244.27.122:8668/v2/notify",
+            "accept": "application/json"
+        }
+    }
+}
+
+### Subscription Details
+GET {{brokerUrl}}/ngsi-ld/v1/subscriptions/urn:ngsi-ld:subscription:a08f0714-33d0-11f0-8696-3ef77dd3e7c2
+
+
+### Update Subscription
+PATCH {{brokerUrl}}/ngsi-ld/v1/subscriptions/urn:ngsi-ld:subscription:a08f0714-33d0-11f0-8696-3ef77dd3e7c2
+content-type: application/json
+
+{
+    "isActive": false
+}
+
+### Delete Subscription
+DELETE {{brokerUrl}}/ngsi-ld/v1/subscriptions/urn:ngsi-ld:subscription:a08f0714-33d0-11f0-8696-3ef77dd3e7c2
+
+### Get Entities
+GET {{brokerUrl}}/ngsi-ld/v1/entities?local=true
+
+### Get Entity by ID
+GET {{brokerUrl}}/ngsi-ld/v1/entities/urn:ngsi-ld:TG8I:240825003
+
+### Create Entity
+POST {{brokerUrl}}/ngsi-ld/v1/entities
+content-type: application/json
+
+{
+    "id": "urn:ngsi-ld:TG8I:240825003-v",
+    "type": "TG8I",
+    "t0": {
+        "type": "Property",
+        "value": 0
+    }
+}
+
+### Update Entity
+PATCH {{brokerUrl}}/ngsi-ld/v1/entities/urn:ngsi-ld:TG8I:240825003-v
+content-type: application/json
+
+{
+    "t0": {
+        "type": "Property",
+        "value": 0
+    }
+}
+
+### GEt Entity
+GET {{brokerUrl}}/ngsi-ld/v1/entities/urn:ngsi-ld:TG8I:240825003-v
+
+### Delete Entity
+DELETE {{brokerUrl}}/ngsi-ld/v1/entities/urn:ngsi-ld:TG8I:240825003-v
+
+### Replace Entity
+PUT {{brokerUrl}}/ngsi-ld/v1/entities/urn:ngsi-ld:TG8I:240825003-v
+content-type: application/json
+
+{
+    "id": "urn:ngsi-ld:TG8I:240825003-v",
+    "type": "TG8I",
+    "t0": {
+        "type": "Property",
+        "value": 10
+    }
+}

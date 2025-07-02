@@ -1,0 +1,1997 @@
+HTTP/1.1 200 OK
+Date: Tue, 01 Jul 2025 22:27:00 GMT
+Connection: close
+Link: <https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"
+Content-Type: application/json
+Content-Length: 26650
+
+[
+  {
+    "id": "urn:ngsi-ld:Organization:Synchro",
+    "type": "Organization",
+    "name": {
+      "type": "Property",
+      "value": "Synchro"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:1",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Dateline Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-12:00) International Date Line West"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-720"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:2",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "UTC-11"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-11:00) Coordinated Universal Time-11"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-660"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:3",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Aleutian Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-10:00) Aleutian Islands"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-600"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:4",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Hawaiian Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-10:00) Hawaii"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-600"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:5",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Marquesas Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-09:30) Marquesas Islands"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-570"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:6",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Alaskan Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-09:00) Alaska"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-540"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:7",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "UTC-09"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-09:00) Coordinated Universal Time-09"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-540"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:8",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Pacific Standard Time (Mexico)"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-08:00) Baja California"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-480"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:9",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "UTC-08"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-08:00) Coordinated Universal Time-08"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-480"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:10",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Pacific Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-08:00) Pacific Time (US & Canada)"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-480"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:11",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "US Mountain Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-07:00) Arizona"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-420"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:12",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Mountain Standard Time (Mexico)"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-07:00) Chihuahua, La Paz, Mazatlan"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-420"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:13",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Mountain Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-07:00) Mountain Time (US & Canada)"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-420"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:14",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Central America Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-06:00) Central America"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-360"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:15",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Central Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-06:00) Central Time (US & Canada)"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-360"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:16",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Easter Island Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-06:00) Easter Island"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:17",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Central Standard Time (Mexico)"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-06:00) Guadalajara, Mexico City, Monterrey"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-360"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:18",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Canada Central Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-06:00) Saskatchewan"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-360"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:19",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "SA Pacific Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-05:00) Bogota, Lima, Quito, Rio Branco"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:20",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Eastern Standard Time (Mexico)"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-05:00) Chetumal"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:21",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Eastern Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-05:00) Eastern Time (US & Canada)"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:22",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Haiti Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-05:00) Haiti"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:23",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Cuba Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-05:00) Havana"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:24",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "US Eastern Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-05:00) Indiana (East)"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:25",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Turks And Caicos Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-05:00) Turks and Caicos"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:26",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Paraguay Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-04:00) Asuncion"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:27",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Atlantic Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-04:00) Atlantic Time (Canada)"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:28",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Venezuela Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-04:00) Caracas"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:29",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Central Brazilian Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-04:00) Cuiaba"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:30",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "SA Western Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-04:00) Georgetown, La Paz, Manaus, San Juan"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:31",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Pacific SA Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-04:00) Santiago"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:32",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Newfoundland Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:30) Newfoundland"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-210"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:33",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Tocantins Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:00) Araguaina"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:34",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "E. South America Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:00) Brasilia"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:35",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "SA Eastern Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:00) Cayenne, Fortaleza"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:36",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Argentina Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:00) City of Buenos Aires"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:37",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Greenland Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:00) Greenland"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:38",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Montevideo Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:00) Montevideo"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:39",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Magallanes Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:00) Punta Arenas"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:40",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Saint Pierre Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:00) Saint Pierre and Miquelon"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:41",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Bahia Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-03:00) Salvador"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:42",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "UTC-02"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-02:00) Coordinated Universal Time-02"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:43",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Mid-Atlantic Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-02:00) Mid-Atlantic - Old"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:44",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Azores Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-01:00) Azores"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-60"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:45",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Cape Verde Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC-01:00) Cabo Verde Is."
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "-60"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:46",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "UTC"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC) Coordinated Universal Time"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "0"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:47",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Morocco Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+00:00) Casablanca"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "60"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:48",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "GMT Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+00:00) Dublin, Edinburgh, Lisbon, London"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "0"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:49",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Greenwich Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+00:00) Monrovia, Reykjavik"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "0"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:50",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "W. Europe Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "60"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:51",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Central Europe Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "60"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:52",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Romance Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+01:00) Brussels, Copenhagen, Madrid, Paris"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "60"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:53",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Sao Tome Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+01:00) Sao Tome"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "0"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:54",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Central European Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+01:00) Sarajevo, Skopje, Warsaw, Zagreb"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "60"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:55",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "W. Central Africa Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+01:00) West Central Africa"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "60"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:56",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Jordan Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Amman"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:57",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "GTB Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Athens, Bucharest"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:58",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Middle East Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Beirut"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:59",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Egypt Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Cairo"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:60",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "E. Europe Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Chisinau"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:61",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Syria Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Damascus"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:62",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "West Bank Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Gaza, Hebron"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:63",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "South Africa Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Harare, Pretoria"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:64",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "FLE Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:65",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Israel Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Jerusalem"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:66",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Kaliningrad Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Kaliningrad"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:67",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Sudan Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Khartoum"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:68",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Libya Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Tripoli"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:69",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Namibia Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+02:00) Windhoek"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "120"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:70",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Arabic Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+03:00) Baghdad"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:71",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Turkey Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+03:00) Istanbul"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:72",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Arab Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+03:00) Kuwait, Riyadh"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:73",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Belarus Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+03:00) Minsk"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:74",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Russian Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+03:00) Moscow, St. Petersburg, Volgograd"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:75",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "E. Africa Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+03:00) Nairobi"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "180"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:76",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Iran Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+03:30) Tehran"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "210"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:77",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Arabian Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+04:00) Abu Dhabi, Muscat"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:78",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Astrakhan Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+04:00) Astrakhan, Ulyanovsk"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:79",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Azerbaijan Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+04:00) Baku"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:80",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Russia Time Zone 3"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+04:00) Izhevsk, Samara"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:81",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Mauritius Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+04:00) Port Louis"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:82",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Saratov Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+04:00) Saratov"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:83",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Georgian Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+04:00) Tbilisi"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:84",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Caucasus Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+04:00) Yerevan"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "240"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:85",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Afghanistan Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+04:30) Kabul"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "270"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:86",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "West Asia Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+05:00) Ashgabat, Tashkent"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:87",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Ekaterinburg Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+05:00) Ekaterinburg"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:88",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Pakistan Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+05:00) Islamabad, Karachi"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "300"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:89",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "India Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "330"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:90",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Sri Lanka Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+05:30) Sri Jayawardenepura"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "330"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:91",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Nepal Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+05:45) Kathmandu"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "345"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:92",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Central Asia Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+06:00) Astana"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "360"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:93",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Bangladesh Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+06:00) Dhaka"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "360"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:94",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Omsk Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+06:00) Omsk"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "360"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:95",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Myanmar Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+06:30) Yangon (Rangoon)"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "390"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:96",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "SE Asia Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+07:00) Bangkok, Hanoi, Jakarta"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "420"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:97",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "Altai Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+07:00) Barnaul, Gorno-Altaysk"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "420"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:98",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "W. Mongolia Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+07:00) Hovd"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "420"
+    }
+  },
+  {
+    "id": "urn:ngsi-ld:TimeZone:99",
+    "type": "TimeZone",
+    "keycloakId": {
+      "type": "Property",
+      "value": ""
+    },
+    "key": {
+      "type": "Property",
+      "value": "North Asia Standard Time"
+    },
+    "name": {
+      "type": "Property",
+      "value": "(UTC+07:00) Krasnoyarsk"
+    },
+    "offsetInMin": {
+      "type": "Property",
+      "value": "420"
+    }
+  }
+]

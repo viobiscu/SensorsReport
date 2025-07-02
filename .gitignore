@@ -488,3 +488,6 @@ $RECYCLE.BIN/
 *version.txt
 /Sensors-Report-Audit.API/gettoken.sh
 /Sensors-Report-Audit.API/token.json
+/knowhow.md
+/knowhow.pdf
+appsettings.development.json

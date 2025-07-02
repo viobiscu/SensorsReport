@@ -1,0 +1,177 @@
+HTTP/1.1 200 OK
+Date: Tue, 01 Jul 2025 22:27:24 GMT
+Connection: close
+Link: <https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"
+Content-Type: application/json
+Content-Length: 1965
+
+{
+  "id": "urn:ngsi-ld:TG8I:240825003",
+  "type": "TG8I",
+  "accessPointName": {
+    "type": "Property",
+    "value": "Synchro-WiFi"
+  },
+  "accessPointPassword": {
+    "type": "Property",
+    "value": "supersecure"
+  },
+  "dhcp": {
+    "type": "Property",
+    "value": true
+  },
+  "gw": {
+    "type": "Property",
+    "value": "192.168.1.1"
+  },
+  "nm": {
+    "type": "Property",
+    "value": "255.255.255.0"
+  },
+  "mac": {
+    "type": "Property",
+    "value": "00:1A:2B:3C:4D:5E"
+  },
+  "missedTX": {
+    "type": "Property",
+    "value": 0
+  },
+  "otaFileName": {
+    "type": "Property",
+    "value": "firmware_v1.2.bin"
+  },
+  "otaHostName": {
+    "type": "Property",
+    "value": "ota.synchro-srl.ro"
+  },
+  "otaPort": {
+    "type": "Property",
+    "value": 8080
+  },
+  "power": {
+    "type": "Property",
+    "value": true
+  },
+  "rssi": {
+    "type": "Property",
+    "value": -55
+  },
+  "rx": {
+    "type": "Property",
+    "value": 123456
+  },
+  "tx": {
+    "type": "Property",
+    "value": 654321
+  },
+  "sampleTime": {
+    "type": "Property",
+    "value": 30
+  },
+  "vbat": {
+    "type": "Property",
+    "value": 3.7
+  },
+  "timestamp": {
+    "type": "Property",
+    "value": "2025-04-02T10:15:00Z"
+  },
+  "serverHost1": {
+    "type": "Property",
+    "value": "data1.synchro-srl.ro"
+  },
+  "t0": {
+    "type": "Property",
+    "value": 29.7246,
+    "name": {
+      "type": "Property",
+      "value": "frig"
+    },
+    "unit": {
+      "type": "Property",
+      "value": "cel"
+    },
+    "AlarmThresholds": {
+      "type": "Property",
+      "value": {
+        "low": {
+          "type": "Property",
+          "value": 3.7
+        },
+        "preLow": {
+          "type": "Property",
+          "value": 4.5
+        },
+        "preHigh": {
+          "type": "Property",
+          "value": 23.7
+        },
+        "high": {
+          "type": "Property",
+          "value": 28
+        }
+      }
+    }
+  },
+  "rh0": {
+    "type": "Property",
+    "value": 87.7964,
+    "AlarmThresholds": {
+      "type": "Property",
+      "value": {
+        "low": {
+          "type": "Property",
+          "value": 10
+        },
+        "preLow": {
+          "type": "Property",
+          "value": 20
+        },
+        "preHigh": {
+          "type": "Property",
+          "value": 80
+        },
+        "high": {
+          "type": "Property",
+          "value": 90
+        }
+      }
+    }
+  },
+  "serverHost2": {
+    "type": "Property",
+    "value": "data2.synchro-srl.ro"
+  },
+  "serverPort2": {
+    "type": "Property",
+    "value": 1883
+  },
+  "t0Min": {
+    "type": "Property",
+    "value": -10
+  },
+  "t0Max": {
+    "type": "Property",
+    "value": 60
+  },
+  "rh0Min": {
+    "type": "Property",
+    "value": 20
+  },
+  "rh0Max": {
+    "type": "Property",
+    "value": 90
+  },
+  "sensorIP": {
+    "type": "Property",
+    "value": "192.168.1.100"
+  },
+  "utcOffset": {
+    "type": "Property",
+    "value": 120
+  },
+  "dateTimeSynchronise": {
+    "type": "Property",
+    "value": "2025-04-02T10:00:00Z"
+  }
+}

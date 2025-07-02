@@ -17,7 +17,7 @@ public static partial class AppConfig
         setupBuilder.LoadConfigurationFromFile(configPath);
     }
 
-    public static Logger GetLogger(string loggerName = null)
+    public static Logger GetLogger(string? loggerName = null)
     {
         if (string.IsNullOrEmpty(loggerName))
             loggerName = Assembly.GetExecutingAssembly().GetName().Name ?? "SensorsReport";

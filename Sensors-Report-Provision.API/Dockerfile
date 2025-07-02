@@ -5,6 +5,7 @@ WORKDIR /app
 ENV ASPNETCORE_URLS="http://+:80"
 ENV DOTNET_USE_POLLING_FILE_WATCHER="false"
 ENV DOTNET_MODIFIABLE_ASSEMBLIES="debug"
+ENV ASPNETCORE_ENVIRONMENT="Production"
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
@@ -27,10 +28,10 @@ RUN pwd
 RUN dotnet publish "Sensors-Report-Provision.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 ARG VERSION=latest
-COPY version.txt ./version.txt
 
 FROM base AS final
 WORKDIR /app
+ENV ASPNETCORE_ENVIRONMENT="Production"
 COPY --from=publish /app/publish .
 ARG VERSION=latest
 LABEL version=$VERSION

@@ -4,16 +4,45 @@
 
 ### Health Check
 GET {{quantumleap}}/health
-#Authorization: Bearer {{access_token}}
+# Response 
+# 200 OK
+#{
+#    "status": "ok"
+#}
 
 ### Version
 GET {{quantumleap}}/version
+# Response
+# 200 OK
+#{
+#    "version": "0.1.0"
+#}
+
 
 ### Entities
 GET {{quantumleap}}/v2/entities
+# Response
+# 200 OK
+#[
+#    {
+#    "entityId": "Room1",
+#    "entityType": "Room",
+#    "index": "2025-05-18T12:00:00.000+00:00"
+#    }
+#]
 
-### Subscriptions
-POST {{quantumleap}}/v2/subscriptions/ HTTP/1.1
-Content-Type: application/json
-NGSILD-Tenant: openiot
-NGSILD-Path: /
+
+### Attributes
+GET {{quantumleap}}/v2/types/{entity_type}/attrs
+
+### Attribute Value
+GET {{quantumleap}}/v2/entities/{entity_id}/attrs/{attr_name}
+
+### Attribute Value (with query parameters)
+GET {{quantumleap}}/v2/entities/{entity_id}/attrs/{attr_name}/value
+
+### Attribute List
+GET {{quantumleap}}/v2/entities/{entity_id}/attrs
+
+### Entity Details
+GET {{quantumleap}}/v2/entities/{entity_id}

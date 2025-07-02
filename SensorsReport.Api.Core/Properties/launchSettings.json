@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "SensorsReport.Api.Core": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:61186;http://localhost:61187"
+    }
+  }
+}

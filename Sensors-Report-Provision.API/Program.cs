@@ -21,18 +21,6 @@ void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection se
 
 void ConfigureServices(IServiceCollection services)
 {
-    services.AddHttpClient("QuantumLeap", (serviceProvider, client) =>
-    {
-        var appConfig = serviceProvider.GetRequiredService<IOptions<AppConfig>>().Value;
-        client.BaseAddress = new Uri(appConfig.QuantumLeapUrl);
-        client.DefaultRequestHeaders.Add("Accept", "application/json");
-        client.Timeout = TimeSpan.FromSeconds(30);
-    })
-    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
-    {
-        MaxConnectionsPerServer = 10
-    });
-
     services.AddHttpClient("OrionContextBroker", (serviceProvider, client) =>
     {
         var appConfig = serviceProvider.GetRequiredService<IOptions<AppConfig>>().Value;
@@ -45,13 +33,11 @@ void ConfigureServices(IServiceCollection services)
         MaxConnectionsPerServer = 10
     });
 
-    services.AddScoped<IQuantumLeapService, QuantumLeapService>();
-    services.AddScoped<IOrionContextBrokerService, OrionContextBrokerService>();
+    services.AddTransient<IOrionContextBrokerService, OrionContextBrokerService>();
 }
 
 public class AppConfig
 {
-    public string QuantumLeapUrl { get; set; } = "http://162.244.27.122:8668";
     public string OrionContextBrokerUrl { get; set; } = "http://orion-ld-broker:1026";
     public string MainTenant { get; set; } = "synchro";
 }

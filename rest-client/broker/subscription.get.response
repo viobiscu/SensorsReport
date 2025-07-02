@@ -1,0 +1,325 @@
+HTTP/1.1 200 OK
+Date: Tue, 01 Jul 2025 22:25:15 GMT
+Connection: close
+Link: <https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"
+Content-Type: application/json
+Content-Length: 5539
+
+[
+  {
+    "id": "urn:ngsi-ld:subscription:a08f0714-33d0-11f0-8696-3ef77dd3e7c1",
+    "type": "Subscription",
+    "description": "Log t0 to Quantum Leap",
+    "entities": [
+      {
+        "type": "TG8I"
+      }
+    ],
+    "watchedAttributes": [
+      "t0"
+    ],
+    "status": "paused",
+    "isActive": false,
+    "notification": {
+      "attributes": [
+        "t0"
+      ],
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://162.244.27.122:8668/v2/notify",
+        "accept": "application/json"
+      },
+      "status": "failed",
+      "timesSent": 163,
+      "lastNotification": "2025-07-01T22:13:04.178Z",
+      "lastFailure": "2025-07-01T22:13:04.178Z",
+      "lastSuccess": "2025-05-18T14:24:45.547Z",
+      "consecutiveErrors": 3,
+      "lastErrorReason": "Timeout awaiting response from notification endpoint"
+    },
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  },
+  {
+    "id": "urn:ngsi-ld:subscription:TG8It0Archive",
+    "type": "Subscription",
+    "description": "Log t0, t1 to Quantum Leap",
+    "entities": [
+      {
+        "type": "TG8I"
+      }
+    ],
+    "watchedAttributes": [
+      "t0",
+      "t1"
+    ],
+    "status": "paused",
+    "isActive": false,
+    "notification": {
+      "attributes": [
+        "t0",
+        "t1"
+      ],
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://quantumleap:8668/v2/notify",
+        "accept": "application/json"
+      },
+      "status": "ok",
+      "timesSent": 169143,
+      "lastNotification": "2025-06-09T11:10:58.185Z",
+      "lastFailure": "2025-06-09T09:32:31.081Z",
+      "lastSuccess": "2025-06-09T11:10:58.185Z"
+    },
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  },
+  {
+    "id": "urn:ngsi-ld:subscription:TG8RSSIArchive",
+    "type": "Subscription",
+    "description": "Log t0 to Quantum Leap",
+    "entities": [
+      {
+        "type": "TG8I"
+      }
+    ],
+    "watchedAttributes": [
+      "RSSI"
+    ],
+    "status": "active",
+    "isActive": true,
+    "notification": {
+      "attributes": [
+        "RSSI"
+      ],
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://quantumleap:8668/v2/notify",
+        "accept": "application/json"
+      },
+      "status": "ok"
+    },
+    "throttling": 86400,
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  },
+  {
+    "id": "urn:ngsi-ld:subscription:TG8Rrh0Archive",
+    "type": "Subscription",
+    "description": "Log rh0, rh1 to Quantum Leap",
+    "entities": [
+      {
+        "type": "TG8I"
+      }
+    ],
+    "watchedAttributes": [
+      "rh0",
+      "rh1"
+    ],
+    "status": "paused",
+    "isActive": false,
+    "notification": {
+      "attributes": [
+        "rh0",
+        "rh1"
+      ],
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://quantumleap:8668/v2/notify",
+        "accept": "application/json"
+      },
+      "status": "ok",
+      "timesSent": 3,
+      "lastNotification": "2025-06-05T11:10:38.502Z",
+      "lastFailure": "2025-06-05T11:10:38.502Z"
+    },
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  },
+  {
+    "id": "urn:ngsi-ld:subscription:TG8RVBatArchive",
+    "type": "Subscription",
+    "description": "Log VBat to Quantum Leap",
+    "entities": [
+      {
+        "type": "TG8I"
+      }
+    ],
+    "watchedAttributes": [
+      "VBat"
+    ],
+    "status": "active",
+    "isActive": true,
+    "notification": {
+      "attributes": [
+        "VBat"
+      ],
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://quantumleap:8668/v2/notify",
+        "accept": "application/json"
+      },
+      "status": "ok"
+    },
+    "throttling": 86400,
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  },
+  {
+    "id": "urn:ngsi-ld:Subscription:LogRuleMonitor",
+    "type": "Subscription",
+    "entities": [
+      {
+        "type": "LogRule"
+      }
+    ],
+    "watchedAttributes": [
+      "high",
+      "low",
+      "enabled",
+      "unit",
+      "consecutiveHit"
+    ],
+    "status": "active",
+    "isActive": true,
+    "notification": {
+      "attributes": [
+        "high",
+        "low",
+        "enabled",
+        "unit",
+        "consecutiveHit"
+      ],
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://Sensors-Report-Business-Broker.API/logrule",
+        "accept": "application/json"
+      },
+      "status": "ok"
+    },
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  },
+  {
+    "id": "urn:ngsi-ld:Subscription:AlarmRuleMonitor",
+    "type": "Subscription",
+    "entities": [
+      {
+        "type": "AlarmRule"
+      }
+    ],
+    "watchedAttributes": [
+      "low",
+      "prelow",
+      "prehigh",
+      "high",
+      "unit"
+    ],
+    "status": "active",
+    "isActive": true,
+    "notification": {
+      "attributes": [
+        "low",
+        "prelow",
+        "prehigh",
+        "high",
+        "unit"
+      ],
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://Sensors-Report-Business-Broker.API/alarmrule",
+        "accept": "application/json"
+      },
+      "status": "ok"
+    },
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  },
+  {
+    "id": "urn:ngsi-ld:Subscription:NotificationRuleMonitor",
+    "type": "Subscription",
+    "entities": [
+      {
+        "type": "NotificationRule"
+      }
+    ],
+    "watchedAttributes": [
+      "enable",
+      "consecutiveHits",
+      "repetAfter",
+      "notifyIfClose",
+      "notifyIfAcknowledged",
+      "repetIfAcknowledged",
+      "notifyIfTimeOut"
+    ],
+    "status": "active",
+    "isActive": true,
+    "notification": {
+      "attributes": [
+        "enable",
+        "consecutiveHits",
+        "repetAfter",
+        "notifyIfClose",
+        "notifyIfAcknowledged",
+        "repetIfAcknowledged",
+        "notifyIfTimeOut"
+      ],
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://Sensors-Report-Business-Broker.API/notificationrule",
+        "accept": "application/json"
+      },
+      "status": "ok"
+    },
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  },
+  {
+    "id": "urn:ngsi-ld:Subscription:Group",
+    "type": "Subscription",
+    "description": "Monitor creation and deletion of a Group. When delete the group, add an attribute delete=true",
+    "entities": [
+      {
+        "type": "Group"
+      }
+    ],
+    "watchedAttributes": [
+      "name",
+      "users",
+      "delete"
+    ],
+    "status": "active",
+    "isActive": true,
+    "notification": {
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://Sensors-Report-Business-Broker.API/group",
+        "accept": "application/json"
+      },
+      "status": "ok"
+    },
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  },
+  {
+    "id": "urn:ngsi-ld:Subscription:User",
+    "type": "Subscription",
+    "description": "Monitor creation and deletion of a User. When delete the user, add an attribute delete=true",
+    "entities": [
+      {
+        "type": "User"
+      }
+    ],
+    "watchedAttributes": [
+      "username",
+      "email",
+      "firstName",
+      "lastName",
+      "mobile",
+      "language",
+      "delete"
+    ],
+    "status": "active",
+    "isActive": true,
+    "notification": {
+      "format": "normalized",
+      "endpoint": {
+        "uri": "http://Sensors-Report-Business-Broker.API/user",
+        "accept": "application/json"
+      },
+      "status": "ok"
+    },
+    "jsonldContext": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
+  }
+]

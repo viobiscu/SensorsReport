@@ -1,87 +1,291 @@
+﻿using Microsoft.Extensions.Options;
+using Sensors_Report_Provision.API.Models;
+using SensorsReport;
 using System.Text;
 using System.Text.Json;
 
 namespace Sensors_Report_Provision.API.Services;
 
-public class OrionContextBrokerService : IOrionContextBrokerService
+
+public class OrionContextBrokerService : BaseHttpService, IOrionContextBrokerService
 {
-    private readonly HttpClient _httpClient;
-    private readonly JsonSerializerOptions _jsonOptions;
+    private string _tenant = "synchro";
 
-    public OrionContextBrokerService(IHttpClientFactory httpClientFactory)
+    public AppConfig Config { get; }
+
+    private static class Endpoints
     {
-        _httpClient = httpClientFactory.CreateClient("OrionContextBroker");
-        _jsonOptions = new JsonSerializerOptions
+        public const string Subscriptions = "/ngsi-ld/v1/subscriptions";
+        public const string Entities = "/ngsi-ld/v1/entities";
+    }
+
+    public OrionContextBrokerService(IOptions<AppConfig> config, IHttpClientFactory httpClientFactory, JsonSerializerOptions? jsonOptions = null)
+        : base(httpClientFactory, jsonOptions)
+    {
+        Config = config?.Value ?? throw new ArgumentNullException(nameof(config), "AppConfig cannot be null");
+    }
+
+    public void SetTenant(string? tenant)
+    {
+        if (string.IsNullOrEmpty(tenant) || Config.MainTenant.Equals(tenant, StringComparison.OrdinalIgnoreCase))
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = false
-        };
+            _tenant = this.Config.MainTenant;
+        }
+        else
+        {
+            _tenant = tenant;
+        }
     }
 
-    public async Task<HttpResponseMessage> GetAsync(string endpoint)
+    public async Task<HttpResponseMessage> GetSubscriptionsAsync(int offset = 0, int limit = 100)
     {
-        return await _httpClient.GetAsync(endpoint);
+        return await this.GetAsync($"{Endpoints.Subscriptions}?offset={offset}&limit={limit}");
     }
 
-    public async Task<HttpResponseMessage> PostAsync(string endpoint, HttpContent content)
+    public async Task<T?> GetSubscriptionsAsync<T>(int offset = 0, int limit = 100) where T : class
     {
-        return await _httpClient.PostAsync(endpoint, content);
+        var response = await this.GetSubscriptionsAsync(offset, limit);
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        return await response.GetContentAsAsync<T>();
     }
 
-    public async Task<HttpResponseMessage> PutAsync(string endpoint, HttpContent content)
+    public async Task<HttpResponseMessage> GetSubscriptionByIdAsync(string subscriptionId)
     {
-        return await _httpClient.PutAsync(endpoint, content);
+        if (string.IsNullOrEmpty(subscriptionId))
+            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        return await this.GetAsync($"{Endpoints.Subscriptions}/{subscriptionId}");
     }
 
-    public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
+    public async Task<T?> GetSubscriptionByIdAsync<T>(string subscriptionId) where T : class
     {
-        return await _httpClient.DeleteAsync(endpoint);
+        if (string.IsNullOrEmpty(subscriptionId))
+            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        var response = await this.GetSubscriptionByIdAsync(subscriptionId);
+        if (!response.IsSuccessStatusCode)
+            return null;
+        return await response.GetContentAsAsync<T>();
     }
 
-    public async Task<HttpResponseMessage> PatchAsync(string endpoint, HttpContent content)
+    public async Task<HttpResponseMessage> CreateSubscriptionAsync(SubscriptionModel subscription)
     {
-        return await _httpClient.PatchAsync(endpoint, content);
-    }
-
-    public async Task<T?> GetJsonAsync<T>(string endpoint) where T : class
-    {
-        var response = await _httpClient.GetAsync(endpoint);
-        response.EnsureSuccessStatusCode();
-        
-        var jsonString = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<T>(jsonString, _jsonOptions);
-    }
-
-    public async Task<T?> PostJsonAsync<T>(string endpoint, object content) where T : class
-    {
-        var jsonContent = JsonSerializer.Serialize(content, _jsonOptions);
+        var jsonContent = JsonSerializer.Serialize(subscription, _jsonOptions);
         var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-        
-        var response = await _httpClient.PostAsync(endpoint, stringContent);
-        response.EnsureSuccessStatusCode();
-        
-        var jsonString = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<T>(jsonString, _jsonOptions);
+        return await this.PostAsync(Endpoints.Subscriptions, stringContent);
+    }
+
+    public async Task<HttpResponseMessage> UpdateSubscriptionAsync(string subscriptionId, SubscriptionModel subscription)
+    {
+        if (string.IsNullOrEmpty(subscriptionId))
+            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        var jsonContent = JsonSerializer.Serialize(subscription, _jsonOptions);
+        var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+        return await this.PatchAsync($"{Endpoints.Subscriptions}/{subscriptionId}", stringContent);
+    }
+
+    public async Task<HttpResponseMessage> DeleteSubscriptionAsync(string subscriptionId)
+    {
+        if (string.IsNullOrEmpty(subscriptionId))
+            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        return await this.DeleteAsync($"{Endpoints.Subscriptions}/{subscriptionId}");
+    }
+
+    public async Task<HttpResponseMessage> GetEntitiesAsync(int offset = 0, int limit = 100)
+    {
+        return await this.GetAsync($"{Endpoints.Entities}?offset={offset}&limit={limit}");
+    }
+
+    public async Task<T?> GetEntitiesAsync<T>(int offset = 0, int limit = 100) where T : class
+    {
+        var response = await GetEntitiesAsync(offset, limit);
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        return await response.GetContentAsAsync<T>();
+    }
+
+    public async Task<HttpResponseMessage> GetEntityByIdAsync(string entityId)
+    {
+        if (string.IsNullOrEmpty(entityId))
+            throw new ArgumentException("Entity ID cannot be null or empty", nameof(entityId));
+        return await GetAsync($"{Endpoints.Entities}/{entityId}");
+    }
+
+    public async Task<T?> GetEntityByIdAsync<T>(string entityId) where T : class
+    {
+        if (string.IsNullOrEmpty(entityId))
+            throw new ArgumentException("Entity ID cannot be null or empty", nameof(entityId));
+
+        return await GetJsonAsync<T>($"{Endpoints.Entities}/{entityId}");
     }
 
     public async Task<HttpResponseMessage> CreateEntityAsync(object entity)
     {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity), "Entity cannot be null");
+
         var jsonContent = JsonSerializer.Serialize(entity, _jsonOptions);
         var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-        
-        return await _httpClient.PostAsync("/v2/entities", stringContent);
+        return await this.PostAsync(Endpoints.Entities, stringContent);
     }
 
     public async Task<HttpResponseMessage> UpdateEntityAsync(string entityId, object entity)
     {
+        if (string.IsNullOrEmpty(entityId))
+            throw new ArgumentException("Entity ID cannot be null or empty", nameof(entityId));
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity), "Entity cannot be null");
+
         var jsonContent = JsonSerializer.Serialize(entity, _jsonOptions);
         var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-        
-        return await _httpClient.PatchAsync($"/v2/entities/{entityId}/attrs", stringContent);
+
+        return await this.PatchAsync($"{Endpoints.Entities}/{entityId}", stringContent);
+    }
+
+    public async Task<HttpResponseMessage> ReplaceEntityAsync(string entityId, object entity)
+    {
+        if (string.IsNullOrEmpty(entityId))
+            throw new ArgumentException("Entity ID cannot be null or empty", nameof(entityId));
+
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity), "Entity cannot be null");
+
+        var jsonContent = JsonSerializer.Serialize(entity, _jsonOptions);
+        var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        return await this.PutAsync($"{Endpoints.Entities}/{entityId}", stringContent);
     }
 
     public async Task<HttpResponseMessage> DeleteEntityAsync(string entityId)
     {
-        return await _httpClient.DeleteAsync($"/v2/entities/{entityId}");
+        if (string.IsNullOrEmpty(entityId))
+            throw new ArgumentException("Entity ID cannot be null or empty", nameof(entityId));
+
+        return await this.DeleteAsync($"{Endpoints.Entities}/{entityId}");
+    }
+
+    public static (bool IsValid, string? ErrorMessage) ValidateSubscriptionPayload(object? payload)
+    {
+        if (payload == null)
+            return (false, "Payload cannot be empty");
+
+        JsonElement jsonElement;
+
+        // Handle different payload types
+        if (payload is string jsonString)
+        {
+            if (string.IsNullOrWhiteSpace(jsonString))
+                return (false, "Payload cannot be empty");
+
+            try
+            {
+                jsonElement = JsonSerializer.Deserialize<JsonElement>(jsonString);
+            }
+            catch (JsonException)
+            {
+                return (false, "Payload must be a valid JSON object");
+            }
+        }
+        else if (payload is JsonElement element)
+        {
+            jsonElement = element;
+        }
+        else
+        {
+            // Try to serialize and deserialize other object types
+            try
+            {
+                var serialized = JsonSerializer.Serialize(payload);
+                jsonElement = JsonSerializer.Deserialize<JsonElement>(serialized);
+            }
+            catch (JsonException)
+            {
+                return (false, "Payload must be a JSON object");
+            }
+        }
+
+        // Check if it's a JSON object
+        if (jsonElement.ValueKind != JsonValueKind.Object)
+            return (false, "Payload must be a JSON object");
+
+        // Required fields for a valid subscription
+        var requiredFields = new[] { "type", "notification" };
+
+        // Check required fields
+        foreach (var field in requiredFields)
+        {
+            if (!jsonElement.TryGetProperty(field, out _))
+                return (false, $"Missing required field: {field}");
+        }
+
+        // Validate type
+        if (jsonElement.TryGetProperty("type", out var typeProperty))
+        {
+            if (typeProperty.ValueKind != JsonValueKind.String ||
+                typeProperty.GetString() != "Subscription")
+            {
+                return (false, "type field must be 'Subscription'");
+            }
+        }
+
+        // Validate notification object
+        if (jsonElement.TryGetProperty("notification", out var notificationProperty))
+        {
+            if (notificationProperty.ValueKind != JsonValueKind.Object)
+                return (false, "notification must be an object");
+
+            if (!notificationProperty.TryGetProperty("endpoint", out _))
+                return (false, "notification must contain an endpoint");
+        }
+
+        return (true, null);
+    }
+
+    private void SetTenantHeaders(string tenant, HttpRequestMessage httpRequestMessage)
+    {
+        if (httpRequestMessage == null)
+            throw new ArgumentNullException(nameof(httpRequestMessage), "HttpRequestMessage cannot be null");
+
+        // Remove existing tenant headers if exist
+        httpRequestMessage.Headers.Remove("Fiware-Service");
+        httpRequestMessage.Headers.Remove("NGSILD-Tenant");
+
+        if (!string.IsNullOrEmpty(tenant) &&
+            !Config.MainTenant.Equals(tenant, StringComparison.OrdinalIgnoreCase))
+        {
+            httpRequestMessage.Headers.Add("Fiware-Service", tenant);
+            httpRequestMessage.Headers.Add("NGSILD-Tenant", tenant);
+        }
+        else
+        {
+            var requestUri = httpRequestMessage.RequestUri?.ToString() ?? throw new InvalidOperationException("Request URI cannot be null");
+            
+            var uriBuilder = new UriBuilder(Config.OrionContextBrokerUrl);
+            uriBuilder.Path = requestUri.Split('?')[0];
+            var query = System.Web.HttpUtility.ParseQueryString(requestUri.Split('?').Length > 1 ? requestUri.Split('?')[1] : string.Empty);
+            query["local"] = "true";
+            uriBuilder.Query = query.ToString();
+            httpRequestMessage.RequestUri = uriBuilder.Uri;
+        }
+    }
+
+    protected override async Task OnBeforeRequestAsync(HttpRequestMessage request)
+    {
+        if (request == null)
+            throw new ArgumentNullException(nameof(request), "HttpRequestMessage cannot be null");
+
+        var path = request.RequestUri?.ToString() ?? string.Empty;
+
+        if (path.StartsWith(Endpoints.Subscriptions, StringComparison.OrdinalIgnoreCase) &&
+            (request.Method == HttpMethod.Post || request.Method == HttpMethod.Patch))
+        {
+            var (isValid, errorMessage) = ValidateSubscriptionPayload(request.Content?.ReadAsStringAsync().Result);
+            if (!isValid)
+                throw new ArgumentException(errorMessage);
+        }
+
+        SetTenantHeaders(this._tenant, request);
+        await base.OnBeforeRequestAsync(request);
     }
 }
