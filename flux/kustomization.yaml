@@ -10,3 +10,5 @@ resources:
   - sensors-report-mqtt-to-orion/service.yaml
   - sensors-report-explorer/deployment.yaml
   - sensors-report-explorer/service.yaml
+  - sensors-report-provision-api/deployment.yaml
+  - sensors-report-provision-api/service.yaml
