@@ -263,25 +263,49 @@ public class ProvisionsController(
 
         foreach (var relatedEntityId in relationship.Object)
         {
-            _logger.LogInformation($"Copying related entity {relatedEntityId}");
-            var relatedEntity = await sourceBroker.GetEntityByIdAsync<EntityModel>(relatedEntityId);
-            if (relatedEntity == null)
+            if (!relatedEntityId.StartsWith("urn:ngsi-ld:subscription:"))
             {
-                _logger.LogWarning($"Related entity {relatedEntityId} not found in source broker.");
-                continue;
-            }
+                _logger.LogInformation($"Copying related entity {relatedEntityId}");
+                var relatedEntity = await sourceBroker.GetEntityByIdAsync<EntityModel>(relatedEntityId);
+                if (relatedEntity == null)
+                {
+                    _logger.LogWarning($"Related entity {relatedEntityId} not found in source broker.");
+                    continue;
+                }
 
-            var existingRelatedEntity = await targetBroker.GetEntityByIdAsync(relatedEntityId);
-            if (existingRelatedEntity.IsSuccessStatusCode)
+                var existingRelatedEntity = await targetBroker.GetEntityByIdAsync(relatedEntityId);
+                if (existingRelatedEntity.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation($"Related entity {relatedEntityId} already exists in target tenant. Skipping creation.");
+                    continue;
+                }
+
+                _logger.LogInformation($"Creating related entity {relatedEntityId} in target tenant {targetTenant}");
+                await CopyRelatedEntities(sourceBroker, targetBroker, relatedEntityId, targetTenant);
+                await targetBroker.CreateEntityAsync(relatedEntity);
+                _logger.LogInformation($"Successfully created related entity {relatedEntityId} in target tenant {targetTenant}");
+            }
+            else
             {
-                _logger.LogInformation($"Related entity {relatedEntityId} already exists in target tenant. Skipping creation.");
-                continue;
-            }
+                _logger.LogInformation($"Copying related subscription {relatedEntityId}");
+                var subscriptionEntity = await sourceBroker.GetSubscriptionByIdAsync<SubscriptionModel>(relatedEntityId);
+                if (subscriptionEntity == null)
+                {
+                    _logger.LogWarning($"Related subscription {relatedEntityId} not found in source broker.");
+                    continue;
+                }
 
-            _logger.LogInformation($"Creating related entity {relatedEntityId} in target tenant {targetTenant}");
-            await CopyRelatedEntities(sourceBroker, targetBroker, relatedEntityId, targetTenant);
-            await targetBroker.CreateEntityAsync(relatedEntity);
-            _logger.LogInformation($"Successfully created related entity {relatedEntityId} in target tenant {targetTenant}");
+                var existingSubscription = await targetBroker.GetSubscriptionByIdAsync(relatedEntityId);
+                if (existingSubscription.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation($"Related subscription {relatedEntityId} already exists in target tenant. Skipping creation.");
+                    continue;
+                }
+
+                _logger.LogInformation($"Creating related subscription {relatedEntityId} in target tenant {targetTenant}");
+                await targetBroker.CreateSubscriptionAsync(subscriptionEntity);
+                _logger.LogInformation($"Successfully created related subscription {relatedEntityId} in target tenant {targetTenant}");
+            }
         }
     }
 }

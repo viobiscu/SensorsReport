@@ -26,6 +26,9 @@ public class PropertyModelBase
 
     [JsonPropertyName("type")]
     public string? Type { get; set; }
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
     
 }
 
@@ -34,8 +37,6 @@ public class PropertyModel : PropertyModelBase
     [JsonPropertyName("value")]
     public JsonElement Value { get; set; }
 
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
 }
 
 public class RelationshipModel : PropertyModelBase
@@ -43,10 +44,8 @@ public class RelationshipModel : PropertyModelBase
     [JsonPropertyName("object")]
     [JsonConverter(typeof(StringOrStringListConverter))]
     public List<string> Object { get; set; } = new List<string>();
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
 }
+
 public class StringOrStringListConverter : JsonConverter<List<string>>
 {
     public override List<string> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
