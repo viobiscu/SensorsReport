@@ -26,6 +26,7 @@ app.ConfigureAppAndRun();
 void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection services)
 {
     services.Configure<AppConfiguration>(configuration.GetSection("AppConfig"));
+    logger.LogSection(configuration, "AppConfig");
 }
 
 void ConfigureServices(IServiceCollection services)

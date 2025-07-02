@@ -52,7 +52,7 @@ public static partial class AppConfig
             log.Info($"Application: {title}");
             log.Info($"Version: {version}");
             log.Info($"Description: {description}");
-            log.Info($"Copyright: {copyright}");
+            log.Info($"Copyright: {copyright}\n");
         }
         catch (Exception ex)
         {
@@ -144,14 +144,14 @@ public static partial class AppConfig
             .AsEnumerable()
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value ?? string.Empty);
 
-
-        logger.Info("============= AppSettings =============");
-        
         if (appsettings.Count == 0)
         {
-            logger.Warn("No appsettings exist.");
+            logger.Info("============= AppSettings (Empty) =============\n");
+            return;
         }
 
+        logger.Info("============= AppSettings (Default Settings) =============");
+        
         foreach (var kvp in appsettings)
         {
             if (kvp.Key == null)
@@ -162,7 +162,7 @@ public static partial class AppConfig
 
             logger.LogVariable("Configuration", kvp.Key, MaskIfSensitiveValue(kvp.Key, kvp.Value));
         }
-        logger.Info("=======================================");
+        logger.Info("=================================================\n");
     }
 
 
@@ -171,7 +171,7 @@ public static partial class AppConfig
         var applicationName = GetAppName();
         var logger = LogManager.GetLogger(applicationName);
 
-        logger.Info("============= Environment variables =============");
+        logger.Info("============= Environment variables (Override for AppSettings) =============");
         foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>().OrderBy(entry => entry.Key))
         {
             if (env.Key.ToString()?.StartsWith(EnvVariablePrefix) == false && !LogEnvironmentKeys.Contains(env.Key.ToString() ?? string.Empty, StringComparer.OrdinalIgnoreCase))
@@ -181,22 +181,20 @@ public static partial class AppConfig
             var value = env.Value?.ToString() ?? string.Empty;
             logger.LogVariable("Environment", key, MaskIfSensitiveValue(key, value));
         }
-        logger.Info("=================================================");
+        logger.Info("=================================================\n");
     }
 
     public static void LogArgs(string[] args)
     {
         var applicationName = GetAppName();
         var logger = LogManager.GetLogger(applicationName);
-
-
-        logger.Info("============= Command line arguments ============");
-
         if (args == null || args.Length == 0)
         {
-            args = [];
-            logger.Warn("No command line arguments provided.");
+            logger.Info("============= Command line arguments (Empty) =============\n");
+            return;
         }
+
+        logger.Info("============= Command line arguments (Override for environment variables) ============");
 
         foreach (var arg in args)
         {
@@ -209,7 +207,38 @@ public static partial class AppConfig
 
             logger.LogVariable("Command line", key, MaskIfSensitiveValue(key, value));
         }
-        logger.Info("=================================================");
+        logger.Info("=================================================\n");
+    }
+
+    public static void LogSection(this Logger logger, IConfiguration configuration, string sectionName)
+    {
+        logger.Info($"============= {sectionName} (Active Config) =============");
+        var section = configuration.GetSection(sectionName);
+        if (!section.Exists())
+        {
+            logger.Warn($"Section '{sectionName}' does not exist in the configuration.");
+            return;
+        }
+
+        var sectionValues = section.AsEnumerable().ToDictionary(kvp => kvp.Key, kvp => kvp.Value ?? string.Empty);
+        if (sectionValues.Count == 0)
+        {
+            logger.Warn($"Section '{sectionName}' is empty.");
+            return;
+        }
+
+        foreach (var kvp in sectionValues)
+        {
+            if (kvp.Key == null)
+                continue;
+
+            if (string.IsNullOrEmpty(kvp.Value))
+                continue;
+
+            logger.LogVariable("Configuration", kvp.Key, MaskIfSensitiveValue(kvp.Key, kvp.Value));
+        }
+
+        logger.Info("=================================================\n");
     }
 
     public static string MaskIfSensitiveValue(string key, string value)
@@ -220,7 +249,7 @@ public static partial class AppConfig
                 ? $"{value[..3]}*****{value[^3..]}"
                 : value[..1] + new string('*', value.Length - 1);
         }
-        
+
         return value;
     }
 
