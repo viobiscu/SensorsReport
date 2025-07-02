@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -59,40 +60,11 @@ public static partial class AppConfig
             log.Info("Application: SensorsReport.API");
         }
 
-        foreach (var arg in args ?? [])
-        {
-            var splitArg = arg.Split('=');
-
-
-            var key = splitArg[0]?.Trim().Replace("--", string.Empty) ?? string.Empty;
-            var value = splitArg.Length > 1 ? splitArg[1]?.Trim() ?? string.Empty : string.Empty;
-
-            if (string.IsNullOrEmpty(value))
-                value = "true";
-
-            if (!arg.Contains('=', StringComparison.CurrentCulture))
-                value = "true";
-
-            log.LogVariable("Command line", key, value);
-        }
-
-        log.Info("============= Environment variables =============");
-        foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>().OrderBy(entry => entry.Key))
-        {
-            var key = env.Key.ToString() ?? string.Empty;
-            var value = env.Value?.ToString() ?? string.Empty;
-            log.LogVariable("Environment", key, value);
-        }
-        log.Info("=================================================");
+        LogAppsettings();
+        LogEnvironmentVariables();
+        LogArgs(args);
     }
 
-    public static List<string> SensitiveEnvironmentKeys = new()
-    {
-        "PASSWORD",
-        "SECRET",
-        "KEY",
-        "TOKEN"
-    };
 
     public static string GetVersion(this AppDomain appDomain)
     {
@@ -126,7 +98,7 @@ public static partial class AppConfig
     {
         return GetDefaultWebAppBuilder(c =>
         {
-            var applicationName = Assembly.GetEntryAssembly()?.GetName().Name ?? Assembly.GetExecutingAssembly()?.GetName().Name ?? "SensorsReport";
+            var applicationName = GetAppName();
             c.SwaggerDoc(apiVersion, new OpenApiInfo { Title = applicationName, Version = apiVersion });
 
             if (useBearerTokenAuthForSwagger)
@@ -152,6 +124,91 @@ public static partial class AppConfig
                 });
             }
         });
+    }
+
+    public static string GetAppName()
+    {
+        return Assembly.GetEntryAssembly()?.GetName().Name ?? Assembly.GetExecutingAssembly()?.GetName().Name ?? "SensorsReport";
+    }
+
+    public static void LogAppsettings()
+    {
+        var applicationName = GetAppName();
+        var logger = LogManager.GetLogger(applicationName);
+
+        var appsettings = new ConfigurationBuilder().
+            SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true, reloadOnChange: false)
+            .Build()
+            .AsEnumerable()
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value ?? string.Empty);
+
+        logger.Info("============= AppSettings =============");
+        foreach (var kvp in appsettings)
+        {
+            if (kvp.Key == null)
+                continue;
+
+            if (string.IsNullOrEmpty(kvp.Value))
+                continue;
+
+            logger.LogVariable("Configuration", kvp.Key, MaskIfSensitiveValue(kvp.Key, kvp.Value));
+        }
+        logger.Info("=======================================");
+    }
+
+    public static void LogEnvironmentVariables()
+    {
+        var applicationName = GetAppName();
+        var logger = LogManager.GetLogger(applicationName);
+
+        logger.Info("============= Environment variables =============");
+        foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>().OrderBy(entry => entry.Key))
+        {
+            if (!LogEnvironmentKeys.Contains(env.Key.ToString() ?? string.Empty, StringComparer.OrdinalIgnoreCase))
+                continue;
+
+            var key = env.Key.ToString() ?? string.Empty;
+            var value = env.Value?.ToString() ?? string.Empty;
+            logger.LogVariable("Environment", key, MaskIfSensitiveValue(key, value));
+        }
+        logger.Info("=================================================");
+    }
+
+    public static void LogArgs(string[] args)
+    {
+        var applicationName = GetAppName();
+        var logger = LogManager.GetLogger(applicationName);
+
+        if (args == null || args.Length == 0)
+            return;
+
+        logger.Info("============= Command line arguments ============");
+        foreach (var arg in args)
+        {
+            var splitArg = arg.Split('=');
+            var key = splitArg[0]?.Trim().Replace("--", string.Empty) ?? string.Empty;
+            var value = splitArg.Length > 1 ? splitArg[1]?.Trim() ?? string.Empty : "true";
+
+            if (!arg.Contains('=', StringComparison.CurrentCulture))
+                value = "true";
+
+            logger.LogVariable("Command line", key, MaskIfSensitiveValue(key, value));
+        }
+        logger.Info("=================================================");
+    }
+
+    public static string MaskIfSensitiveValue(string key, string value)
+    {
+        if (SensitiveEnvironmentKeys.Any(s => key.Contains(s, StringComparison.OrdinalIgnoreCase)))
+        {
+            value = value.Length > 6
+                ? $"{value[..3]}*****{value[^3..]}"
+                : value[..1] + new string('*', value.Length - 1);
+        }
+        
+        return value;
     }
 
     public static WebApplicationBuilder GetDefaultWebAppBuilder(Action<SwaggerGenOptions> swaggerSetupAction)
@@ -234,9 +291,6 @@ public static partial class AppConfig
             return;
         }
 
-        if (!LogEnvironmentKeys.Contains(key, StringComparer.OrdinalIgnoreCase))
-            return;
-
         if (SensitiveEnvironmentKeys.Any(s => key.Contains(s, StringComparison.OrdinalIgnoreCase)))
         {
             value = value.Length > 6
@@ -246,6 +300,14 @@ public static partial class AppConfig
 
         log.Info($"{type} variable: {key}={value}");
     }
+
+    public static HashSet<string> SensitiveEnvironmentKeys = new()
+    {
+        "PASSWORD",
+        "SECRET",
+        "KEY",
+        "TOKEN"
+    };
 
     private static HashSet<string> LogEnvironmentKeys = [
         "ASPNETCORE_ENVIRONMENT",

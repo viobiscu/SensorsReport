@@ -27,5 +27,5 @@ spec:
         env:
           - name: ASPNETCORE_ENVIRONMENT
             value: "Production"
-          - name: OrionContextBrokerUrl
+          - name: AppConfig_OrionContextBrokerUrl
             value: "http://orion-ld-broker:1026"
