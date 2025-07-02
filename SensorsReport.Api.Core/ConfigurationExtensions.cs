@@ -34,7 +34,7 @@ public static partial class AppConfig
             var copyright = assembly
                 .GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)
                 .OfType<AssemblyCopyrightAttribute>()
-                .FirstOrDefault()?.Copyright ?? "Copyright © 2024-2025";
+                .FirstOrDefault()?.Copyright ?? $"Copyright © 2024-{DateTime.Now.Year}";
 
             var description = assembly
                 .GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)

@@ -2,6 +2,10 @@ using Microsoft.Extensions.Options;
 using SensorsReport;
 using Sensors_Report_Provision.API.Services;
 using NLog;
+using System.Reflection;
+
+[assembly: AssemblyTitle("SensorsReport.Provision.API")]
+[assembly: AssemblyDescription("API for provisioning sensors in Sensors Report")]
 
 LogManager.Setup((config) => config.ConfigureLogger());
 var logger = LogManager.GetLogger("SensorsReport.Provision.API");;
