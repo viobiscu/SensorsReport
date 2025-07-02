@@ -144,7 +144,14 @@ public static partial class AppConfig
             .AsEnumerable()
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value ?? string.Empty);
 
+
         logger.Info("============= AppSettings =============");
+        
+        if (appsettings.Count == 0)
+        {
+            logger.Warn("No appsettings exist.");
+        }
+
         foreach (var kvp in appsettings)
         {
             if (kvp.Key == null)
@@ -158,6 +165,7 @@ public static partial class AppConfig
         logger.Info("=======================================");
     }
 
+
     public static void LogEnvironmentVariables()
     {
         var applicationName = GetAppName();
@@ -166,7 +174,7 @@ public static partial class AppConfig
         logger.Info("============= Environment variables =============");
         foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>().OrderBy(entry => entry.Key))
         {
-            if (!LogEnvironmentKeys.Contains(env.Key.ToString() ?? string.Empty, StringComparer.OrdinalIgnoreCase))
+            if (env.Key.ToString()?.StartsWith(EnvVariablePrefix) == false && !LogEnvironmentKeys.Contains(env.Key.ToString() ?? string.Empty, StringComparer.OrdinalIgnoreCase))
                 continue;
 
             var key = env.Key.ToString() ?? string.Empty;
@@ -181,10 +189,15 @@ public static partial class AppConfig
         var applicationName = GetAppName();
         var logger = LogManager.GetLogger(applicationName);
 
-        if (args == null || args.Length == 0)
-            return;
 
         logger.Info("============= Command line arguments ============");
+
+        if (args == null || args.Length == 0)
+        {
+            args = [];
+            logger.Warn("No command line arguments provided.");
+        }
+
         foreach (var arg in args)
         {
             var splitArg = arg.Split('=');
@@ -226,6 +239,7 @@ public static partial class AppConfig
         builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
         builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false);
         builder.Configuration.AddEnvironmentVariables();
+        builder.Configuration.AddEnvironmentVariables(EnvVariablePrefix);
 
         if (args != null)
             builder.Configuration.AddCommandLine(args);
@@ -300,6 +314,8 @@ public static partial class AppConfig
 
         log.Info($"{type} variable: {key}={value}");
     }
+
+    private const string EnvVariablePrefix = "SR_";
 
     public static HashSet<string> SensitiveEnvironmentKeys = new()
     {
