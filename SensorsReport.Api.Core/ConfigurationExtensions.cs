@@ -1,4 +1,9 @@
-using System.Reflection;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using NLog;
 using NLog.Config;
@@ -40,12 +45,12 @@ public static partial class AppConfig
             var description = assembly
                 .GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)
                 .OfType<AssemblyDescriptionAttribute>()
-                .FirstOrDefault()?.Description ?? "API for audit logging system for sensor reports";
+                .FirstOrDefault()?.Description ?? "API for sensor reports";
 
             var title = assembly
                 .GetCustomAttributes(typeof(AssemblyTitleAttribute), false)
                 .OfType<AssemblyTitleAttribute>()
-                .FirstOrDefault()?.Title ?? "SensorsReportAudit.API";
+                .FirstOrDefault()?.Title ?? "SensorsReport.API";
 
             var version = appDomain.GetVersion();
 
@@ -57,7 +62,7 @@ public static partial class AppConfig
         catch (Exception ex)
         {
             log.Warn($"Error retrieving assembly attributes: {ex.Message}");
-            log.Info("Application: SensorsReportAudit.API");
+            log.Info("Application: SensorsReport.API");
         }
 
         foreach (var arg in args ?? [])
@@ -122,11 +127,11 @@ public static partial class AppConfig
         return string.IsNullOrEmpty(value) ? defaultValue : value;
     }
 
-    public static WebApplicationBuilder GetDefaultWebAppBuilder(string apiVersion = "v1", bool useBearerTokenAuthForSwagger = false)
+    public static WebApplicationBuilder GetDefaultWebAppBuilder(this Assembly assembly, string apiVersion = "v1", bool useBearerTokenAuthForSwagger = false)
     {
         return GetDefaultWebAppBuilder(c =>
         {
-            var applicationName = Assembly.GetExecutingAssembly().GetName().Name;
+            var applicationName = assembly.GetName().Name;
             c.SwaggerDoc(apiVersion, new OpenApiInfo { Title = applicationName, Version = apiVersion });
 
             if (useBearerTokenAuthForSwagger)
@@ -214,7 +219,7 @@ public static partial class AppConfig
         }
 
         app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint($"/swagger/{apiVersion}/swagger.json", $"SensorsReportAudit API {apiVersion}"));
+        app.UseSwaggerUI(c => c.SwaggerEndpoint($"/swagger/{apiVersion}/swagger.json", $"SensorsReport API {apiVersion}"));
 
         return app;
     }
@@ -252,7 +257,7 @@ public static partial class AppConfig
       internalLogLevel=""Info"">
 
   <targets>
-    <target xsi:type=""ColoredConsole"" 
+    <target xsi:type=""ColoredConsole""
             name=""logconsole""
             layout=""${longdate} ${level:uppercase=true} ${logger:shortName=true} ${message} ${exception:format=tostring}"">
       <highlight-row condition=""level == LogLevel.Trace"" foregroundColor=""DarkGray"" />
@@ -270,13 +275,13 @@ public static partial class AppConfig
 
     <!-- System framework logs -->
     <logger name=""System.*"" maxlevel=""Warn"" final=""true"" />
-    
+
     <!-- ASP.NET Core hosting logs -->
     <logger name=""Microsoft.AspNetCore.Hosting.*"" minlevel=""Error"" final=""true"" />
 
     <!-- Entity Framework logs -->
     <logger name=""Microsoft.EntityFrameworkCore.*"" maxlevel=""Warn"" final=""true"" />
-    
+
     <!-- All other logs -->
     <logger name=""*"" minlevel=""Trace"" writeTo=""logconsole"" />
   </rules>

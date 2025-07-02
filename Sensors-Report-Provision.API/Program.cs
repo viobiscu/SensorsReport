@@ -1,12 +1,13 @@
 using Microsoft.Extensions.Options;
 using SensorsReport;
 using Sensors_Report_Provision.API.Services;
+using System.Reflection;
 
 var logger = SensorsReport.AppConfig.GetLogger();
 logger.Info("Application starting...");
 logger.LogProgramInfo(AppDomain.CurrentDomain, args);
 
-var builder = SensorsReport.AppConfig.GetDefaultWebAppBuilder();
+var builder = Assembly.GetExecutingAssembly().GetDefaultWebAppBuilder();
 
 ConfigureConfigs(builder.Configuration, builder.Services);
 ConfigureServices(builder.Services);

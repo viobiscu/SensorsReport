@@ -122,7 +122,7 @@ public class ProvisionsController(
         return Ok();
     }
 
-    [HttpPost("/entity/{entityId}")]
+    [HttpPost("entity/{entityId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -164,7 +164,7 @@ public class ProvisionsController(
         return Ok();
     }
 
-    [HttpPost("/subscription/{subscriptionId}")]
+    [HttpPost("subscription/{subscriptionId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
