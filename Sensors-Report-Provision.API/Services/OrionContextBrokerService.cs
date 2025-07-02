@@ -260,13 +260,15 @@ public class OrionContextBrokerService : BaseHttpService, IOrionContextBrokerSer
         else
         {
             var requestUri = httpRequestMessage.RequestUri?.ToString() ?? throw new InvalidOperationException("Request URI cannot be null");
-            
-            var uriBuilder = new UriBuilder(Config.OrionContextBrokerUrl);
-            uriBuilder.Path = requestUri.Split('?')[0];
-            var query = System.Web.HttpUtility.ParseQueryString(requestUri.Split('?').Length > 1 ? requestUri.Split('?')[1] : string.Empty);
-            query["local"] = "true";
-            uriBuilder.Query = query.ToString();
-            httpRequestMessage.RequestUri = uriBuilder.Uri;
+            if (requestUri.StartsWith(Endpoints.Entities, StringComparison.OrdinalIgnoreCase))
+            {
+                var uriBuilder = new UriBuilder(Config.OrionContextBrokerUrl);
+                uriBuilder.Path = requestUri.Split('?')[0];
+                var query = System.Web.HttpUtility.ParseQueryString(requestUri.Split('?').Length > 1 ? requestUri.Split('?')[1] : string.Empty);
+                query["local"] = "true";
+                uriBuilder.Query = query.ToString();
+                httpRequestMessage.RequestUri = uriBuilder.Uri;
+            }
         }
     }
 

@@ -105,7 +105,8 @@ public class BaseHttpService
     public async virtual Task<T?> GetJsonAsync<T>(string endpoint) where T : class
     {
         var response = await GetAsync(endpoint);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
 
         var jsonString = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<T>(jsonString, _jsonOptions);
@@ -117,7 +118,8 @@ public class BaseHttpService
         var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
         var response = await PostAsync(endpoint, stringContent);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
 
         var jsonString = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<T>(jsonString, _jsonOptions);
