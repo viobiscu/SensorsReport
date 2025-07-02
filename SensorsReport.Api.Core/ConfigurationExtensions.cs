@@ -76,13 +76,14 @@ public static partial class AppConfig
             log.LogVariable("Command line", key, value);
         }
 
-        log.Info("Environment variables starting:");
+        log.Info("============= Environment variables =============");
         foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>().OrderBy(entry => entry.Key))
         {
             var key = env.Key.ToString() ?? string.Empty;
             var value = env.Value?.ToString() ?? string.Empty;
             log.LogVariable("Environment", key, value);
         }
+        log.Info("=================================================");
     }
 
     public static List<string> SensitiveEnvironmentKeys = new()
