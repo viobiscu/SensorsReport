@@ -11,7 +11,7 @@ public class OrionContextBrokerService : BaseHttpService, IOrionContextBrokerSer
 {
     private string _tenant = "synchro";
 
-    public AppConfig Config { get; }
+    public AppConfiguration Config { get; }
 
     private static class Endpoints
     {
@@ -19,7 +19,7 @@ public class OrionContextBrokerService : BaseHttpService, IOrionContextBrokerSer
         public const string Entities = "/ngsi-ld/v1/entities";
     }
 
-    public OrionContextBrokerService(IOptions<AppConfig> config, IHttpClientFactory httpClientFactory, JsonSerializerOptions? jsonOptions = null)
+    public OrionContextBrokerService(IOptions<AppConfiguration> config, IHttpClientFactory httpClientFactory, JsonSerializerOptions? jsonOptions = null)
         : base(httpClientFactory, jsonOptions)
     {
         Config = config?.Value ?? throw new ArgumentNullException(nameof(config), "AppConfig cannot be null");

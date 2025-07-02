@@ -14,26 +14,20 @@ namespace SensorsReport;
 
 public static partial class AppConfig
 {
-    public static void ConfigureLogger(this ISetupBuilder setupBuilder, string fileName = "nlog.config")
+    public static ISetupBuilder ConfigureLogger(this ISetupBuilder setupBuilder, string fileName = "nlog.config")
     {
         var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
         if (!File.Exists(configPath))
             File.WriteAllText(configPath, DefaultNlogConfig);
-        setupBuilder.LoadConfigurationFromFile(configPath);
+        return setupBuilder.LoadConfigurationFromFile(configPath);
     }
 
-    public static Logger GetLogger(string? loggerName = null)
+    public static void LogProgramInfo(this Logger log, AppDomain appDomain, string[] args, string[]? logEnvironmentKeys = null)
     {
-        if (string.IsNullOrEmpty(loggerName))
-            loggerName = Assembly.GetExecutingAssembly().GetName().Name ?? "SensorsReport";
+        foreach (var key in logEnvironmentKeys ?? Array.Empty<string>())
+            LogEnvironmentKeys.Add(key);
 
-        LogManager.Setup().ConfigureLogger();
-        return LogManager.GetLogger(loggerName);
-    }
-
-    public static void LogProgramInfo(this Logger log, AppDomain appDomain, string[] args)
-    {
-        var assembly = Assembly.GetExecutingAssembly();
+        var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
 
         try
         {
@@ -127,11 +121,11 @@ public static partial class AppConfig
         return string.IsNullOrEmpty(value) ? defaultValue : value;
     }
 
-    public static WebApplicationBuilder GetDefaultWebAppBuilder(this Assembly assembly, string apiVersion = "v1", bool useBearerTokenAuthForSwagger = false)
+    public static WebApplicationBuilder GetDefaultWebAppBuilder(string apiVersion = "v1", bool useBearerTokenAuthForSwagger = false)
     {
         return GetDefaultWebAppBuilder(c =>
         {
-            var applicationName = assembly.GetName().Name;
+            var applicationName = Assembly.GetEntryAssembly()?.GetName().Name ?? Assembly.GetExecutingAssembly()?.GetName().Name ?? "SensorsReport";
             c.SwaggerDoc(apiVersion, new OpenApiInfo { Title = applicationName, Version = apiVersion });
 
             if (useBearerTokenAuthForSwagger)
@@ -239,6 +233,9 @@ public static partial class AppConfig
             return;
         }
 
+        if (!LogEnvironmentKeys.Contains(key, StringComparer.OrdinalIgnoreCase))
+            return;
+
         if (SensitiveEnvironmentKeys.Any(s => key.Contains(s, StringComparison.OrdinalIgnoreCase)))
         {
             value = value.Length > 6
@@ -248,6 +245,17 @@ public static partial class AppConfig
 
         log.Info($"{type} variable: {key}={value}");
     }
+
+    private static HashSet<string> LogEnvironmentKeys = [
+        "ASPNETCORE_ENVIRONMENT",
+        "ASPNETCORE_URLS",
+        "ASPNETCORE_HTTPS_PORT",
+        "DOTNET_RUNNING_IN_CONTAINER",
+        "DOTNET_VERSION",
+        "DOTNET_ROOT",
+        "HOSTTYPE",
+        "LANG"
+    ];
 
     private const string DefaultNlogConfig = @"""
 <?xml version=""1.0"" encoding=""utf-8"" ?>

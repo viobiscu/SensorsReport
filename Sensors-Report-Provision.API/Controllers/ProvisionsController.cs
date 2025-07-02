@@ -16,13 +16,13 @@ public class ProvisionRequest
 public class ProvisionsController(
     IServiceProvider serviceProvider,
     ILogger<ProvisionsController> logger,
-    IOptions<AppConfig> config) : ControllerBase
+    IOptions<AppConfiguration> config) : ControllerBase
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider
         ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly ILogger<ProvisionsController> _logger = logger
         ?? throw new ArgumentNullException(nameof(logger));
-    private readonly AppConfig _config = config?.Value
+    private readonly AppConfiguration _config = config?.Value
         ?? throw new ArgumentNullException(nameof(config));
 
     [HttpPost]
