@@ -12,3 +12,6 @@ resources:
   - sensors-report-explorer/service.yaml
   - sensors-report-provision-api/deployment.yaml
   - sensors-report-provision-api/service.yaml
+  - sensors-report-sms-api/mongo-deployment.yaml
+  - sensors-report-sms-api/deployment.yaml
+  - sensors-report-sms-api/service.yaml
