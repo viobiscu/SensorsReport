@@ -33,6 +33,7 @@ public class UpdateSmsStatusBackgroundService : BackgroundService
             try
             {
                 var entrustedSms = await smsRepository.GetAsync(null, null, null, 10, 0, SmsStatusEnum.Entrusted);
+
                 if (entrustedSms == null || entrustedSms.Count == 0)
                 {
                     logger.LogInformation("No SMS records found with status 'Entrusted' to update.");
@@ -74,6 +75,44 @@ public class UpdateSmsStatusBackgroundService : BackgroundService
 
                         var actualTtl = TimeSpan.FromMinutes(sms.Ttl ?? appConfig.Value.DefaultTtlInMinutes);
                         if (sms.Timestamp.Add(actualTtl) < DateTime.UtcNow)
+                        {
+                            logger.LogInformation("Updating SMS with ID {SmsId} to 'Expired' status due to TTL expiration (TTL: {TTL}).", sms.Id, actualTtl);
+                            sms.Status = SmsStatusEnum.Expired;
+                        }
+
+                        if (sms.Status == currentStatus)
+                        {
+                            logger.LogInformation("No status change for SMS with ID {SmsId}. Current status is '{Status}'.", sms.Id, Enum.GetName(sms.Status));
+                            continue;
+                        }
+
+                        logger.LogInformation("Updating SMS with ID {SmsId} to '{status}' status.", sms.Id, Enum.GetName(sms.Status));
+                        await smsRepository.UpdateAsync(sms.Id!, sms);
+                    }
+                }
+
+                var pendingSms = await smsRepository.GetAsync(null, null, null, 10, 0, SmsStatusEnum.Pending);
+
+                if (pendingSms == null || pendingSms.Count == 0)
+                {
+                    logger.LogInformation("No SMS records found with status 'Pending' to update.");
+                }
+                else
+                {
+                    foreach (var sms in pendingSms)
+                    {
+                        if (stoppingToken.IsCancellationRequested)
+                        {
+                            logger.LogInformation("Cancellation requested, stopping SMS status update task.");
+                            return;
+                        }
+
+                        logger.LogInformation("Processing SMS with ID {SmsId}, status '{Status}' and tenant '{Tenant}'", sms.Id, Enum.GetName(sms.Status), sms.Tenant);
+
+                        var currentStatus = sms.Status;
+
+                        var actualTtl = TimeSpan.FromMinutes(sms.Ttl ?? appConfig.Value.DefaultTtlInMinutes);
+                        if (sms.Timestamp <= DateTime.UtcNow.Add(-actualTtl))
                         {
                             logger.LogInformation("Updating SMS with ID {SmsId} to 'Expired' status due to TTL expiration (TTL: {TTL}).", sms.Id, actualTtl);
                             sms.Status = SmsStatusEnum.Expired;
