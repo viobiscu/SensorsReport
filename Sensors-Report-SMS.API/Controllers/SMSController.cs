@@ -1,63 +1,141 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
+using Sensors_Report_SMS.API.Models;
+using Sensors_Report_SMS.API.Repositories;
+using SensorsReport;
+using System.Text.Json;
 
-namespace Sensors_Report_SMS.API.Controllers
+namespace Sensors_Report_SMS.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[UseTenantHeader]
+public class SmsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class SMSController : ControllerBase
+    [HttpGet]
+    [ProducesResponseType(typeof(List<SmsModel>), 200)]
+    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [Produces("application/json")]
+    public async Task<IActionResult> Get([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, [FromQuery] string? fromDate, [FromQuery] string? toDate, [FromQuery] int limit = 100, [FromQuery] int offset = 0, [FromQuery] SmsStatusEnum? status = null)
     {
-        // In-memory store for demonstration
-        private static readonly List<SMSRecord> SMSs = new List<SMSRecord>();
+        ArgumentNullException.ThrowIfNull(tenantRetriever, nameof(tenantRetriever));
+        ArgumentNullException.ThrowIfNull(repository, nameof(repository));
 
-        // GET /api/SMS?fromDate=...&toDate=...&limit=...&offset=...
-        [HttpGet]
-        [Authorize]
-        public IActionResult Get([FromQuery] string? fromDate, [FromQuery] string? toDate, [FromQuery] int? limit, [FromQuery] int? offset)
-        {
-            var query = SMSs.AsQueryable();
-            // Simulate Quantum Leap-style query params
-            if (!string.IsNullOrEmpty(fromDate) && DateTime.TryParse(fromDate, out var from))
-                query = query.Where(e => e.Timestamp >= from);
-            if (!string.IsNullOrEmpty(toDate) && DateTime.TryParse(toDate, out var to))
-                query = query.Where(e => e.Timestamp <= to);
-            if (offset.HasValue)
-                query = query.Skip(offset.Value);
-            if (limit.HasValue)
-                query = query.Take(limit.Value);
-            return Ok(query.ToList());
-        }
+        var tenantInfo = tenantRetriever.CurrentTenantInfo;
 
-        // POST /api/SMS
-        [HttpPost]
-        [Authorize]
-        public IActionResult Post([FromBody] SMSRecord sms)
-        {
-            sms.Id = Guid.NewGuid().ToString();
-            sms.Timestamp = DateTime.UtcNow;
-            SMSs.Add(sms);
-            return CreatedAtAction(nameof(GetById), new { SMSId = sms.Id }, sms);
-        }
+        var entities = await repository.GetAsync(
+            tenantInfo.Tenant,
+            fromDate,
+            toDate,
+            limit,
+            offset,
+            status
+        );
 
-        // GET /api/SMS/{SMSId}
-        [HttpGet("{SMSId}")]
-        [Authorize]
-        public IActionResult GetById(string SMSId)
-        {
-            var sms = SMSs.FirstOrDefault(e => e.Id == SMSId);
-            if (sms == null)
-                return NotFound();
-            return Ok(sms);
-        }
+        if (entities == null || entities.Count == 0)
+            return NotFound("No SMS records found for the specified criteria.");
+
+
+        return Ok(entities);
     }
 
-    public class SMSRecord
+    [HttpGet("{smsId}")]
+    [ProducesResponseType(typeof(SmsModel), 200)]
+    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [Produces("application/json")]
+    public async Task<IActionResult> GetById([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId)
     {
-        public string Id { get; set; } = string.Empty;
-        public string To { get; set; } = string.Empty;
-        public string Message { get; set; } = string.Empty;
-        public DateTime Timestamp { get; set; }
+        if (string.IsNullOrWhiteSpace(smsId))
+            return BadRequest("SMS ID cannot be null or empty.");
+
+        var tenantInfo = tenantRetriever.CurrentTenantInfo;
+        var entity = await repository.GetAsync(smsId, tenantInfo.Tenant);
+        if (entity == null)
+            return NotFound($"SMS with ID {smsId} not found.");
+        return Ok(entity);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(SmsModel), 201)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [Produces("application/json")]
+    public async Task<IActionResult> Post([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, [FromBody] SmsModel sms)
+    {
+
+        var tenantInfo = tenantRetriever.CurrentTenantInfo;
+        if (sms == null)
+            return BadRequest("SMS model cannot be null.");
+
+        sms.Tenant = tenantInfo.Tenant;
+        var createdSms = await repository.CreateAsync(sms);
+        return CreatedAtAction(nameof(GetById), new { smsId = createdSms.Id }, createdSms);
+    }
+
+    [HttpPut("{smsId}")]
+    [ProducesResponseType(typeof(SmsModel), 200)]
+    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [Produces("application/json")]
+    public async Task<IActionResult> Put([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId, [FromBody] SmsModel sms)
+    {
+        var tenantInfo = tenantRetriever.CurrentTenantInfo;
+        if (string.IsNullOrWhiteSpace(smsId))
+            return BadRequest("SMS ID cannot be null or empty.");
+        if (sms == null)
+            return BadRequest("SMS model cannot be null.");
+        sms.Id = smsId; // Ensure the ID is set for the update
+
+        var existingSms = await repository.GetAsync(smsId, tenantInfo.Tenant);
+        if (existingSms == null)
+            return NotFound($"SMS with ID {smsId} not found.");
+
+        sms.Tenant = tenantInfo.Tenant; // Ensure the tenant is set for the update
+        var updatedSms = await repository.UpdateAsync(smsId, sms);
+        return Ok(updatedSms);
+    }
+
+    [HttpDelete("{smsId}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [Produces("application/json")]
+    public async Task<IActionResult> Delete([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId)
+    {
+        var tenantInfo = tenantRetriever.CurrentTenantInfo;
+        if (string.IsNullOrWhiteSpace(smsId))
+            return BadRequest("SMS ID cannot be null or empty.");
+        var deleted = await repository.DeleteAsync(smsId, tenantInfo.Tenant);
+        if (!deleted)
+            return NotFound($"SMS with ID {smsId} not found or could not be deleted.");
+        return NoContent();
+    }
+
+    [HttpPatch("{smsId}")]
+    [PatchRequestBody(typeof(SmsModel))]
+    [ProducesResponseType(typeof(SmsModel), 200)]
+    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [Produces("application/json")]
+    public async Task<IActionResult> Patch([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId, [FromBody] JsonElement patchDoc)
+    {
+        var tenantInfo = tenantRetriever.CurrentTenantInfo;
+        if (string.IsNullOrWhiteSpace(smsId))
+            return BadRequest("SMS ID cannot be null or empty.");
+        if (patchDoc.ValueKind != JsonValueKind.Object)
+            return BadRequest("Patch document must be a JSON object.");
+        var existingSms = await repository.GetAsync(smsId, tenantInfo.Tenant);
+        if (existingSms == null)
+            return NotFound($"SMS with ID {smsId} not found.");
+        var updatedSms = await repository.PatchAsync(smsId, patchDoc, tenantInfo.Tenant);
+        if (updatedSms == null)
+            return BadRequest("Failed to apply patch document.");
+        return Ok(updatedSms);
     }
 }

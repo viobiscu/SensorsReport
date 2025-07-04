@@ -1,0 +1,51 @@
+---
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: sms-mongodb
+  namespace: mongodb
+spec:
+  members: 1
+  type: ReplicaSet
+  version: "6.0.5"
+  security:
+    authentication:
+      modes: ["SCRAM"]
+    tls:
+      enabled: false
+  users:
+    - name: sms-db-user
+      db: admin
+      passwordSecretRef:
+        name: sms-mongodb-user-password
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+        - name: readWrite
+          db: sms-db
+      scramCredentialsSecretName: sms-db-scram
+  additionalMongodConfig:
+    storage.wiredTiger.engineConfig.journalCompressor: zlib
+
+# the user credentials will be generated from this secret
+# once the credentials are generated, this secret is no longer required
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sms-mongodb-user-password
+  namespace: mongodb
+type: Opaque
+stringData:
+  password: "6S2VJbpbrtBwdA@0vu*5YLdeDr"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sms-api-mongodb-connection
+  namespace: default 
+type: Opaque
+stringData:
+  MONGODB_URI: "mongodb+srv://sms-db-user:6S2VJbpbrtBwdA%400vu%2A5YLdeDr@sms-mongodb-svc.mongodb.svc.cluster.local/sms-db?authSource=admin&tls=false"

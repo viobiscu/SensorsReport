@@ -10,10 +10,7 @@ using System.Reflection;
 LogManager.Setup((config) => config.ConfigureLogger());
 var logger = LogManager.GetLogger("SensorsReport.Provision.API");;
 logger.Info("Application starting...");
-logger.LogProgramInfo(AppDomain.CurrentDomain, args, [
-    "OrionContextBrokerUrl",
-    "MainTenant"
-]);
+logger.LogProgramInfo(AppDomain.CurrentDomain, args);
 
 var builder = AppConfig.GetDefaultWebAppBuilder();
 

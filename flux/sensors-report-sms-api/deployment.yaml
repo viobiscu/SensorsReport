@@ -16,14 +16,37 @@ spec:
     spec:
       containers:
       - name: sensors-report-sms-api
-        image: sensors-report-sms-api:dev
+        image: viobiscu/sensors-report-sms-api:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: Development
-        - name: Keycloak__Authority
-          value: http://keycloak:8080/realms/sr
+        - name: SR_AppConfig__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: sms-api-mongodb-connection
+              key: MONGODB_URI
+        - name: SR_AppConfig__DatabaseName
+          value: sms-db
+        - name: SR_AppConfig__SmsCollectionName
+          value: sms
+        - name: SR_AppConfig__ProviderCollectionName
+          value: providers
+        - name: SR_AppConfig__ProviderTrustTimeoutInSecond
+          value: "1800"  # 30 minutes
+        - name: SR_AppConfig__MaxRetryCount
+          value: "3"
+        - name: SR_AppConfig__DefaultTtlInMinutes
+          value: "30"  # Default TTL for SMS messages 
         volumeMounts:
         - name: logs
           mountPath: /app/logs

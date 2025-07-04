@@ -1,107 +1,48 @@
+using Microsoft.Extensions.Options;
+using SensorsReport;
 using NLog;
-using NLog.Web;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using System.Reflection;
+using SensorsReport.Api.Core.Services.Tenants;
+using Sensors_Report_SMS.API.Repositories;
+using Sensors_Report_SMS.API.Tasks;
 
-var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "nlog.config");
-LogManager.Setup().LoadConfigurationFromFile(configPath);
-var logger = LogManager.GetCurrentClassLogger();
+[assembly: AssemblyTitle("SensorsReport.SMS.API")]
+[assembly: AssemblyDescription("API for SMS in Sensors Report")]
 
-try
+LogManager.Setup((config) => config.ConfigureLogger());
+var logger = LogManager.GetLogger("SensorsReport.SMS.API");;
+logger.Info("Application starting...");
+logger.LogProgramInfo(AppDomain.CurrentDomain, args);
+
+var builder = AppConfig.GetDefaultWebAppBuilder(useTenantHeader: true);
+
+ConfigureConfigs(builder.Configuration, builder.Services);
+ConfigureServices(builder.Services);
+
+var app = builder.Build();
+app.ConfigureAppAndRun();
+
+void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection services)
 {
-    logger.Info("Application starting...");
-    // Log version from version.txt
-    try
-    {
-        string versionFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.txt");
-        if (File.Exists(versionFile))
-        {
-            string version = File.ReadAllText(versionFile).Trim();
-            logger.Info($"Build Version: {version}");
-        }
-        else
-        {
-            logger.Warn("version.txt not found");
-        }
-    }
-    catch (Exception ex)
-    {
-        logger.Warn($"Could not read version.txt: {ex.Message}");
-    }
-
-    var builder = WebApplication.CreateBuilder(args);
-    builder.Logging.ClearProviders();
-    builder.Host.UseNLog();
-
-    // JWT/Keycloak authentication setup
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.Authority = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/sr";
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
-        };
-    });
-
-    builder.Services.AddControllers();
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen(c =>
-    {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "SensorsReportSMS API", Version = "v1" });
-        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-        {
-            Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer [token]'",
-            Name = "Authorization",
-            In = ParameterLocation.Header,
-            Type = SecuritySchemeType.ApiKey,
-            Scheme = "Bearer"
-        });
-        c.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-                },
-                Array.Empty<string>()
-            }
-        });
-    });
-
-    var app = builder.Build();
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
-    app.UseRouting();
-    app.UseAuthentication();
-    app.UseAuthorization();
-    app.MapControllers();
-    app.Run();
-}
-catch (Exception ex)
-{
-    logger.Error(ex, "Application startup failed");
-    throw;
-}
-finally
-{
-    LogManager.Shutdown();
+    services.Configure<AppConfiguration>(configuration.GetSection("AppConfig"));
+    logger.LogSection(configuration, "AppConfig");
 }
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+void ConfigureServices(IServiceCollection services)
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    services.AddTenantServices();
+    services.AddScoped<ISmsRepository, SmsRepository>();
+    services.AddScoped<IProviderRepository, ProviderRepository>();
+    services.AddHostedService<UpdateSmsStatusBackgroundService>();
+}
+
+public class AppConfiguration
+{
+    public string? ConnectionString { get; set; }
+    public string? DatabaseName { get; set; }
+    public string? SmsCollectionName { get; set; }
+    public string? ProviderCollectionName { get; set; }
+    public int ProviderTrustTimeoutInSecond { get; set; } = 60 * 30; // Default to 30 minutes
+    public int MaxRetryCount { get; set; } = 3; // Default to 3 retries
+    public int DefaultTtlInMinutes { get; set; } = 30; // Default TTL for SMS messages
 }

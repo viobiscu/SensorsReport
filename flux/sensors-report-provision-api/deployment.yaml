@@ -15,6 +15,7 @@ spec:
       containers:
       - name: sensors-report-provisioning-api
         image: viobiscu/sensors-report-provision-api:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         resources:

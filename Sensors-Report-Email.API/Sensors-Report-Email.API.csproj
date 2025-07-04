@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../SensorsReport.Api.Core/SensorsReport.Api.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="version.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -34,7 +38,7 @@
   </PropertyGroup>
   <Target Name="ReadVersionTxt" BeforeTargets="GenerateAssemblyInfo">
     <ReadLinesFromFile File="version.txt">
-      <Output TaskParameter="Lines" PropertyName="AppVersion"/>
+      <Output TaskParameter="Lines" PropertyName="AppVersion" />
     </ReadLinesFromFile>
   </Target>
   <PropertyGroup>
