@@ -4,6 +4,7 @@ namespace: default
 resources:
   - sensors-report-swagger-api/deployment.yaml
   - sensors-report-swagger-api/service.yaml
+  - sensors-report-swagger-api/swagger-rbac.yaml
   - sensors-report-audit-api/deployment.yaml
   - sensors-report-audit-api/service.yaml
   - sensors-report-business-broker-api/deployment.yaml
