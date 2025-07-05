@@ -303,18 +303,23 @@ public static partial class AppConfig
 
     public static void ConfigureAppAndRun(this WebApplication app, Action<WebApplication> configureApp = null!, string apiVersion = "v1")
     {
-        app.ConfigureApp(configureApp)
-            .ConfigureSwagger(apiVersion)
-            .ConfigureDefaultEndpoints()
+        app.ConfigureApp(configureApp, apiVersion)
             .Run();
     }
 
-    public static WebApplication ConfigureApp(this WebApplication app, Action<WebApplication> configureApp = null!)
+    public static WebApplication ConfigureApp(this WebApplication app, Action<WebApplication> configureApp = null!, string apiVersion = "v1")
     {
         configureApp?.Invoke(app);
 
         if (app.Environment.IsDevelopment())
             app.UseDeveloperExceptionPage();
+
+        if (!string.IsNullOrEmpty(apiVersion))
+        {
+            app.ConfigureSwagger(apiVersion);
+        }
+
+        app.ConfigureDefaultEndpoints();
 
         app.UseRouting();
         app.MapControllers();
@@ -338,11 +343,6 @@ public static partial class AppConfig
 
     public static WebApplication ConfigureSwagger(this WebApplication app, string apiVersion = "v1")
     {
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-        }
-
         app.UseSwagger();
         app.UseSwaggerUI(c => c.SwaggerEndpoint($"/swagger/{apiVersion}/swagger.json", $"SensorsReport API {apiVersion}"));
 

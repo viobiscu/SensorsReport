@@ -1,6 +1,9 @@
 ﻿using k8s;
 using k8s.Models;
 using Microsoft.Extensions.Caching.Memory;
+using MMLib.SwaggerForOcelot.Configuration;
+using MMLib.SwaggerForOcelot.Repositories;
+using MMLib.SwaggerForOcelot.ServiceDiscovery;
 using Ocelot.Configuration;
 using Ocelot.Configuration.File;
 using Ocelot.Configuration.Repository;
@@ -114,5 +117,116 @@ public class KubeConfigurationRepository : IFileConfigurationRepository
     public Task<Response> Set(FileConfiguration fileConfiguration)
     {
         return Task.FromResult<Response>(new OkResponse());
+    }
+}
+
+public class SwaggerEndPointKubernetesProvider : ISwaggerEndPointProvider
+{
+    private readonly ILogger<KubeConfigurationRepository> _logger;
+    private readonly IMemoryCache _cache;
+    private readonly IKubernetes _kubernetesClient;
+    private const string SwaggerEndPointConfigCacheKey = "SwaggerEndPointConfiguration";
+
+    public SwaggerEndPointKubernetesProvider(
+        ILogger<KubeConfigurationRepository> logger,
+        IMemoryCache cache,
+        IKubernetes kubernetesClient)
+    {
+        _logger = logger;
+        _cache = cache;
+        _kubernetesClient = kubernetesClient;
+    }
+
+    public IReadOnlyList<SwaggerEndPointOptions> GetAll()
+    {
+        var cachedConfig = _cache.Get<List<SwaggerEndPointOptions>>(SwaggerEndPointConfigCacheKey);
+        if (cachedConfig != null)
+        {
+            _logger.LogInformation("Swagger endpoint configuration found in cache.");
+            return cachedConfig;
+        }
+        cachedConfig = new List<SwaggerEndPointOptions>();
+
+        _logger.LogInformation("Swagger endpoint configuration not found in cache. Fetching from Kubernetes API...");
+
+        try
+        {
+            V1ServiceList services = _kubernetesClient.CoreV1.ListNamespacedService("default");
+
+            var routes = new List<FileRoute>();
+
+            foreach (V1Service service in services.Items)
+            {
+                var serviceName = service.Metadata.Name;
+                if (string.IsNullOrEmpty(serviceName))
+                {
+                    _logger.LogWarning("Service name is null or empty. Skipping this service.");
+                    continue;
+                }
+
+                if (!serviceName.StartsWith("sensors-report-", StringComparison.OrdinalIgnoreCase) ||
+                    !serviceName.Contains("-api", StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogInformation($"Service '{serviceName}' does not match naming convention. Skipping.");
+                    continue;
+                }
+
+
+                var url = $"http://{serviceName}.default.svc.cluster.local/swagger/v1/swagger.json";
+                var config = new SwaggerEndPointOptions
+                {
+                    Key = serviceName,
+                    Config = [
+                        new SwaggerEndPointConfig
+                        {
+                            Name = serviceName,
+                            Url = url,
+                            Version = "v1",
+                            Service = new SwaggerService()
+                            {
+                                Name = serviceName,
+                                Path = "/swagger/v1/swagger.json",
+                            }
+                        }
+                    ]
+                };
+
+                cachedConfig.Add(config);
+
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get Swagger endpoint configuration from Kubernetes API.");
+            return new List<SwaggerEndPointOptions>();
+        }
+
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
+        _cache.Set(SwaggerEndPointConfigCacheKey, cachedConfig, cacheEntryOptions);
+        _logger.LogInformation($"Successfully generated Swagger endpoint configuration with {cachedConfig.Count} endpoints from Kubernetes.");
+        return cachedConfig;
+    }
+
+    public SwaggerEndPointOptions GetByKey(string key)
+    {
+        return this.GetAll().FirstOrDefault(x =>
+            x.Key.Equals(key, StringComparison.OrdinalIgnoreCase)) ??
+            throw new KeyNotFoundException($"Swagger endpoint configuration for key '{key}' not found.");
+    }
+}
+
+public class SwaggerServiceDiscoveryKubernetesProvider : ISwaggerServiceDiscoveryProvider
+{
+    public Task<Uri> GetSwaggerUriAsync(SwaggerEndPointConfig endPoint, MMLib.SwaggerForOcelot.Configuration.RouteOptions route)
+    {
+        if (endPoint == null || string.IsNullOrEmpty(endPoint.Name))
+        {
+            throw new ArgumentException("Invalid endpoint configuration.");
+        }
+
+        var serviceUri = $"http://{endPoint.Url}/swagger/v1/swagger.json";
+
+        return Task.FromResult(new Uri(serviceUri));
     }
 }
