@@ -1,24 +1,57 @@
+﻿using KubeClient;
+using NLog;
+using Ocelot.Configuration.Repository;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Provider.Kubernetes;
+using SensorsReport;
+using System.Reflection;
 
-var builder = WebApplication.CreateBuilder(args);
+[assembly: AssemblyTitle("SensorsReport.Swagger.API")]
+[assembly: AssemblyDescription("Swagger in Sensors Report")]
 
-builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
-    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+LogManager.Setup((config) => config.ConfigureLogger());
+var logger = LogManager.GetLogger("SensorsReport.Swagger.API"); ;
+logger.Info("Application starting...");
+logger.LogProgramInfo(AppDomain.CurrentDomain, args);
 
-builder.Services.AddOcelot(builder.Configuration);
-builder.Services.AddSwaggerForOcelot(builder.Configuration);
-builder.Services.AddEndpointsApiExplorer();
+var builder = AppConfig.GetDefaultWebAppBuilder(useTenantHeader: true);
+
+ConfigureConfigs(builder.Configuration, builder.Services);
+ConfigureServices(builder.Services);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.Use(async (context, next) =>
 {
-    app.UseSwaggerForOcelotUI(opt =>
+    if (context.Request.Path == "/")
     {
-        opt.PathToSwaggerGenerator = "/swagger/docs"; 
-    });
+        context.Response.Redirect("./swagger/index.html", permanent: true);
+        return;
+    }
+    await next.Invoke();
+});
+
+app.UseSwaggerForOcelotUI(opt =>
+{
+    opt.PathToSwaggerGenerator = "/swagger/docs";
+});
+
+app.ConfigureAppAndRun(async c =>
+{
+    await c.UseOcelot();
+});
+
+void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection services)
+{
 }
 
-app.UseOcelot().Wait();
-app.Run();
+void ConfigureServices(IServiceCollection services)
+{
+    services.AddKubeClient(usePodServiceAccount: true);
+    services.AddMemoryCache();
+    services.AddSingleton<IFileConfigurationRepository, KubeConfigurationRepository>();
+    services.AddOcelot(builder.Configuration).AddKubernetes();
+    services.AddSwaggerForOcelot(builder.Configuration);
+    services.AddEndpointsApiExplorer();
+}
