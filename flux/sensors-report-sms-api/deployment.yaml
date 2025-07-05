@@ -29,7 +29,7 @@ spec:
             memory: "512Mi"
         env:
         - name: ASPNETCORE_ENVIRONMENT
-          value: Development
+          value: Production
         - name: SR_AppConfig__ConnectionString
           valueFrom:
             secretKeyRef:
