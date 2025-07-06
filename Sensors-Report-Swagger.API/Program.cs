@@ -1,16 +1,13 @@
 ﻿using k8s;
-using KubeClient;
-using MMLib.SwaggerForOcelot.Repositories;
-using MMLib.SwaggerForOcelot.ServiceDiscovery;
+using MMLib.SwaggerForOcelot.DependencyInjection;
 using NLog;
-using Ocelot.Configuration.Repository;
+using NLog.Extensions.Logging;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Kubernetes;
+using Ocelot.ServiceDiscovery;
 using SensorsReport;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.Json;
 
 [assembly: AssemblyTitle("SensorsReport.Swagger.API")]
 [assembly: AssemblyDescription("Swagger in Sensors Report")]
@@ -21,65 +18,40 @@ logger.Info("Application starting...");
 logger.LogProgramInfo(AppDomain.CurrentDomain, args);
 
 var builder = AppConfig.GetDefaultWebAppBuilder(useTenantHeader: true);
+builder.Services.AddLogging().AddNLog();
+builder.Services
+    .AddSingleton<ServiceDiscoveryFinderDelegate>((serviceProvider, config, downstreamRoute)
+        => new KubernetesApiDiscoveryProvider(serviceProvider, config, downstreamRoute));
+var kubernetesClient = GetKubernetesClient();
+((IConfigurationManager)builder.Configuration).Add(new KubernetesConfigurationSource(kubernetesClient, logger));
+builder.Services.AddSingleton(kubernetesClient);
+builder.Services.AddOcelot();
+builder.Services.AddSwaggerForOcelot(builder.Configuration);
 
-ConfigureConfigs(builder.Configuration, builder.Services);
-ConfigureServices(builder.Services);
 
 var app = builder.Build();
-
-var swagger = app.Services.GetService<ISwaggerEndPointProvider>();
-var all = swagger?.GetAll();
-
-logger.Info("Swagger Endpoints: {SwaggerEndpoints}", JsonSerializer.Serialize(swagger?.GetAll()) ?? "None");
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path == "/")
-    {
-        context.Response.Redirect("./swagger", permanent: true);
-        return;
-    }
-    await next.Invoke();
-});
 
 app.UseSwaggerForOcelotUI(opt =>
 {
     opt.PathToSwaggerGenerator = "/swagger/docs";
 });
 
-app.ConfigureApp(async c =>
-{
-    await c.UseOcelot();
-}, apiVersion: null!);
-
+app.UseOcelot().Wait();
 app.Run();
 
-void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection services)
+IKubernetes GetKubernetesClient()
 {
-}
-
-void ConfigureServices(IServiceCollection services)
-{
+    IKubernetes client;
     if (builder.Environment.IsDevelopment())
     {
-        var configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".kube", "config");
-        if (!File.Exists(configPath))
-        {
-            throw new FileNotFoundException("Kubernetes config file not found.", configPath);
-        }
-
-        var kubeConfig = KubernetesClientConfiguration.BuildConfigFromConfigFile(configPath);
-        services.AddSingleton<IKubernetes>(new Kubernetes(kubeConfig));
+        var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
+        client = new Kubernetes(config);
     }
     else
     {
-        services.AddKubeClient(usePodServiceAccount: true);
+        var inClusterConfig = KubernetesClientConfiguration.InClusterConfig();
+        client = new Kubernetes(inClusterConfig);
     }
-
-    services.AddMemoryCache();
-    services.AddOcelot(builder.Configuration).AddKubernetes();
-    services.AddSwaggerForOcelot(builder.Configuration);
-    services.AddEndpointsApiExplorer();
-    services.AddTransient<IFileConfigurationRepository, KubeConfigurationRepository>();
-    services.AddTransient<ISwaggerEndPointProvider, SwaggerEndPointKubernetesProvider>();
-    services.AddTransient<ISwaggerServiceDiscoveryProvider, SwaggerServiceDiscoveryKubernetesProvider>();
+    return client;
 }
+

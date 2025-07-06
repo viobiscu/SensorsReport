@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="KubernetesClient" Version="17.0.4" />
     <PackageReference Include="MMLib.SwaggerForOcelot" Version="9.0.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="6.0.1" />
     <PackageReference Include="Ocelot" Version="24.0.0" />
     <PackageReference Include="Ocelot.Provider.Kubernetes" Version="24.0.0" />
   </ItemGroup>
