@@ -18,3 +18,8 @@ resources:
   - sensors-report-sms-api/mongo-deployment.yaml
   - sensors-report-sms-api/deployment.yaml
   - sensors-report-sms-api/service.yaml
+  - sensors-report-email-api/service.yaml
+  - sensors-report-email-api/deployment.yaml
+  - sensors-report-email-consumer/service.yaml
+  - sensors-report-email-consumer/deployment.yaml
+  - sensors-report-email-consumer/smtp-secret.yaml
