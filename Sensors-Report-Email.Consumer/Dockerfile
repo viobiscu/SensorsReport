@@ -11,21 +11,21 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy and restore project files
-COPY Sensors-Report-Email.API/Sensors-Report-Email.API.csproj ./Sensors-Report-Email.API/
+COPY Sensors-Report-Email.Consumer/Sensors-Report-Email.Consumer.csproj ./Sensors-Report-Email.Consumer/
 COPY SensorsReport.Api.Core/SensorsReport.Api.Core.csproj ./SensorsReport.Api.Core/
-RUN dotnet restore ./Sensors-Report-Email.API/Sensors-Report-Email.API.csproj
+RUN dotnet restore ./Sensors-Report-Email.Consumer/Sensors-Report-Email.Consumer.csproj
 
 # Copy source code
-COPY Sensors-Report-Email.API/ ./Sensors-Report-Email.API/
+COPY Sensors-Report-Email.Consumer/ ./Sensors-Report-Email.Consumer/
 COPY SensorsReport.Api.Core/ ./SensorsReport.Api.Core/
-WORKDIR /src/Sensors-Report-Email.API
+WORKDIR /src/Sensors-Report-Email.Consumer
 RUN pwd
-RUN dotnet build "Sensors-Report-Email.API.csproj" -c Release -o /app/build
+RUN dotnet build "Sensors-Report-Email.Consumer.csproj" -c Release -o /app/build
 
 FROM build AS publish
-WORKDIR /src/Sensors-Report-Email.API
+WORKDIR /src/Sensors-Report-Email.Consumer
 RUN pwd
-RUN dotnet publish "Sensors-Report-Email.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Sensors-Report-Email.Consumer.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 ARG VERSION=latest
 
@@ -35,4 +35,4 @@ ENV ASPNETCORE_ENVIRONMENT="Production"
 COPY --from=publish /app/publish .
 ARG VERSION=latest
 LABEL version=$VERSION
-ENTRYPOINT ["dotnet", "Sensors-Report-Email.API.dll"]
+ENTRYPOINT ["dotnet", "Sensors-Report-Email.Consumer.dll"]
