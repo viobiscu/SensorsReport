@@ -152,7 +152,7 @@ public class EmailRepository : IEmailRepository
             .Set(e => e.ErrorMessage, errorMessage)
             .Set(e => e.LastUpdatedAt, DateTime.UtcNow);
 
-        if (string.IsNullOrEmpty(errorMessage))
+        if (!string.IsNullOrEmpty(errorMessage))
             update.Inc(e => e.RetryCount, 1);
 
         var filter = Builders<EmailModel>.Filter.Eq(e => e.Id, id);
