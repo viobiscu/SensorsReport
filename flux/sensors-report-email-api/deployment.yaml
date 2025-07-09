@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: sensors-report-email-api
-        image: sensors-report-email-api:latest
+        image: viobiscu/sensors-report-email-api:latest
         ports:
         - containerPort: 80
         resources:
