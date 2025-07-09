@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sensors-Report-Email.API", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sensors-Report-Swagger.API", "Sensors-Report-Swagger.API\Sensors-Report-Swagger.API.csproj", "{6942ACF6-7A9E-4AC0-AE12-2A3667691FCF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sensors-Report-Email.Consumer", "Sensors-Report-Email.Consumer\Sensors-Report-Email.Consumer.csproj", "{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,8 +127,23 @@ Global
 		{6942ACF6-7A9E-4AC0-AE12-2A3667691FCF}.Release|x64.Build.0 = Release|Any CPU
 		{6942ACF6-7A9E-4AC0-AE12-2A3667691FCF}.Release|x86.ActiveCfg = Release|Any CPU
 		{6942ACF6-7A9E-4AC0-AE12-2A3667691FCF}.Release|x86.Build.0 = Release|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Debug|x64.Build.0 = Debug|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Debug|x86.Build.0 = Debug|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Release|x64.ActiveCfg = Release|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Release|x64.Build.0 = Release|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Release|x86.ActiveCfg = Release|Any CPU
+		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {87C852E5-5519-4397-9944-B0824A7EA3DD}
 	EndGlobalSection
 EndGlobal

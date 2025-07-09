@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Sensors_Report_Email.Consumer</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.13.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.15" />
+    <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="NLog" Version="5.4.0" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="5.4.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../SensorsReport.Api.Core/SensorsReport.Api.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="version.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="IncrementVersion" AfterTargets="Build">
+    <Exec Command="bash increment_version.sh -ver" WorkingDirectory="$(ProjectDir)" />
+  </Target>
+
+  <PropertyGroup>
+    <AppVersion>1.0.0.0</AppVersion>
+  </PropertyGroup>
+  <Target Name="ReadVersionTxt" BeforeTargets="GenerateAssemblyInfo">
+    <ReadLinesFromFile File="version.txt">
+      <Output TaskParameter="Lines" PropertyName="AppVersion" />
+    </ReadLinesFromFile>
+  </Target>
+  <PropertyGroup>
+    <Version>$(AppVersion)</Version>
+    <FileVersion>$(AppVersion)</FileVersion>
+    <AssemblyVersion>$(AppVersion)</AssemblyVersion>
+  </PropertyGroup>
+</Project>

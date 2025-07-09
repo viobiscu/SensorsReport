@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SensorsReport;
 using NLog;
 using System.Reflection;
@@ -24,8 +24,8 @@ app.ConfigureAppAndRun();
 
 void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection services)
 {
-    services.Configure<AppConfiguration>(configuration.GetSection("AppConfig"));
-    logger.LogSection(configuration, "AppConfig");
+    services.Configure<AppConfiguration>(configuration.GetSection("AppConfiguration"));
+    logger.LogSection(configuration, "AppConfiguration");
 }
 
 void ConfigureServices(IServiceCollection services)

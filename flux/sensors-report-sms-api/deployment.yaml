@@ -30,22 +30,22 @@ spec:
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: Production
-        - name: SR_AppConfig__ConnectionString
+        - name: SR_AppConfiguration__ConnectionString
           valueFrom:
             secretKeyRef:
-              name: sms-api-mongodb-connection
+              name: notification-api-mongodb-connection
               key: MONGODB_URI
-        - name: SR_AppConfig__DatabaseName
+        - name: SR_AppConfiguration__DatabaseName
           value: sms-db
-        - name: SR_AppConfig__SmsCollectionName
+        - name: SR_AppConfiguration__SmsCollectionName
           value: sms
-        - name: SR_AppConfig__ProviderCollectionName
+        - name: SR_AppConfiguration__ProviderCollectionName
           value: providers
-        - name: SR_AppConfig__ProviderTrustTimeoutInSecond
+        - name: SR_AppConfiguration__ProviderTrustTimeoutInSecond
           value: "1800"  # 30 minutes
-        - name: SR_AppConfig__MaxRetryCount
+        - name: SR_AppConfiguration__MaxRetryCount
           value: "3"
-        - name: SR_AppConfig__DefaultTtlInMinutes
+        - name: SR_AppConfiguration__DefaultTtlInMinutes
           value: "30"  # Default TTL for SMS messages 
         volumeMounts:
         - name: logs

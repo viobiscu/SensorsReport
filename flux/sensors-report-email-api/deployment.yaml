@@ -16,14 +16,37 @@ spec:
     spec:
       containers:
       - name: sensors-report-email-api
-        image: sensors-report-email-api:dev
+        image: sensors-report-email-api:latest
         ports:
         - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         env:
+        - name: SR_AppConfiguration__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: notification-api-mongodb-connection
+              key: MONGODB_URI
+        - name: SR_AppConfiguration__DatabaseName
+          value: email-db
+        - name: SR_AppConfiguration__EmailCollectionName
+          value: email
+        - name: SR_AppConfiguration__RabbitMQConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: connection_string
+        - name: SR_AppConfiguration__RabbitMQExchangeName
+          value: sensorsreport.exchange.notification.email
+        - name: SR_AppConfiguration__RabbitMQRoutingKey
+          value: sensorsreport.routingkey.notification.email
         - name: ASPNETCORE_ENVIRONMENT
-          value: Development
-        - name: Keycloak__Authority
-          value: http://keycloak:8080/realms/sr
+          value: Production
         volumeMounts:
         - name: logs
           mountPath: /app/logs

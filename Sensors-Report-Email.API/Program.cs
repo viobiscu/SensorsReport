@@ -1,20 +1,19 @@
-using Microsoft.Extensions.Options;
-using SensorsReport;
+﻿using Microsoft.Extensions.Options;
 using NLog;
+using Sensors_Report_Email.API;
+using Sensors_Report_Email.API.Tasks;
+using SensorsReport;
 using System.Reflection;
 
-[assembly: AssemblyTitle("SensorsReport.Provision.API")]
-[assembly: AssemblyDescription("API for provisioning sensors in Sensors Report")]
+[assembly: AssemblyTitle("SensorsReport.Email.API")]
+[assembly: AssemblyDescription("API for Email in Sensors Report")]
 
 LogManager.Setup((config) => config.ConfigureLogger());
-var logger = LogManager.GetLogger("SensorsReport.Provision.API");;
+var logger = LogManager.GetLogger("SensorsReport.Email.API");
 logger.Info("Application starting...");
-logger.LogProgramInfo(AppDomain.CurrentDomain, args, [
-    "OrionContextBrokerUrl",
-    "MainTenant"
-]);
+logger.LogProgramInfo(AppDomain.CurrentDomain, args);
 
-var builder = AppConfig.GetDefaultWebAppBuilder();
+var builder = SensorsReport.AppConfig.GetDefaultWebAppBuilder();
 
 ConfigureConfigs(builder.Configuration, builder.Services);
 ConfigureServices(builder.Services);
@@ -24,20 +23,25 @@ app.ConfigureAppAndRun();
 
 void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection services)
 {
+    services.Configure<AppConfiguration>(configuration.GetSection("AppConfiguration"));
+    logger.LogSection(configuration, "AppConfiguration");
 
 }
 
 void ConfigureServices(IServiceCollection services)
 {
-    services.AddHttpClient("OrionContextBroker", (serviceProvider, client) =>
-    {
-        var appConfig = serviceProvider.GetRequiredService<IOptions<AppConfiguration>>().Value;
-        client.BaseAddress = new Uri(appConfig.OrionContextBrokerUrl);
-        client.DefaultRequestHeaders.Add("Accept", "application/json");
-        client.Timeout = TimeSpan.FromSeconds(30);
-    })
-    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
-    {
-        MaxConnectionsPerServer = 10
-    });
+    services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<AppConfiguration>>().Value);
+    services.AddSingleton<IEmailRepository, EmailRepository>();
+    services.AddSingleton<IQueueService, RabbitMQService>();
+    services.AddHostedService<ReconciliationEmailTask>();
+}
+
+public class AppConfiguration
+{
+    public string? ConnectionString { get; set; }
+    public string? DatabaseName { get; set; }
+    public string? EmailCollectionName { get; set; }
+    public string? RabbitMQConnectionString { get; set; }
+    public string RabbitMQExchange { get; set; } = "sensorsreport.exchange.notification.email";
+    public string RabbitMQRoutingKey { get; set; } = "sensorsreport.routingkey.notification.email";
 }

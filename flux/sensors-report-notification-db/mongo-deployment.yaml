@@ -2,7 +2,7 @@
 apiVersion: mongodbcommunity.mongodb.com/v1
 kind: MongoDBCommunity
 metadata:
-  name: sms-mongodb
+  name: notification-mongodb
   namespace: mongodb
 spec:
   members: 1
@@ -14,10 +14,10 @@ spec:
     tls:
       enabled: false
   users:
-    - name: sms-db-user
+    - name: notification-db-user
       db: admin
       passwordSecretRef:
-        name: sms-mongodb-user-password
+        name: notification-mongodb-user-password
       roles:
         - name: clusterAdmin
           db: admin
@@ -25,7 +25,9 @@ spec:
           db: admin
         - name: readWrite
           db: sms-db
-      scramCredentialsSecretName: sms-db-scram
+        - name: readWrite
+          db: email-db
+      scramCredentialsSecretName: notification-db-scram
   additionalMongodConfig:
     storage.wiredTiger.engineConfig.journalCompressor: zlib
 
@@ -35,7 +37,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: sms-mongodb-user-password
+  name: notification-mongodb-user-password
   namespace: mongodb
 type: Opaque
 stringData:
@@ -44,8 +46,8 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: sms-api-mongodb-connection
+  name: notification-api-mongodb-connection
   namespace: default 
 type: Opaque
 stringData:
-  MONGODB_URI: "mongodb+srv://sms-db-user:6S2VJbpbrtBwdA%400vu%2A5YLdeDr@sms-mongodb-svc.mongodb.svc.cluster.local/sms-db?authSource=admin&tls=false"
+  MONGODB_URI: "mongodb+srv://notification-db-user:6S2VJbpbrtBwdA%400vu%2A5YLdeDr@notification-mongodb-svc.mongodb.svc.cluster.local/notification-db?authSource=admin&tls=false"

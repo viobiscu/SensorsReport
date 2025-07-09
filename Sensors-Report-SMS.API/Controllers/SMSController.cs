@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Sensors_Report_SMS.API.Models;
 using Sensors_Report_SMS.API.Repositories;
 using SensorsReport;
@@ -13,9 +13,9 @@ public class SmsController : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(List<SmsModel>), 200)]
-    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [ProducesResponseType(typeof(JsonMessageResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
     public async Task<IActionResult> Get([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, [FromQuery] string? fromDate, [FromQuery] string? toDate, [FromQuery] int limit = 100, [FromQuery] int offset = 0, [FromQuery] SmsStatusEnum? status = null)
     {
@@ -41,12 +41,12 @@ public class SmsController : ControllerBase
     }
 
     [HttpGet("{smsId}")]
-    [ProducesResponseType(typeof(SmsModel), 200)]
-    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [ProducesResponseType(typeof(SmsModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(JsonMessageResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
-    public async Task<IActionResult> GetById([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId)
+    public async Task<IActionResult> Get([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId)
     {
         if (string.IsNullOrWhiteSpace(smsId))
             return BadRequest("SMS ID cannot be null or empty.");
@@ -59,9 +59,9 @@ public class SmsController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(SmsModel), 201)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [ProducesResponseType(typeof(SmsModel), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
     public async Task<IActionResult> Post([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, [FromBody] SmsModel sms)
     {
@@ -72,14 +72,14 @@ public class SmsController : ControllerBase
 
         sms.Tenant = tenantInfo.Tenant;
         var createdSms = await repository.CreateAsync(sms);
-        return CreatedAtAction(nameof(GetById), new { smsId = createdSms.Id }, createdSms);
+        return CreatedAtAction(nameof(Get), new { smsId = createdSms.Id }, createdSms);
     }
 
     [HttpPut("{smsId}")]
-    [ProducesResponseType(typeof(SmsModel), 200)]
-    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [ProducesResponseType(typeof(SmsModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(JsonMessageResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
     public async Task<IActionResult> Put([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId, [FromBody] SmsModel sms)
     {
@@ -99,29 +99,12 @@ public class SmsController : ControllerBase
         return Ok(updatedSms);
     }
 
-    [HttpDelete("{smsId}")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
-    [Produces("application/json")]
-    public async Task<IActionResult> Delete([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId)
-    {
-        var tenantInfo = tenantRetriever.CurrentTenantInfo;
-        if (string.IsNullOrWhiteSpace(smsId))
-            return BadRequest("SMS ID cannot be null or empty.");
-        var deleted = await repository.DeleteAsync(smsId, tenantInfo.Tenant);
-        if (!deleted)
-            return NotFound($"SMS with ID {smsId} not found or could not be deleted.");
-        return NoContent();
-    }
-
     [HttpPatch("{smsId}")]
     [PatchRequestBody(typeof(SmsModel))]
-    [ProducesResponseType(typeof(SmsModel), 200)]
-    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
-    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [ProducesResponseType(typeof(SmsModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(JsonMessageResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
     public async Task<IActionResult> Patch([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId, [FromBody] JsonElement patchDoc)
     {
@@ -137,5 +120,22 @@ public class SmsController : ControllerBase
         if (updatedSms == null)
             return BadRequest("Failed to apply patch document.");
         return Ok(updatedSms);
+    }
+
+    [HttpDelete("{smsId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(JsonMessageResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
+    [Produces("application/json")]
+    public async Task<IActionResult> Delete([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, string smsId)
+    {
+        var tenantInfo = tenantRetriever.CurrentTenantInfo;
+        if (string.IsNullOrWhiteSpace(smsId))
+            return BadRequest("SMS ID cannot be null or empty.");
+        var deleted = await repository.DeleteAsync(smsId, tenantInfo.Tenant);
+        if (!deleted)
+            return NotFound($"SMS with ID {smsId} not found or could not be deleted.");
+        return NoContent();
     }
 }
