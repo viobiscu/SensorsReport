@@ -153,7 +153,10 @@ public class EmailRepository : IEmailRepository
             .Set(e => e.LastUpdatedAt, DateTime.UtcNow);
 
         if (!string.IsNullOrEmpty(errorMessage))
-            update.Inc(e => e.RetryCount, 1);
+        {
+            update = update.Inc(e => e.RetryCount, 1);
+            logger.LogInformation("Incrementing retry count for email record with ID: {Id}", id);
+        }
 
         var filter = Builders<EmailModel>.Filter.Eq(e => e.Id, id);
         var result = Collection.UpdateOne(filter, update);
@@ -161,7 +164,7 @@ public class EmailRepository : IEmailRepository
         var entity = await GetAsync(id);
         if (result.IsAcknowledged && result.ModifiedCount > 0)
         {
-            logger.LogInformation("Successfully updated status of email record with ID: {Id} Status: {Status}", id, Enum.GetName(status));
+            logger.LogInformation("Successfully updated status of email record with ID: {Id} Status: {Status} RetryCount: {Retry}", id, Enum.GetName(status), entity.RetryCount);
         }
         else
         {

@@ -35,4 +35,6 @@ ENV ASPNETCORE_ENVIRONMENT="Production"
 COPY --from=publish /app/publish .
 ARG VERSION=latest
 LABEL version=$VERSION
+RUN apt update
+RUN apt install -y libgssapi-krb5-2
 ENTRYPOINT ["dotnet", "Sensors-Report-Email.Consumer.dll"]
