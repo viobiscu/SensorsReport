@@ -22,14 +22,20 @@ public class EmailService : IEmailService
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(emailModel.FromName, emailModel.FromEmail));
         message.To.Add(new MailboxAddress(emailModel.ToName, emailModel.ToEmail));
+        message.MessageId = emailModel.Id;
+        message.Headers.Add("X-Email-Id", emailModel.Id);
+        message.References.Add(emailModel.Id);
+        message.InReplyTo = emailModel.Id;
+        message.ReplyTo.Add(new MailboxAddress(emailModel.FromName, $"{emailModel.Id}+{emailModel.FromEmail}"));
+
         if (!string.IsNullOrEmpty(emailModel.CcEmail))
             message.Cc.Add(new MailboxAddress(emailModel.CcName, emailModel.CcEmail));
 
         if (!string.IsNullOrEmpty(emailModel.BccEmail))
             message.Bcc.Add(new MailboxAddress(emailModel.BccName, emailModel.BccEmail));
 
-        message.Subject = emailModel.Subject;
-        message.Body = new TextPart("html") { Text = emailModel.BodyHtml };
+        message.Subject = $"{emailModel.Subject} [Ref:{emailModel.Id}]";
+        message.Body = new TextPart("html") { Text = $"{emailModel.BodyHtml} <style data-message-id=\"{emailModel.Id}\" />" };
 
         try
         {

@@ -77,6 +77,8 @@ public class EmailConsumerService : BackgroundService, IDisposable
                 return;
             }
 
+            await emailRepository.UpdateStatusAsync(email.Id, EmailStatusEnum.Sending);
+
             await emailService.SendEmailAsync(email);
 
             await emailRepository.UpdateStatusAsync(email.Id, EmailStatusEnum.Sent);
