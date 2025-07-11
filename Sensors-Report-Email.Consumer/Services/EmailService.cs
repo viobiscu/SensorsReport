@@ -19,14 +19,13 @@ public class EmailService : IEmailService
 
     public async Task SendEmailAsync(EmailModel emailModel)
     {
+        var replyToAddress = $"{emailModel.Id}+{emailModel.FromEmail}";
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(emailModel.FromName, emailModel.FromEmail));
         message.To.Add(new MailboxAddress(emailModel.ToName, emailModel.ToEmail));
-        message.MessageId = emailModel.Id;
         message.Headers.Add("X-Email-Id", emailModel.Id);
         message.References.Add(emailModel.Id);
-        message.InReplyTo = emailModel.Id;
-        message.ReplyTo.Add(new MailboxAddress(emailModel.FromName, $"{emailModel.Id}+{emailModel.FromEmail}"));
+        message.ReplyTo.Add(new MailboxAddress(emailModel.FromName, replyToAddress));
 
         if (!string.IsNullOrEmpty(emailModel.CcEmail))
             message.Cc.Add(new MailboxAddress(emailModel.CcName, emailModel.CcEmail));
@@ -35,7 +34,7 @@ public class EmailService : IEmailService
             message.Bcc.Add(new MailboxAddress(emailModel.BccName, emailModel.BccEmail));
 
         message.Subject = $"{emailModel.Subject} [Ref:{emailModel.Id}]";
-        message.Body = new TextPart("html") { Text = $"{emailModel.BodyHtml} <style data-message-id=\"{emailModel.Id}\" />" };
+        message.Body = new TextPart("html") { Text = $"{emailModel.BodyHtml} <small style=\"font-size:10px; color:#999;\">Ref:<i>{emailModel.Id}</i></small>" };
 
         try
         {
