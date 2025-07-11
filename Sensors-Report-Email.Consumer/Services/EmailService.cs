@@ -24,7 +24,6 @@ public class EmailService : IEmailService
         message.From.Add(new MailboxAddress(emailModel.FromName, emailModel.FromEmail));
         message.To.Add(new MailboxAddress(emailModel.ToName, emailModel.ToEmail));
         message.Headers.Add("X-Email-Id", emailModel.Id);
-        message.References.Add(emailModel.Id);
         message.ReplyTo.Add(new MailboxAddress(emailModel.FromName, replyToAddress));
 
         if (!string.IsNullOrEmpty(emailModel.CcEmail))
