@@ -2,8 +2,9 @@
 using NLog;
 using SensorsReport;
 using SensorsReport.Extensions;
+using SensorsReport.OrionLD.Extensions;
 using SensorsReport.Webhook.API.Services;
-using System.Reflection;
+using SensorsReport.Webhook.API.Tasks;
 
 LogManager.Setup((config) => config.ConfigureLogger());
 var logger = LogManager.GetLogger("SensorsReport.Webhook.API");
@@ -12,23 +13,20 @@ logger.LogProgramInfo(AppDomain.CurrentDomain, args);
 
 var builder = SensorsReport.AppConfig.GetDefaultWebAppBuilder();
 
-ConfigureConfigs(builder.Configuration, builder.Services);
-ConfigureServices(builder.Services);
+Configure(builder.Configuration, builder.Services);
 
 var app = builder.Build();
 app.ConfigureAppAndRun();
 
-void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection services)
+void Configure(IConfigurationManager configuration, IServiceCollection services)
 {
+    services.AddOrionLdServices(configuration);
     services.Configure<AppConfiguration>(configuration.GetSection("AppConfiguration"));
     logger.LogSection(configuration, "AppConfiguration");
-}
-
-void ConfigureServices(IServiceCollection services)
-{
     services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<AppConfiguration>>().Value);
     services.AddSingleton<INotifyRuleQueueService, RabbitMQNotifyRuleService>();
     services.AddTenantServices();
+    services.AddHostedService<AutoRegisterAlarmSubscriptions>();
 }
 
 public class AppConfiguration
