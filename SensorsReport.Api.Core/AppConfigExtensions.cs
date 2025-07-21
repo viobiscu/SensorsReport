@@ -11,6 +11,8 @@ using NLog;
 using NLog.Config;
 using NLog.Web;
 using SensorsReport;
+using SensorsReport.Extensions;
+using SensorsReport.OrionLD.Extensions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace SensorsReport;
@@ -97,7 +99,7 @@ public static partial class AppConfig
 
     public static WebApplicationBuilder GetDefaultWebAppBuilder(string apiVersion = "v1", bool useBearerTokenAuthForSwagger = false, bool useTenantHeader = false)
     {
-        return GetDefaultWebAppBuilder(c =>
+        var app = GetDefaultWebAppBuilder(c =>
         {
             var applicationName = GetAppName();
             c.SwaggerDoc(apiVersion, new OpenApiInfo { Title = applicationName, Version = apiVersion });
@@ -133,6 +135,11 @@ public static partial class AppConfig
                 });
             }
         });
+
+        if (useTenantHeader)
+            app.Services.AddTenantServices();
+
+        return app;
     }
 
     public static string GetAppName()
@@ -278,6 +285,7 @@ public static partial class AppConfig
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddEnvironmentVariables(EnvVariablePrefix);
 
+
         if (args != null)
             builder.Configuration.AddCommandLine(args);
 
@@ -292,11 +300,24 @@ public static partial class AppConfig
             options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
         });
 
+        builder.Services.AutoConfig(builder.Configuration);
+        builder.Services.AddTenantServices();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(swaggerSetupAction);
 
         builder.Logging.ClearProviders();
         builder.Host.UseNLog();
+
+        builder.Services.AddHttpLogging(logging =>
+        {
+            logging.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
+            logging.RequestHeaders.Add("User-Agent");
+            logging.RequestHeaders.Add("NGSILD-Tenant");
+            logging.RequestHeaders.Add("Fiware-Service");
+            logging.MediaTypeOptions.AddText("application/json");
+            logging.RequestBodyLogLimit = 4096;
+            logging.ResponseBodyLogLimit = 4096;
+        });
 
         return builder;
     }
@@ -319,6 +340,7 @@ public static partial class AppConfig
             app.ConfigureSwagger(apiVersion);
         }
 
+        app.UseHttpLogging();
         app.ConfigureDefaultEndpoints();
 
         app.UseRouting();

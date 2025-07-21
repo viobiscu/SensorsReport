@@ -35,11 +35,11 @@ public static class RabbitMqHelpers
         };
     }
 
-    public static void InitializeExchange(IModel channel, string exchangeName)
+    public static void InitializeExchange(IModel channel, string exchangeName, string exchangeType = ExchangeType.Direct)
     {
         channel.ExchangeDeclare(
             exchange: exchangeName,
-            type: ExchangeType.Direct,
+            type: exchangeType,
             durable: true);
     }
 

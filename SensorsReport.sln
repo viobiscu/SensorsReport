@@ -3,23 +3,46 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReportAudit", "Sensors-Report-Audit\SensorsReportAudit.csproj", "{7961852F-9F45-4B2B-86B2-F44B1484A643}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Audit", "SensorsReport.Audit\SensorsReport.Audit.csproj", "{7961852F-9F45-4B2B-86B2-F44B1484A643}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReportAudit.API", "Sensors-Report-Audit.API\SensorsReportAudit.API.csproj", "{199316C2-8467-4603-B6A5-2F246DD259E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Audit.API", "SensorsReport.Audit.API\SensorsReport.Audit.API.csproj", "{199316C2-8467-4603-B6A5-2F246DD259E7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sensors-Report-MQTT-to-Orion", "Sensors-Report-MQTT-to-Orion\Sensors-Report-MQTT-to-Orion.csproj", "{788C267D-F7CC-447D-8C8C-9C58E08D0E98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sensors-Report-Provision.API", "Sensors-Report-Provision.API\Sensors-Report-Provision.API.csproj", "{5CCB932F-F0E8-4C03-A3B6-DEA43602A231}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Provision.API", "SensorsReport.Provision.API\SensorsReport.Provision.API.csproj", "{5CCB932F-F0E8-4C03-A3B6-DEA43602A231}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Api.Core", "SensorsReport.Api.Core\SensorsReport.Api.Core.csproj", "{6F58C9DF-A021-4AE1-8BB6-34C1D468C3CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sensors-Report-SMS.API", "Sensors-Report-SMS.API\Sensors-Report-SMS.API.csproj", "{6431A1DE-DDC3-47DD-95BF-40670076AC78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.SMS.API", "SensorsReport.SMS.API\SensorsReport.SMS.API.csproj", "{6431A1DE-DDC3-47DD-95BF-40670076AC78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sensors-Report-Email.API", "Sensors-Report-Email.API\Sensors-Report-Email.API.csproj", "{A0508D82-D3CE-4C27-A38E-2B5A049D3169}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Email.API", "SensorsReport.Email.API\SensorsReport.Email.API.csproj", "{A0508D82-D3CE-4C27-A38E-2B5A049D3169}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sensors-Report-Swagger.API", "Sensors-Report-Swagger.API\Sensors-Report-Swagger.API.csproj", "{6942ACF6-7A9E-4AC0-AE12-2A3667691FCF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Swagger.API", "SensorsReport.Swagger.API\SensorsReport.Swagger.API.csproj", "{6942ACF6-7A9E-4AC0-AE12-2A3667691FCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sensors-Report-Email.Consumer", "Sensors-Report-Email.Consumer\Sensors-Report-Email.Consumer.csproj", "{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Email.Consumer", "SensorsReport.Email.Consumer\SensorsReport.Email.Consumer.csproj", "{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Alarm.API", "SensorsReport.Alarm.API\SensorsReport.Alarm.API.csproj", "{B4EE4807-431B-4675-92B2-49A143DC67C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Flux", "Flux", "{2CE90471-D0F5-D1F6-C160-84DE999B61C9}"
+	ProjectSection(SolutionItems) = preProject
+		flux\kustomization.yaml = flux\kustomization.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{BA2F99F9-9746-F2C6-F6E4-864B78F18D06}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.targets = Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NLog", "NLog", "{9DC6D3C5-4A05-F1B5-4E35-53D24430D317}"
+	ProjectSection(SolutionItems) = preProject
+		nlog.config = nlog.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{FBF56CC3-7AE6-AD2D-3F14-7F97FD322CD6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Business.Broker.API", "SensorsReport.Business.Broker.API\SensorsReport.Business.Broker.API.csproj", "{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Webhook.API", "SensorsReport.Webhook.API\SensorsReport.Webhook.API.csproj", "{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -139,9 +162,50 @@ Global
 		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Release|x64.Build.0 = Release|Any CPU
 		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Release|x86.ActiveCfg = Release|Any CPU
 		{2DBD4B4F-9720-4801-A84E-1B2C2BB657EC}.Release|x86.Build.0 = Release|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Debug|x64.Build.0 = Debug|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Debug|x86.Build.0 = Debug|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Release|x64.ActiveCfg = Release|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Release|x64.Build.0 = Release|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Release|x86.ActiveCfg = Release|Any CPU
+		{B4EE4807-431B-4675-92B2-49A143DC67C5}.Release|x86.Build.0 = Release|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Debug|x64.Build.0 = Debug|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Debug|x86.Build.0 = Debug|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Release|x64.ActiveCfg = Release|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Release|x64.Build.0 = Release|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Release|x86.ActiveCfg = Release|Any CPU
+		{21A0AFFD-4BE4-FF00-1A9E-2FFC81DCE38E}.Release|x86.Build.0 = Release|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Debug|x64.Build.0 = Debug|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Debug|x86.Build.0 = Debug|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Release|x64.ActiveCfg = Release|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Release|x64.Build.0 = Release|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Release|x86.ActiveCfg = Release|Any CPU
+		{997AEECF-664A-4B28-A166-9A2CA3BAC3C6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7961852F-9F45-4B2B-86B2-F44B1484A643} = {FBF56CC3-7AE6-AD2D-3F14-7F97FD322CD6}
+		{788C267D-F7CC-447D-8C8C-9C58E08D0E98} = {FBF56CC3-7AE6-AD2D-3F14-7F97FD322CD6}
+		{6F58C9DF-A021-4AE1-8BB6-34C1D468C3CA} = {FBF56CC3-7AE6-AD2D-3F14-7F97FD322CD6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {87C852E5-5519-4397-9944-B0824A7EA3DD}

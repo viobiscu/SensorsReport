@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-email-api
+  labels:
+    app: sensors-report-email-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-email-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-email-api
+    spec:
+      containers:
+      - name: sensors-report-email-api
+        image: viobiscu/sensors-report-email-api:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        env:
+        - name: SR_AppConfiguration__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: notification-api-mongodb-connection
+              key: MONGODB_URI
+        - name: SR_AppConfiguration__DatabaseName
+          value: email-db
+        - name: SR_AppConfiguration__EmailCollectionName
+          value: email
+        - name: SR_AppConfiguration__RabbitMQConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: connection_string
+        - name: SR_AppConfiguration__RabbitMQExchangeName
+          value: sensorsreport.exchange.notification.email
+        - name: SR_AppConfiguration__RabbitMQRoutingKey
+          value: sensorsreport.routingkey.notification.email
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: logs
+        emptyDir: {}

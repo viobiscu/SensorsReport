@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-sms-api
+  labels:
+    app: sensors-report-sms-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-sms-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-sms-api
+    spec:
+      containers:
+      - name: sensors-report-sms-api
+        image: viobiscu/sensors-report-sms-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: SR_AppConfiguration__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: notification-api-mongodb-connection
+              key: MONGODB_URI
+        - name: SR_AppConfiguration__DatabaseName
+          value: sms-db
+        - name: SR_AppConfiguration__SmsCollectionName
+          value: sms
+        - name: SR_AppConfiguration__ProviderCollectionName
+          value: providers
+        - name: SR_AppConfiguration__ProviderTrustTimeoutInSecond
+          value: "1800"  # 30 minutes
+        - name: SR_AppConfiguration__MaxRetryCount
+          value: "3"
+        - name: SR_AppConfiguration__DefaultTtlInMinutes
+          value: "30"  # Default TTL for SMS messages 
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: logs
+        emptyDir: {}

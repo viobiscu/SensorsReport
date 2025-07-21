@@ -486,8 +486,10 @@ $RECYCLE.BIN/
 .flux_manifest_path
 
 *version.txt
-/Sensors-Report-Audit.API/gettoken.sh
-/Sensors-Report-Audit.API/token.json
+/Sensors.Report.Audit.API/gettoken.sh
+/Sensors.Report.Audit.API/token.json
 /knowhow.md
 /knowhow.pdf
 appsettings.development.json
+/misc-files/*.md
+/misc-files/*.pdf

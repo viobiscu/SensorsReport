@@ -1,16 +1,16 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace SensorsReport;
 
-public class BaseHttpService
+public class BaseHttpService<TServiceName> where TServiceName : BaseHttpService<TServiceName>
 {
     internal readonly HttpClient _httpClient;
     protected readonly JsonSerializerOptions _jsonOptions;
 
     public BaseHttpService(IHttpClientFactory httpClientFactory, JsonSerializerOptions? jsonOptions = null)
     {
-        _httpClient = httpClientFactory.CreateClient("OrionContextBroker");
+        _httpClient = httpClientFactory.CreateClient(typeof(TServiceName).Name);
         _jsonOptions = jsonOptions ?? GetJsonOptions();
     }
 

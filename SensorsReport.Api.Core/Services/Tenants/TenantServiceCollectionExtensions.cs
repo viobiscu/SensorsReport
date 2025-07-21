@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SensorsReport.Api.Core.Services.Tenants;
+namespace SensorsReport.Extensions;
 
 public static class TenantServiceCollectionExtensions
 {

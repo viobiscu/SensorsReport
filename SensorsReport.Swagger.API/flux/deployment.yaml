@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-swagger-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-swagger-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-swagger-api
+    spec:
+      serviceAccountName: swagger-service-account
+      containers:
+      - name: sensors-report-swagger-api
+        image: viobiscu/sensors-report-swagger-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"

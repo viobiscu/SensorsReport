@@ -33,7 +33,5 @@ RUN dotnet publish "Sensors-Report-MQTT-to-Orion.csproj" -c Release -o /app/publ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-# Copy NLog configuration
-COPY --from=publish /app/publish/nlog.config .
 
 ENTRYPOINT ["dotnet", "Sensors-Report-MQTT-to-Orion.dll"]

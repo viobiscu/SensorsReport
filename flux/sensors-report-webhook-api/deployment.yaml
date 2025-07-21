@@ -1,0 +1,42 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-webhook-api
+  labels:
+    app: sensors-report-webhook-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-webhook-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-webhook-api
+    spec:
+      containers:
+        - name: sensors-report-webhook-api
+          image: viobiscu/sensors-report-webhook-api:latest
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: SR_OrionLdConfig__BrokerUrl
+              value: "http://orion-ld-broker:1026"
+            - name: SR_QuantumLeapConfig__QuantumLeapHost
+              value: "http://quantum.sensorsreport.net:8668"
+            - name: SR_RabbitMQExchangeConfig__RabbitMQConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-default-user
+                  key: connection_string
+            - name: SR_RabbitMQExchangeConfig__RabbitMQExchange
+              value: sensorsreport.exchange.notification.webhook

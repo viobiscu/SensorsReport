@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-email-consumer
+  labels:
+    app: sensors-report-email-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-email-consumer
+  template:
+    metadata:
+      labels:
+        app: sensors-report-email-consumer
+    spec:
+      containers:
+      - name: sensors-report-email-consumer
+        image: viobiscu/sensors-report-email-consumer:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "96Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: SR_AppConfiguration__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: notification-api-mongodb-connection
+              key: MONGODB_URI
+        - name: SR_AppConfiguration__RabbitMQConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: connection_string
+        - name: SR_AppConfiguration__DatabaseName
+          value: email-db
+        - name: SR_AppConfiguration__EmailCollectionName
+          value: email
+        - name: SR_AppConfiguration__RabbitMQExchangeName
+          value: sensorsreport.exchange.notification.email
+        - name: SR_AppConfiguration__RabbitMQQueueName
+          value: sensorsreport.queue.notification.email
+        - name: SR_AppConfiguration__RabbitMQRoutingKey
+          value: sensorsreport.routingkey.notification.email
+
+        - name: SR_AppConfiguration__SmtpServer
+          valueFrom:
+            secretKeyRef:
+              name: email-smtp-secret
+              key: Server
+        - name: SR_AppConfiguration__SmtpPort
+          valueFrom:
+            secretKeyRef:
+              name: email-smtp-secret
+              key: Port
+        - name: SR_AppConfiguration__SmtpUseSSL
+          valueFrom:
+            secretKeyRef:
+              name: email-smtp-secret
+              key: UseSSL
+        - name: SR_AppConfiguration__SmtpUsername
+          valueFrom:
+            secretKeyRef:
+              name: email-smtp-secret
+              key: Username
+        - name: SR_AppConfiguration__SmtpPassword
+          valueFrom:
+            secretKeyRef:
+              name: email-smtp-secret
+              key: Password
+      volumes:
+      - name: logs
+        emptyDir: {}

@@ -57,13 +57,13 @@
       }
     },
     {
-      "name": ".NET Core Launch (Sensors-Report-Audit.API)",
+      "name": ".NET Core Launch (Sensors.Report.Audit.API)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/Sensors-Report-Audit.API/bin/Debug/net8.0/SensorsReportAudit.API.dll",
+      "program": "${workspaceFolder}/Sensors.Report.Audit.API/bin/Debug/net8.0/SensorsReportAudit.API.dll",
       "args": [],
-      "cwd": "${workspaceFolder}/Sensors-Report-Audit.API",
+      "cwd": "${workspaceFolder}/Sensors.Report.Audit.API",
       "stopAtEntry": false,
       "serverReadyAction": {
         "action": "openExternally",
@@ -73,7 +73,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "sourceFileMap": {
-        "/Views": "${workspaceFolder}/Sensors-Report-Audit.API/Views"
+        "/Views": "${workspaceFolder}/Sensors.Report.Audit.API/Views"
       },
       "justMyCode": false,
       "console": "integratedTerminal"

@@ -1,0 +1,249 @@
+﻿<Project>
+
+  <!-- Common properties for all projects -->
+  <PropertyGroup>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  
+  <!-- Assembly Information -->
+  <PropertyGroup>
+    <Company>Synchro</Company>
+    <Product>SensorsReport</Product>
+    <Copyright>Copyright © Synchro $(Year)</Copyright>
+    <AssemblyTitle>$(MSBuildProjectName)</AssemblyTitle>
+    <AssemblyDescription>$(MSBuildProjectName) - Part of SensorsReport system</AssemblyDescription>
+    <AssemblyConfiguration Condition="'$(Configuration)' == 'Debug'">Debug</AssemblyConfiguration>
+    <AssemblyConfiguration Condition="'$(Configuration)' != 'Debug'">Release</AssemblyConfiguration>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Year>$([System.DateTime]::Now.ToString("yyyy"))</Year>
+  </PropertyGroup>
+
+  <!-- Common NuGet packages for API projects -->
+  <ItemGroup Condition="$(MSBuildProjectName.StartsWith('SensorsReport.'))">
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.15" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="NLog" Version="6.0.1" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="6.0.1" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="6.0.1" />
+  </ItemGroup>
+
+  <!-- Centralized Project References Management -->
+
+  <!-- Api.Core project reference for all API projects except Api.Core itself -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'SensorsReport.Api.Core' And $(MSBuildProjectName.StartsWith('SensorsReport.')) And Exists('$(MSBuildThisFileDirectory)SensorsReport.Api.Core\SensorsReport.Api.Core.csproj')">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)SensorsReport.Api.Core\SensorsReport.Api.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Version management for all projects -->
+  <ItemGroup>
+    <None Update="version.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Copy nlog.config from parent directory to project directory and output -->
+  <Target Name="CopyNLogConfig" BeforeTargets="Build"
+          Condition="Exists('$(MSBuildProjectDirectory)\..\nlog.config') And !Exists('$(ProjectDir)nlog.config')">
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\..\nlog.config"
+          DestinationFiles="$(ProjectDir)nlog.config" />
+    <Message Text="Copied nlog.config from parent directory to project directory" Importance="high" />
+  </Target>
+
+  <ItemGroup>
+    <Content Update="nlog.config" Condition="Exists('$(ProjectDir)nlog.config')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Docker image configuration properties -->
+  <PropertyGroup>
+    <!-- Default Docker registry and organization -->
+    <DockerRegistry Condition="'$(DockerRegistry)' == ''">viobiscu</DockerRegistry>
+
+    <!-- Auto-generate Docker image name from project if not specified -->
+    <ServiceName Condition="'$(ServiceName)' == ''">$(MSBuildProjectName.ToLower().Replace('.', '-').Replace('sensorsreport', 'sensors-report'))</ServiceName>
+
+    <!-- Docker image name property - can be overridden per project -->
+    <DockerImageName Condition="'$(DockerImageName)' == ''">$(DockerRegistry)/$(ServiceName)</DockerImageName>
+
+    <!-- Version for Docker tags -->
+    <DockerImageTag Condition="'$(DockerImageTag)' == ''">$(AppVersion)</DockerImageTag>
+
+    <!-- Common Docker properties for standardized Dockerfiles -->
+    <DockerWorkDir>/app</DockerWorkDir>
+    <DockerBuildWorkDir>/src</DockerBuildWorkDir>
+    <DockerProjectPath>./$(MSBuildProjectName)/</DockerProjectPath>
+    <DockerProjectFile>$(MSBuildProjectName).csproj</DockerProjectFile>
+  </PropertyGroup>
+
+  <!-- Version management properties -->
+  <PropertyGroup>
+    <AppVersion>1.0.0.1</AppVersion>
+    <VersionFile>$(ProjectDir)version.txt</VersionFile>
+  </PropertyGroup>
+
+  <!-- Read existing version if file exists -->
+  <Target Name="ReadVersionTxt" BeforeTargets="GenerateAssemblyInfo" Condition="Exists('$(VersionFile)')">
+    <ReadLinesFromFile File="$(VersionFile)">
+      <Output TaskParameter="Lines" PropertyName="CurrentVersion" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <AppVersion>$(CurrentVersion.Trim())</AppVersion>
+      <DockerImageTag>$(AppVersion)</DockerImageTag>
+    </PropertyGroup>
+  </Target>
+
+  <!-- Set version properties for assembly -->
+  <PropertyGroup>
+    <Version>$(AppVersion)</Version>
+    <FileVersion>$(AppVersion)</FileVersion>
+    <AssemblyVersion>$(AppVersion)</AssemblyVersion>
+  </PropertyGroup>
+
+  <!-- Increment version target -->
+  <Target Name="IncrementVersionInternal" DependsOnTargets="ReadVersionTxt">
+    <PropertyGroup>
+      <!-- Parse version components using MSBuild string functions -->
+      <MajorVersion>$([System.String]::new('$(AppVersion)').Split('.')[0])</MajorVersion>
+      <MinorVersion>$([System.String]::new('$(AppVersion)').Split('.')[1])</MinorVersion>
+      <PatchVersion>$([System.String]::new('$(AppVersion)').Split('.')[2])</PatchVersion>
+
+      <!-- Increment patch version -->
+      <NewPatchVersion>$([MSBuild]::Add($(PatchVersion), 1))</NewPatchVersion>
+      <NewVersion>$(MajorVersion).$(MinorVersion).$(NewPatchVersion)</NewVersion>
+    </PropertyGroup>
+
+    <!-- Write new version to file -->
+    <WriteLinesToFile File="$(VersionFile)" Lines="$(NewVersion)" Overwrite="true" />
+
+    <!-- Update version properties for current build -->
+    <PropertyGroup>
+      <AppVersion>$(NewVersion)</AppVersion>
+      <Version>$(NewVersion)</Version>
+      <FileVersion>$(NewVersion)</FileVersion>
+      <AssemblyVersion>$(NewVersion)</AssemblyVersion>
+      <DockerImageTag>$(NewVersion)</DockerImageTag>
+    </PropertyGroup>
+
+    <Message Text="Setting API version to: $(NewVersion)" Importance="high" />
+  </Target>
+
+  <!-- Docker build internal target -->
+  <Target Name="BuildDockerInternal">
+    <!-- Validate Docker image name property -->
+    <Error Text="DockerImageName property is not set. Please define it in your project file."
+           Condition="'$(DockerImageName)' == ''" />
+
+    <PropertyGroup>
+      <!-- Docker image names using the property -->
+      <DockerImageVersioned>$(DockerImageName):$(DockerImageTag)</DockerImageVersioned>
+      <DockerImageLatest>$(DockerImageName):latest</DockerImageLatest>
+
+      <!-- Dockerfile path -->
+      <DockerfilePath>$(MSBuildProjectDirectory)\Dockerfile</DockerfilePath>
+      <BuildContext>$(MSBuildThisFileDirectory)</BuildContext>
+    </PropertyGroup>
+
+    <!-- Check if Dockerfile exists -->
+    <Error Text="Dockerfile not found at: $(DockerfilePath)" Condition="!Exists('$(DockerfilePath)')" />
+
+    <!-- Display Docker configuration -->
+    <Message Text="Docker Configuration:" Importance="high" />
+    <Message Text="  - Registry: $(DockerRegistry)" Importance="high" />
+    <Message Text="  - Image Name: $(DockerImageName)" Importance="high" />
+    <Message Text="  - Tag: $(DockerImageTag)" Importance="high" />
+    <Message Text="  - Full Image: $(DockerImageVersioned)" Importance="high" />
+
+    <!-- Build Docker images -->
+    <Message Text="Building Docker images..." Importance="high" />
+    <Exec Command="docker build -f &quot;$(DockerfilePath)&quot; -t &quot;$(DockerImageVersioned)&quot; &quot;$(BuildContext)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)" />
+
+    <Exec Command="docker build -f &quot;$(DockerfilePath)&quot; -t &quot;$(DockerImageLatest)&quot; &quot;$(BuildContext)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)" />
+
+    <Message Text="Built image: $(DockerImageVersioned)" Importance="high" />
+    <Message Text="You can now push the image and update your deployment YAML with:" Importance="high" />
+    <Message Text="  image: $(DockerImageVersioned)" Importance="high" />
+  </Target>
+
+  <!-- Docker push internal target -->
+  <Target Name="PushDockerInternal">
+    <PropertyGroup>
+      <!-- Use the configured Docker image name -->
+      <DockerImageVersioned>$(DockerImageName):$(DockerImageTag)</DockerImageVersioned>
+      <DockerImageLatest>$(DockerImageName):latest</DockerImageLatest>
+    </PropertyGroup>
+
+    <!-- Push images -->
+    <Message Text="Pushing images to Docker Hub..." Importance="high" />
+    <Exec Command="docker push &quot;$(DockerImageVersioned)&quot;" />
+    <Message Text="Pushed images: $(DockerImageVersioned)" Importance="high" />
+
+    <Exec Command="docker push &quot;$(DockerImageLatest)&quot;" />
+    <Message Text="Pushed images: $(DockerImageLatest)" Importance="high" />
+  </Target>
+
+  <!-- CONSOLIDATED TARGET 1: Increment Version + Build Docker -->
+  <Target Name="BuildDocker" DependsOnTargets="IncrementVersionInternal;BuildDockerInternal">
+    <Message Text="✅ Completed: Version increment + Docker build" Importance="high" />
+  </Target>
+
+  <!-- CONSOLIDATED TARGET 2: Increment Version + Build Docker + Push Docker -->
+  <Target Name="BuildAndPushDocker" DependsOnTargets="IncrementVersionInternal;BuildDockerInternal;PushDockerInternal">
+    <Message Text="✅ Completed: Version increment + Docker build + Docker push" Importance="high" />
+  </Target>
+
+  <!-- Individual targets for flexibility -->
+  <Target Name="IncrementVersion" DependsOnTargets="IncrementVersionInternal">
+    <Message Text="✅ Version incremented only" Importance="high" />
+  </Target>
+
+  <!-- Auto-increment version during build -->
+  <Target Name="AutoIncrementVersion" BeforeTargets="Build" DependsOnTargets="IncrementVersionInternal" />
+
+  <Target Name="CopyFluxFiles">
+    <PropertyGroup>
+      <!-- Set source path within project directory and target path in solution flux directory -->
+      <FluxSourcePath>$(MSBuildProjectDirectory)\flux</FluxSourcePath>
+      <FluxTargetPath>$(MSBuildThisFileDirectory)flux\$(ServiceName)</FluxTargetPath>
+    </PropertyGroup>
+
+    <!-- Print debug info: service name and folders -->
+    <Message Text="Service name: $(ServiceName)" Importance="high" Condition="Exists('$(FluxSourcePath)')" />
+    <Message Text="Source folder: $(FluxSourcePath)" Importance="high" Condition="Exists('$(FluxSourcePath)')" />
+    <Message Text="Target folder: $(FluxTargetPath)" Importance="high" Condition="Exists('$(FluxSourcePath)')" />
+
+    <!-- Ensure the target flux folder exists -->
+    <MakeDir Directories="$(FluxTargetPath)" Condition="!Exists('$(FluxTargetPath)') And Exists('$(FluxSourcePath)')" />
+
+    <!-- Find all YAML files in the project's flux source folder -->
+    <ItemGroup Condition="Exists('$(FluxSourcePath)')">
+      <FluxFiles Include="$(FluxSourcePath)\*.yaml" />
+    </ItemGroup>
+
+    <!-- Copy YAML files and print info about the operation -->
+    <Copy SourceFiles="@(FluxFiles)" DestinationFolder="$(FluxTargetPath)"
+          Condition="'@(FluxFiles)' != '' And Exists('$(FluxSourcePath)')" />
+    <Message Text="YAML files copied: @(FluxFiles) -> $(FluxTargetPath)"
+             Importance="high"
+             Condition="'@(FluxFiles)' != '' And Exists('$(FluxSourcePath)')" />
+    <Message Text="No flux directory found at: $(FluxSourcePath)"
+             Importance="normal"
+             Condition="!Exists('$(FluxSourcePath)')" />
+  </Target>
+
+  <!-- Auto-run flux copying after successful builds -->
+  <Target Name="AutoCopyFluxFiles" AfterTargets="Build" DependsOnTargets="CopyFluxFiles" />
+
+  <Target Name="ShowBuildTargets" AfterTargets="Build">
+    <Message Text="Available custom targets:" Importance="high" />
+    <Message Text="dotnet build -t:IncrementVersion" Importance="high" />
+    <Message Text="dotnet build -t:CopyFluxFiles" Importance="high" />
+    <Message Text="dotnet build -t:BuildDocker" Importance="high" />
+    <Message Text="dotnet build -t:BuildAndPushDocker" Importance="high" />
+  </Target>
+</Project>
