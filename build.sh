@@ -86,8 +86,10 @@ select_action() {
     echo "4) Build Docker image (dotnet build -t:BuildDocker)"
     echo "5) Build and Push Docker (dotnet build -t:BuildAndPushDocker)"
     echo "6) Apply flux directory (kubectl apply -f flux/)"
+    echo "7) Update Kustomization files"
+    echo "8) Update Kustomization & Apply flux"
     echo ""
-    read -p "Select action (1-6): " actionChoice
+    read -p "Select action (1-8): " actionChoice
     
     case $actionChoice in
         1) selectedAction="build" ;;
@@ -96,11 +98,74 @@ select_action() {
         4) selectedAction="docker-build" ;;
         5) selectedAction="build-and-push-docker" ;;
         6) selectedAction="apply-flux" ;;
+        7) selectedAction="update-kustomization" ;;
+        8) selectedAction="update-and-apply-flux" ;;
         *) 
             echo "❌ Invalid selection!"
             exit 1
             ;;
     esac
+}
+
+# Function to update kustomization files
+update_kustomization() {
+    echo "🔄 Updating kustomization files..."
+    
+    local flux_dir="flux"
+    local main_kustomization="$flux_dir/kustomization.yaml"
+    
+    # Update main kustomization.yaml with direct file references
+    echo "🔄 Updating main kustomization.yaml with direct file references..." >&2
+    
+    # Find existing service directories
+    local service_dirs=($(find "$flux_dir" -maxdepth 1 -type d -name "sensors-report-*" | sort))
+    
+    # Create new kustomization.yaml content
+    local kustomization_content=""
+    kustomization_content+="apiVersion: kustomize.config.k8s.io/v1beta1"$'\n'
+    kustomization_content+="kind: Kustomization"$'\n'
+    kustomization_content+="namespace: default"$'\n'
+    kustomization_content+="resources:"$'\n'
+    
+    # Add each YAML file from service directories
+    for service_dir in "${service_dirs[@]}"; do
+        local dir_name=$(basename "$service_dir")
+        echo "📁 Processing directory: $dir_name" >&2
+        
+        # Find YAML files in directory (excluding kustomization files)
+        local yaml_files=($(find "$service_dir" -maxdepth 1 -name "*.yaml" -o -name "*.yml" | grep -v kustomization | sort))
+        
+        if [[ ${#yaml_files[@]} -gt 0 ]]; then
+            for yaml_file in "${yaml_files[@]}"; do
+                local filename=$(basename "$yaml_file")
+                kustomization_content+="  - $dir_name/$filename"$'\n'
+                echo "  ✅ Added: $dir_name/$filename" >&2
+            done
+        else
+            echo "  ⚠️  No YAML files found in $dir_name" >&2
+        fi
+    done
+    
+    # Write the content to file
+    printf "%s" "$kustomization_content" > "$main_kustomization"
+    
+    echo "✅ Main kustomization.yaml updated with direct file references" >&2
+    
+    # Test kustomization if kustomize is available
+    if command -v kustomize &> /dev/null; then
+        echo "🧪 Testing kustomization..." >&2
+        if kustomize build "$flux_dir" > /dev/null; then
+            echo "✅ Kustomization test successful" >&2
+        else
+            echo "❌ Kustomization test failed" >&2
+            echo "💡 Use 'git checkout $main_kustomization' to revert if needed" >&2
+            return 1
+        fi
+    else
+        echo "⚠️  Kustomize not installed, skipping test" >&2
+    fi
+    
+    return 0
 }
 
 # Function to execute the selected action
@@ -112,6 +177,27 @@ execute_action() {
     
     # Handle all projects option
     if [[ "$selectedProject" == "ALL" ]]; then
+        # Special handling for kustomization actions
+        if [[ "$selectedAction" == "update-kustomization" ]] || [[ "$selectedAction" == "update-and-apply-flux" ]]; then
+            echo "🔄 Updating kustomization files for all services..."
+            if update_kustomization; then
+                echo "✅ Kustomization files updated successfully"
+                if [[ "$selectedAction" == "update-and-apply-flux" ]]; then
+                    echo "⚡ Applying flux directory..."
+                    if kubectl apply -f flux/; then
+                        echo "✅ Flux applied successfully"
+                    else
+                        echo "❌ Flux apply failed"
+                        exit 1
+                    fi
+                fi
+            else
+                echo "❌ Kustomization update failed"
+                exit 1
+            fi
+            return
+        fi
+        
         local successCount=0
         local failCount=0
         
@@ -221,6 +307,24 @@ execute_action() {
                 fi
                 echo "⚡ Applying flux directory..."
                 kubectl apply -f flux/
+                ;;
+            "update-kustomization")
+                echo "🔄 Updating kustomization files..."
+                cd ..
+                update_kustomization
+                cd "$selectedProject"
+                ;;
+            "update-and-apply-flux")
+                echo "🔄 Updating kustomization and applying flux..."
+                cd ..
+                if update_kustomization; then
+                    echo "⚡ Applying flux directory..."
+                    kubectl apply -f flux/
+                else
+                    echo "❌ Kustomization update failed, skipping apply"
+                    exit 1
+                fi
+                cd "$selectedProject"
                 ;;
         esac
         
