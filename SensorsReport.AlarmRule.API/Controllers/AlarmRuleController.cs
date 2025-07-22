@@ -17,15 +17,15 @@ public class AlarmRuleController : ControllerBase
     {
         ArgumentNullException.ThrowIfNull(alarmService, nameof(alarmService));
 
-        var alarms = await alarmService.GetAsync(
+        var alarmRules = await alarmService.GetAsync(
             offset: offset,
             limit: limit
         );
 
-        if (alarms == null || alarms.Count == 0)
+        if (alarmRules == null || alarmRules.Count == 0)
             return NotFound();
 
-        return Ok(alarms);
+        return Ok(alarmRules);
     }
 
     [HttpGet("{alarmRuleId}")]
@@ -34,16 +34,16 @@ public class AlarmRuleController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
-    public async Task<IActionResult> Get([FromServices] IAlarmRuleService alarmService, string alarmRuleId)
+    public async Task<IActionResult> Get([FromServices] IAlarmRuleService alarmRuleService, string alarmRuleId)
     {
         if (string.IsNullOrWhiteSpace(alarmRuleId))
             return BadRequest("Alarm Rule ID cannot be null or empty.");
 
-        var alarm = await alarmService.GetAsync(alarmRuleId);
-        if (alarm == null)
+        var alarmRule = await alarmRuleService.GetAsync(alarmRuleId);
+        if (alarmRule == null)
             return NotFound();
 
-        return Ok(alarm);
+        return Ok(alarmRule);
     }
 
     [HttpPost]
@@ -51,14 +51,14 @@ public class AlarmRuleController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
-    public async Task<IActionResult> Post([FromServices] IAlarmRuleService alarmService, [FromBody] AlarmRuleModel alarmRule)
+    public async Task<IActionResult> Post([FromServices] IAlarmRuleService alarmRuleService, [FromBody] AlarmRuleModel alarmRule)
     {
-        ArgumentNullException.ThrowIfNull(alarmService, nameof(alarmService));
+        ArgumentNullException.ThrowIfNull(alarmRuleService, nameof(alarmRuleService));
         if (alarmRule == null)
             return BadRequest("Alarm Rule model cannot be null.");
 
-        var createdAlarm = await alarmService.PostAsync(alarmRule);
-        return CreatedAtAction(nameof(Get), new { alarmRuleId = createdAlarm.Id }, createdAlarm);
+        var createdAlarmRule = await alarmRuleService.PostAsync(alarmRule);
+        return CreatedAtAction(nameof(Get), new { alarmRuleId = createdAlarmRule.Id }, createdAlarmRule);
     }
 
     [HttpPut("{alarmRuleId}")]
@@ -67,15 +67,15 @@ public class AlarmRuleController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
-    public async Task<IActionResult> Put([FromServices] IAlarmRuleService alarmService, string alarmRuleId, [FromBody] AlarmRuleModel alarmRule)
+    public async Task<IActionResult> Put([FromServices] IAlarmRuleService alarmRuleService, string alarmRuleId, [FromBody] AlarmRuleModel alarmRule)
     {
-        ArgumentNullException.ThrowIfNull(alarmService, nameof(alarmService));
+        ArgumentNullException.ThrowIfNull(alarmRuleService, nameof(alarmRuleService));
         if (string.IsNullOrWhiteSpace(alarmRuleId))
             return BadRequest("Alarm Rule ID cannot be null or empty.");
         if (alarmRule == null)
             return BadRequest("Alarm Rule model cannot be null.");
-        var updatedAlarm = await alarmService.PutAsync(alarmRuleId, alarmRule);
-        return Ok(updatedAlarm);
+        var updatedAlarmRule = await alarmRuleService.PutAsync(alarmRuleId, alarmRule);
+        return Ok(updatedAlarmRule);
     }
 
 
@@ -86,16 +86,16 @@ public class AlarmRuleController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
-    public async Task<IActionResult> Patch([FromServices] IAlarmRuleService alarmService, string alarmRuleId, [FromBody] AlarmRuleModel alarmRule)
+    public async Task<IActionResult> Patch([FromServices] IAlarmRuleService alarmRuleService, string alarmRuleId, [FromBody] AlarmRuleModel alarmRule)
     {
-        ArgumentNullException.ThrowIfNull(alarmService, nameof(alarmService));
+        ArgumentNullException.ThrowIfNull(alarmRuleService, nameof(alarmRuleService));
         if (string.IsNullOrWhiteSpace(alarmRuleId))
             return BadRequest("Alarm Rule ID cannot be null or empty.");
         if (alarmRule == null)
             return BadRequest("Alarm Rule model cannot be null.");
 
-        var updatedAlarm = await alarmService.PutAsync(alarmRuleId, alarmRule);
-        return Ok(updatedAlarm);
+        var updatedAlarmRule = await alarmRuleService.PutAsync(alarmRuleId, alarmRule);
+        return Ok(updatedAlarmRule);
     }
 
     [HttpDelete("{alarmRuleId}")]
@@ -104,12 +104,12 @@ public class AlarmRuleController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
-    public async Task<IActionResult> Delete([FromServices] IAlarmRuleService alarmService, string alarmRuleId)
+    public async Task<IActionResult> Delete([FromServices] IAlarmRuleService alarmRuleService, string alarmRuleId)
     {
-        ArgumentNullException.ThrowIfNull(alarmService, nameof(alarmService));
+        ArgumentNullException.ThrowIfNull(alarmRuleService, nameof(alarmRuleService));
         if (string.IsNullOrWhiteSpace(alarmRuleId))
             return BadRequest("Alarm Rule ID cannot be null or empty.");
-        await alarmService.DeleteAsync(alarmRuleId);
+        await alarmRuleService.DeleteAsync(alarmRuleId);
         return NoContent();
     }
 }

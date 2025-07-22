@@ -64,18 +64,18 @@ public class AlarmRuleService : IAlarmRuleService
         return alarmRule;
     }
 
-    public async Task<AlarmRuleModel> PutAsync(string alarmRuleId, AlarmRuleModel alarm)
+    public async Task<AlarmRuleModel> PutAsync(string alarmRuleId, AlarmRuleModel alarmRule)
     {
         ArgumentNullException.ThrowIfNull(orionService, nameof(orionService));
         ArgumentNullException.ThrowIfNull(tenantRetriever, nameof(tenantRetriever));
         if (string.IsNullOrWhiteSpace(alarmRuleId))
             throw new ArgumentException("Alarm rule ID cannot be null or empty.", nameof(alarmRuleId));
-        if (alarm == null)
-            throw new ArgumentNullException(nameof(alarm), "Alarm model cannot be null.");
-        var response = await this.orionService.UpdateEntityAsync(alarmRuleId, alarm);
+        if (alarmRule == null)
+            throw new ArgumentNullException(nameof(alarmRule), "Alarm model cannot be null.");
+        var response = await this.orionService.UpdateEntityAsync(alarmRuleId, alarmRule);
         if (!response.IsSuccessStatusCode)
             throw new InvalidOperationException($"Failed to update alarm rule: {response.ReasonPhrase}");
-        return alarm;
+        return alarmRule;
     }
 
     public async Task DeleteAsync(string alarmRuleId)
@@ -95,8 +95,8 @@ public interface IAlarmRuleService
     Task<List<AlarmRuleModel>> GetAsync(int offset = 0, int limit = 100);
     Task<AlarmRuleModel?> GetAsync(string alarmRuleId);
     Task<AlarmRuleModel> PostAsync(AlarmRuleModel alarmRule);
-    Task<AlarmRuleModel> PutAsync(string alarmId, AlarmRuleModel alarmRule);
-    Task DeleteAsync(string alarmId);
+    Task<AlarmRuleModel> PutAsync(string alarmRuleId, AlarmRuleModel alarmRule);
+    Task DeleteAsync(string alarmRuleId);
 }
 
 public class AlarmRuleModel : EntityModel

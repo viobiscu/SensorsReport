@@ -46,6 +46,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.Webhook.API",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.AlarmRule.API", "SensorsReport.AlarmRule.API\SensorsReport.AlarmRule.API.csproj", "{A0B4229C-A7EB-4BB3-9149-B31AF0343EE4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.NotificationRule.API", "SensorsReport.NotificationRule.API\SensorsReport.NotificationRule.API.csproj", "{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.LogRule.API", "SensorsReport.LogRule.API\SensorsReport.LogRule.API.csproj", "{138D239B-B66E-4A87-8292-77D632DC2348}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -212,6 +216,30 @@ Global
 		{A0B4229C-A7EB-4BB3-9149-B31AF0343EE4}.Release|x64.Build.0 = Release|Any CPU
 		{A0B4229C-A7EB-4BB3-9149-B31AF0343EE4}.Release|x86.ActiveCfg = Release|Any CPU
 		{A0B4229C-A7EB-4BB3-9149-B31AF0343EE4}.Release|x86.Build.0 = Release|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Debug|x64.Build.0 = Debug|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Debug|x86.Build.0 = Debug|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Release|x64.ActiveCfg = Release|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Release|x64.Build.0 = Release|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Release|x86.ActiveCfg = Release|Any CPU
+		{7A0F3CBB-77A3-4EEB-9A4A-E026BDC8DDB2}.Release|x86.Build.0 = Release|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Debug|x64.Build.0 = Debug|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Debug|x86.Build.0 = Debug|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Release|Any CPU.Build.0 = Release|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Release|x64.ActiveCfg = Release|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Release|x64.Build.0 = Release|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Release|x86.ActiveCfg = Release|Any CPU
+		{138D239B-B66E-4A87-8292-77D632DC2348}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
