@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: sensors-report-business-broker-api
-          image: viobiscu/sensors-report-business-broker:latest
+          image: viobiscu/sensors-report-business-broker-api:latest
           ports:
             - containerPort: 80
           env:
