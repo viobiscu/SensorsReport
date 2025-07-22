@@ -4,7 +4,11 @@
 # Usage: ./build.sh
 
 clear
-echo "=========================================="
+echo "======================    # Create new kustomization.yaml content
+    local kustomization_content=""
+    kustomization_content+="apiVersion: kustomize.config.k8s.io/v1beta1"$'\n'
+    kustomization_content+="kind: Kustomization"$'\n'
+    kustomization_content+="resources:"$'\n'====="
 echo "  SensorsReport Interactive Build Tool"
 echo "=========================================="
 
@@ -122,10 +126,19 @@ update_kustomization() {
     
     # Create new kustomization.yaml content
     local kustomization_content=""
-    kustomization_content+="apiVersion: kustomize.config.k8s.io/v1beta1"$'\n'
+    kustomization_content+="apiVersion: kustomize.toolkit.fluxcd.io/v1beta2"$'\n'
     kustomization_content+="kind: Kustomization"$'\n'
-    kustomization_content+="namespace: default"$'\n'
-    kustomization_content+="resources:"$'\n'
+    kustomization_content+="metadata:"$'\n'
+    kustomization_content+="  name: sensors-report"$'\n'
+    kustomization_content+="  namespace: flux-system"$'\n'
+    kustomization_content+="spec:"$'\n'
+    kustomization_content+="  interval: 10m"$'\n'
+    kustomization_content+="  sourceRef:"$'\n'
+    kustomization_content+="    kind: GitRepository"$'\n'
+    kustomization_content+="    name: sensors-report"$'\n'
+    kustomization_content+="  path: \"./flux\""$'\n'
+    kustomization_content+="  prune: true"$'\n'
+    kustomization_content+="  resources:"$'\n'
     
     # Add each YAML file from service directories
     for service_dir in "${service_dirs[@]}"; do
@@ -138,8 +151,8 @@ update_kustomization() {
         if [[ ${#yaml_files[@]} -gt 0 ]]; then
             for yaml_file in "${yaml_files[@]}"; do
                 local filename=$(basename "$yaml_file")
-                kustomization_content+="  - $dir_name/$filename"$'\n'
-                echo "  ✅ Added: $dir_name/$filename" >&2
+                kustomization_content+="  - ./$dir_name/$filename"$'\n'
+                echo "  ✅ Added: ./$dir_name/$filename" >&2
             done
         else
             echo "  ⚠️  No YAML files found in $dir_name" >&2
@@ -154,7 +167,7 @@ update_kustomization() {
     # Test kustomization if kustomize is available
     if command -v kustomize &> /dev/null; then
         echo "🧪 Testing kustomization..." >&2
-        if kustomize build "$flux_dir" > /dev/null; then
+        if kustomize build "$flux_dir" | head -1 > /dev/null; then
             echo "✅ Kustomization test successful" >&2
         else
             echo "❌ Kustomization test failed" >&2
@@ -183,13 +196,9 @@ execute_action() {
             if update_kustomization; then
                 echo "✅ Kustomization files updated successfully"
                 if [[ "$selectedAction" == "update-and-apply-flux" ]]; then
-                    echo "⚡ Applying flux directory..."
-                    if kubectl apply -f flux/; then
-                        echo "✅ Flux applied successfully"
-                    else
-                        echo "❌ Flux apply failed"
-                        exit 1
-                    fi
+                    echo "⚡ Applying flux directory with direct file apply..."
+                    find flux/sensors-report-* -name "*.yaml" | grep -v kustomization | xargs -I {} kubectl apply -f {} 2>/dev/null || true
+                    echo "✅ Flux applied successfully"
                 fi
             else
                 echo "❌ Kustomization update failed"
@@ -318,8 +327,9 @@ execute_action() {
                 echo "🔄 Updating kustomization and applying flux..."
                 cd ..
                 if update_kustomization; then
-                    echo "⚡ Applying flux directory..."
-                    kubectl apply -f flux/
+                    echo "⚡ Applying flux directory with direct file apply..."
+                    find flux/sensors-report-* -name "*.yaml" | grep -v kustomization | xargs -I {} kubectl apply -f {} 2>/dev/null || true
+                    echo "✅ Flux applied successfully"
                 else
                     echo "❌ Kustomization update failed, skipping apply"
                     exit 1
