@@ -2,4 +2,18 @@
 kind: Kustomization
 namespace: default
 resources:
-  - sensors-report-*
+  - sensors-report-alarm-api/
+  - sensors-report-alarmrule-api/
+  - sensors-report-audit-api/
+  - sensors-report-business-broker-api/
+  - sensors-report-email-api/
+  - sensors-report-email-consumer/
+  - sensors-report-explorer/
+  - sensors-report-logrule-api/
+  - sensors-report-mqtt-to-orion/
+  - sensors-report-notification-db/
+  - sensors-report-notificationrule-api/
+  - sensors-report-provision-api/
+  - sensors-report-sms-api/
+  - sensors-report-swagger-api/
+  - sensors-report-webhook-api/
