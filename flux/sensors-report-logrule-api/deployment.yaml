@@ -1,0 +1,33 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-logrule-api
+  labels:
+    app: sensors-report-logrule-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-logrule-api
+  template:
+    metadata:
+      labels:
+        app: sensors-report-logrule-api
+    spec:
+      containers:
+        - name: sensors-report-logrule-api
+          image: viobiscu/sensors-report-logrule-api:latest
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: SR_OrionLdConfig__BrokerUrl
+              value: "http://orion-ld-broker:1026"
