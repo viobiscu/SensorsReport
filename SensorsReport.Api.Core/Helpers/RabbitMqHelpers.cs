@@ -43,9 +43,9 @@ public static class RabbitMqHelpers
             durable: true);
     }
 
-    public static void InitializeRabbitMQ(IModel channel, string exchangeName, string queueName, string routingKey, TimeSpan? retryDelay)
+    public static void InitializeRabbitMQ(IModel channel, string exchangeName, string queueName, string routingKey, TimeSpan? retryDelay, string exchangeType = ExchangeType.Direct)
     {
-        InitializeExchange(channel, exchangeName);
+        InitializeExchange(channel, exchangeName, exchangeType);
 
         IDictionary<string, object>? mainQueueArgs = null;
 
@@ -60,7 +60,7 @@ public static class RabbitMqHelpers
                 { "x-message-ttl", Convert.ToInt32(retryDelay.Value.TotalMilliseconds) }
             };
 
-            channel.ExchangeDeclare(exchange: dlxExchangeName, type: ExchangeType.Direct, durable: true);
+            channel.ExchangeDeclare(exchange: dlxExchangeName, type: exchangeType, durable: true);
             channel.QueueDeclare(queue: retryQueueName, durable: true, exclusive: false, autoDelete: false, arguments: retryQueueArgs);
             channel.QueueBind(queue: retryQueueName, exchange: dlxExchangeName, routingKey: routingKey);
 

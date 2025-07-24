@@ -37,9 +37,9 @@ public class WebhookController : ControllerBase
         _logger.LogInformation("Webhook notification received: {Payload}", JsonSerializer.Serialize(payload));
 
         var tenant = tenantRetriever.CurrentTenantInfo;
-        if (!payload.TryGetProperty("id", out _) ||
+        if (!payload.TryGetProperty("id", out var notificationId) ||
             !payload.TryGetProperty("type", out var typeElement) ||
-            !payload.TryGetProperty("subscriptionId", out _) ||
+            !payload.TryGetProperty("subscriptionId", out var subIdElement) ||
             !payload.TryGetProperty("data", out var dataElement))
         {
             return BadRequest("Invalid webhook notification format");
@@ -51,16 +51,12 @@ public class WebhookController : ControllerBase
             return BadRequest($"Unknown notification type: {type}");
         }
 
-        if (!string.IsNullOrEmpty(subscriptionId))
+        if (string.IsNullOrEmpty(subscriptionId) || subIdElement.GetString() != subscriptionId)
         {
-            if (!payload.TryGetProperty("subscriptionId", out var subIdElement) ||
-                subIdElement.GetString() != subscriptionId)
-            {
-                return BadRequest("Query parameter subscriptionId does not match payload subscriptionId");
-            }
+            return BadRequest("Query parameter subscriptionId does not match payload subscriptionId");
         }
 
-        await notifyRuleQueueService.EnqueueNotificationAsync(dataElement, tenant);
+        await notifyRuleQueueService.EnqueueNotificationAsync(dataElement, tenant, notificationId.GetString()!);
         _logger.LogInformation("Webhook notification enqueued successfully for subscriptionId: {SubscriptionId}", subscriptionId);
         return NoContent();
     }
@@ -127,9 +123,4 @@ public class WebhookController : ControllerBase
         await Task.CompletedTask;
     }
 
-    private async Task ProcessWebhookDataAsync(JsonElement payload)
-    {
-        _logger.LogInformation("Webhook notification processing: {Payload}", JsonSerializer.Serialize(payload));
-        await Task.Delay(100);
-    }
 }

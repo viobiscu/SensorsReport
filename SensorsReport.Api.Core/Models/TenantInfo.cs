@@ -1,4 +1,4 @@
-
+﻿
 namespace SensorsReport;
 
 public class TenantInfo
