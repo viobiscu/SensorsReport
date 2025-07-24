@@ -1,4 +1,4 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
+﻿apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: default
 resources:
@@ -39,3 +39,5 @@ resources:
   - sensors-report-webhook-api/service.yaml
   - sensors-report-workflow-api/deployment.yaml
   - sensors-report-workflow-api/service.yaml
+  - sensors-report-alarmrule-consumer/deployment.yaml
+  - sensors-report-alarmrule-consumer/service.yaml
