@@ -48,7 +48,7 @@ public class RabbitMQNotifyRuleService : INotifyRuleQueueService
         }
     }
 
-    public Task EnqueueNotificationAsync(JsonElement notification, TenantInfo tenant, string notificationId)
+    public Task EnqueueNotificationAsync(JsonElement notification, TenantInfo tenant, string subscriptionId)
     {
         if (_channel == null)
             throw new InvalidOperationException("RabbitMQ channel is not initialized.");
@@ -59,7 +59,7 @@ public class RabbitMQNotifyRuleService : INotifyRuleQueueService
             using var writer = new Utf8JsonWriter(stream);
 
             writer.WriteStartObject();
-            writer.WriteString("notificationId", notificationId);
+            writer.WriteString("subscriptionId", subscriptionId);
             // Write tenant information
             writer.WritePropertyName("tenant");
             writer.WriteStartObject();

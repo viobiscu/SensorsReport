@@ -74,7 +74,16 @@ public class RabbitMQService : IQueueService, IDisposable
             var message = Encoding.UTF8.GetString(body);
             var deliveryTag = ea.DeliveryTag;
 
-            await onMessageReceived(message, deliveryTag);
+            try
+            {
+                await onMessageReceived(message, deliveryTag);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing message: {Message}", message);
+                RejectMessage(deliveryTag, requeue: false);
+                return;
+            }
         };
 
         _channel.BasicConsume(queue: _config.RabbitMQQueue, autoAck: false, consumer: consumer);

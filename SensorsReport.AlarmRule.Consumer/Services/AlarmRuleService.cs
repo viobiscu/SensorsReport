@@ -98,8 +98,3 @@ public interface IAlarmRuleService
     Task<AlarmRuleModel> PutAsync(string alarmRuleId, AlarmRuleModel alarmRule);
     Task DeleteAsync(string alarmRuleId);
 }
-
-public class AlarmRuleModel : EntityModel
-{
-
-}

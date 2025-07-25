@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using SensorsReport.OrionLD;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace SensorsReport.AlarmRule.Consumer;
 
@@ -44,239 +45,308 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
         }
     }
 
-    private async Task ProcessMessageAsync(string message, ulong deliveryTag)
+    private bool IsValidMessage(string message)
     {
-        using var scope = serviceProvider.CreateScope();
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            logger.LogWarning("Received empty or null message.");
+            return false;
+        }
 
         try
         {
-            var webhookData = JsonSerializer.Deserialize<WebhookData>(message, new JsonSerializerOptions
+            var subscriptionData = JsonSerializer.Deserialize<SubscriptionEventModel>(message, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            if (webhookData == null || webhookData.Data == null)
+            if (subscriptionData == null || subscriptionData.Data == null || !subscriptionData.Data.Any())
             {
-                logger.LogWarning("Received message with null or empty Data. Rejecting message permanently. DeliveryTag: {DeliveryTag}", deliveryTag);
-                queueService.AcknowledgeMessage(deliveryTag);
-                return;
+                logger.LogWarning("Received message with null or empty Data: {Message}", message);
+                return false;
             }
 
-            var orionLd = scope.ServiceProvider.GetRequiredService<IOrionLdService>();
-            if (!string.IsNullOrEmpty(webhookData.Tenant?.Tenant))
+            if (subscriptionData.Data.Any(d => d == null || string.IsNullOrEmpty(d.Id)))
             {
-                orionLd.SetTenant(webhookData?.Tenant?.Tenant ?? string.Empty);
+                logger.LogWarning("Received message with null or empty Entity Id in Data: {Message}", message);
+                return false;
             }
 
-            var entity = webhookData!.Data.FirstOrDefault();
-        
-            if (entity == null || string.IsNullOrEmpty(entity.Id))
+            if (subscriptionData.Data.Any(d => d.Type?.Equals("Alarm", StringComparison.OrdinalIgnoreCase) == true))
+            {
+                logger.LogInformation("Received message with Alarm type in Data, skipping processing: {Message}", message);
+                return false;
+            }
+        }
+        catch (JsonException ex)
         {
-                logger.LogWarning("Received message with null or empty Entity Id. Rejecting message permanently. DeliveryTag: {DeliveryTag}", deliveryTag);
+            logger.LogWarning(ex, "Received invalid JSON message: {Message}", message);
+            return false;
+        }
+
+        return true;
+    }
+
+    private (bool isValid, string? errorMessage) IsValidProperty(KeyValuePair<string, JsonElement> prop)
+    {
+        if (string.IsNullOrEmpty(prop.Key))
+            return (false, "Received property with null or empty key.");
+
+        if (prop.Value.ValueKind != JsonValueKind.Object)
+            return (false, string.Format("Received property {0} with non-object value.", prop.Key));
+
+        if (!prop.Value.TryGetProperty("AlarmRule", out var alarmRuleElement) || alarmRuleElement.ValueKind != JsonValueKind.Object)
+            return (false, string.Format("Received property {0} without valid AlarmRule object.", prop.Key));
+
+        if (!alarmRuleElement.TryGetProperty("object", out var alarmRuleIdElement) || alarmRuleIdElement.ValueKind != JsonValueKind.String || string.IsNullOrEmpty(alarmRuleIdElement.GetString()))
+            return (false, string.Format("Received property {0} without valid AlarmRule object ID.", prop.Key));
+
+        try
+        {
+            var propertyData = prop.Value.Deserialize<AlarmRulePropertyModel>();
+            if (propertyData == null || propertyData.Value == null || propertyData.ObservedAt == null)
+                return (false, string.Format("Received property {0} with invalid data.", prop.Key));
+
+            if (string.IsNullOrEmpty(propertyData.AlarmRule?.Object.FirstOrDefault()))
+                return (false, string.Format("There is no AlarmRule for {0}.", prop.Key));
+        }
+        catch (JsonException ex)
+        {
+            logger.LogWarning(ex, "Failed to deserialize property {Property}: {Message}", prop.Key, ex.Message);
+            return (false, string.Format("Received property {0} with invalid JSON format.", prop.Key));
+        }
+
+        return (true, null);
+    }
+
+    public (bool isValid, string? errorMessage) IsValidAlarmRule(AlarmRuleModel? alarmRule)
+    {
+        if (alarmRule == null)
+            return (false, "Received null AlarmRule.");
+        if (string.IsNullOrEmpty(alarmRule.Id))
+            return (false, "Received AlarmRule with null or empty Id.");
+        if (string.IsNullOrEmpty(alarmRule.Type) || !alarmRule.Type.Equals("AlarmRule", StringComparison.OrdinalIgnoreCase))
+            return (false, "Received AlarmRule with invalid Type.");
+        if (!string.IsNullOrEmpty(alarmRule.Status?.Value) && !string.Equals(alarmRule.Status?.Value, AlarmRuleModel.StatusValues.Active.Value, StringComparison.OrdinalIgnoreCase))
+            return (false, "Alarm rule is not active");
+        return (true, null);
+    }
+
+    private async Task ProcessMessageAsync(string message, ulong deliveryTag)
+    {
+        using var scope = serviceProvider.CreateScope();
+
+        if (!IsValidMessage(message))
+        {
+            logger.LogWarning("Invalid message received. Rejecting message permanently. DeliveryTag: {DeliveryTag}", deliveryTag);
             queueService.AcknowledgeMessage(deliveryTag);
-                return;
+            return;
+        }
+
+        var subscriptionData = JsonSerializer.Deserialize<SubscriptionEventModel>(message, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+
+        var orionLd = scope.ServiceProvider.GetRequiredService<IOrionLdService>();
+        if (!string.IsNullOrEmpty(subscriptionData.Tenant?.Tenant))
+            orionLd.SetTenant(subscriptionData.Tenant?.Tenant ?? string.Empty);
+
+        var entity = subscriptionData!.Data!.FirstOrDefault();
+        logger.LogInformation("Processing message for Entity Id: {EntityId}, DeliveryTag: {DeliveryTag}, Tenant: {Tenant}", entity!.Id, deliveryTag, subscriptionData.Tenant?.Tenant);
+
+        var subscription = await orionLd.GetSubscriptionByIdAsync<SubscriptionModel>(subscriptionData.SubscriptionId!)!;
+        if (subscription == null)
+        {
+            logger.LogWarning("Subscription with Id {SubscriptionId} not found. Skipping message. DeliveryTag: {DeliveryTag}", subscriptionData.SubscriptionId, deliveryTag);
+            queueService.AcknowledgeMessage(deliveryTag);
+            return;
+        }
+
+        // ensure only watched attributes by subscription are processed
+        var properties = entity.Properties.Where(p => subscription.WatchedAttributes!.Contains(p.Key));
+
+        foreach (var prop in properties)
+        {
+            var (isValid, errorMessage) = IsValidProperty(prop);
+            if (!isValid)
+            {
+                logger.LogWarning("Skipping property {Property} in Entity Id: {EntityId}, Tenant: {Tenant}, Message: {Message} ", prop.Key, entity.Id, subscriptionData?.Tenant?.Tenant, errorMessage);
+                continue;
             }
 
-            if (entity?.Type?.Equals("Alarm", StringComparison.OrdinalIgnoreCase) == true)
+            var propertyData = prop.Value.Deserialize<AlarmRulePropertyModel>()!;
+            var alarmRuleId = propertyData.AlarmRule?.Object.FirstOrDefault()!;
+
+            logger.LogInformation("Processing alarm rule {AlarmRuleId} for property {Property}, Tenant: {Tenant}", alarmRuleId, prop.Key, subscriptionData?.Tenant?.Tenant);
+
+            var alarmRule = (await orionLd.GetEntityByIdAsync<AlarmRuleModel>(alarmRuleId))!;
+
+            (isValid, errorMessage) = IsValidAlarmRule(alarmRule);
+
+            if (!isValid)
             {
-                queueService.AcknowledgeMessage(deliveryTag);
-                return;
+                logger.LogWarning("Skipping processing for AlarmRule {AlarmRuleId} in Entity Id: {EntityId}, Tenant: {Tenant}, Message: {Message}", alarmRuleId, entity.Id, subscriptionData?.Tenant?.Tenant, errorMessage);
+                continue;
             }
 
-            logger.LogInformation("Processing message for Entity Id: {EntityId}, DeliveryTag: {DeliveryTag}", entity!.Id, deliveryTag);
+            var alarmId = propertyData.Alarm?.Object?.FirstOrDefault();
+            var alarm = new AlarmModel();
+            var isNew = true;
 
-            foreach (var prop in entity.Properties)
+            if (string.IsNullOrEmpty(alarmId))
             {
-                if (prop.Value.ValueKind != JsonValueKind.Object)
-                    continue;
-
-                prop.Value.TryGetProperty("AlarmRule", out var alarmRuleProperty);
-                if (alarmRuleProperty.ValueKind != JsonValueKind.Object)
-                    continue;
-
-                alarmRuleProperty.TryGetProperty("object", out var alarmRuleIdProperty);
-                if (alarmRuleIdProperty.ValueKind != JsonValueKind.String || string.IsNullOrEmpty(alarmRuleIdProperty.GetString()))
+                alarmId = $"urn:ngsi-ld:Alarm:{Guid.NewGuid():D}";
+            }
+            else
+            {
+                try
                 {
-                    logger.LogWarning("No alarm rule for property {Property}, skipping", prop.Key);
-                    continue;
-                }
-
-                var alarmRuleId = alarmRuleIdProperty.GetString()!;
-                logger.LogInformation("Processing alarm rule {AlarmRuleId} for property {Property}", alarmRuleId, prop.Key);
-
-                var alarmRule = await orionLd.GetEntityByIdAsync<EntityModel>(alarmRuleId);
-
-                if (alarmRule == null)
-                {
-                    logger.LogWarning("Alarm rule {AlarmRuleId} not found, skipping", alarmRuleId);
-                    continue;
-                }
-
-                var oboservedAt = prop.Value.GetProperty("observedAt").GetDateTimeOffset();
-                var value = prop.Value.GetProperty("value").GetDouble();
-
-                var low = alarmRule.Properties.FirstOrDefault(p => p.Key == "low").Value;
-                var preLow = alarmRule.Properties.FirstOrDefault(p => p.Key == "prelow").Value;
-                var preHigh = alarmRule.Properties.FirstOrDefault(p => p.Key == "prehigh").Value;
-                var high = alarmRule.Properties.FirstOrDefault(p => p.Key == "high").Value;
-                var unit = alarmRule.Properties.FirstOrDefault(p => p.Key == "unit").Value;
-                var alarmId = $"urn:ngsi-ld:Alarm:{entity.Id.Split(":").Last()}";
-                var alarm = await orionLd.GetEntityByIdAsync<EntityModel>(alarmId);
-                var isNewAlarm = false;
-
-                if (alarm == null)
-                {
-                    isNewAlarm = true;
-                    logger.LogInformation("Creating empty alarm for Entity Id: {EntityId}", entity.Id);
-                    alarm = new EntityModel
+                    var existingAlarm = (await orionLd.GetEntityByIdAsync<AlarmModel>(alarmId!));
+                    if (existingAlarm != null && existingAlarm.Status?.Value?.Equals(AlarmModel.StatusValues.Close.Value, StringComparison.OrdinalIgnoreCase) != true)
                     {
-                        Id = alarmId,
-                        Type = "Alarm",
-                        Properties = new Dictionary<string, JsonElement>
-                        {
-                            {
-                                "belongto", JsonSerializer.SerializeToElement(new RelationshipModel
-                                {
-                                    Type = PropertyModelBase.PropertyType.Relationship,
-                                    Object = [entity.Id]
-                                })
-                            }
-                        },
-                    };
-                }
-
-                var prevStatus = "close";
-                var additionalData = new Dictionary<string, JsonElement>();
-
-                if (alarm.Properties.TryGetValue(prop.Key, out var existingProp))
-                {
-                    alarm.Properties.Remove(prop.Key); // remove previous record
-                    prevStatus = existingProp.GetProperty("status").GetProperty("value").GetString() ?? "close";
-                    if (existingProp.TryGetProperty("additionalData", out var existingAdditionalData))
+                        alarm = existingAlarm;
+                        isNew = false;
+                    }
+                    else
                     {
-                        additionalData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(existingAdditionalData.GetRawText()) ?? new Dictionary<string, JsonElement>();
-                        additionalData = additionalData.Where(kv =>
-                            kv.Key != "observedAt" &&
-                            kv.Key != "unit" &&
-                            kv.Key != "status")
-                            .ToDictionary(kv => kv.Key, kv => kv.Value);
+                        alarmId = $"urn:ngsi-ld:Alarm:{Guid.NewGuid():D}";
                     }
                 }
-
-                logger.LogInformation("Updating existing property {Property} in alarm {AlarmId}", prop.Key, alarm.Id);
-                var updatedProp = new PropertyModel
+                catch (Exception ex)
                 {
-                    Type = PropertyModelBase.PropertyType.Property,
-                    Value = prop.Value.GetProperty("value"),
-                    AdditionalData = new Dictionary<string, JsonElement>
+                    logger.LogWarning(ex, "Failed to retrieve existing alarm with Id {AlarmId}. It may not exist, not in correct format or is not accessible. DeliveryTag: {DeliveryTag}, Tenant: {Tenant}", alarmId, deliveryTag, subscriptionData?.Tenant?.Tenant);
+                    isNew = true;
+                }
+            }
+
+            alarm.Id = alarmId;
+            alarm.Type = "Alarm";
+            alarm.Severity = AlarmModel.SeverityLevels.High;
+
+            var prevStatus = (alarm.Status?.Value ?? AlarmModel.StatusValues.Close.Value)!;
+
+            var sensorValue = propertyData.Value!;
+
+            if (sensorValue < alarmRule.Low?.Value)
+            {
+                logger.LogInformation("Sensor value {SensorValue} is below low threshold {LowThreshold} for AlarmRule {AlarmRuleId}, Tenant: {Tenant}", sensorValue, alarmRule.Low?.Value, alarmRuleId, subscriptionData?.Tenant?.Tenant);
+                alarm.Description = new()
+                {
+                    Value = string.Format("Sensor value for probe {0} is below low threshold", prop.Key),
+                };
+                alarm.Status = AlarmModel.StatusValues.Open;
+                alarm.Threshold = alarmRule.Low;
+            }
+            else if (sensorValue < alarmRule.PreLow?.Value)
+            {
+                logger.LogInformation("Sensor value {SensorValue} is below pre-low threshold {PreLowThreshold} for AlarmRule {AlarmRuleId}, Tenant: {Tenant}", sensorValue, alarmRule.PreLow?.Value, alarmRuleId, subscriptionData?.Tenant?.Tenant);
+                alarm.Description = new()
+                {
+                    Value = string.Format("Sensor value for probe {0} is below pre-low threshold", prop.Key),
+                };
+                alarm.Status = AlarmModel.StatusValues.Open;
+                alarm.Threshold = alarmRule.PreLow;
+            }
+            else if (sensorValue > alarmRule.High?.Value)
+            {
+                logger.LogInformation("Sensor value {SensorValue} is above high threshold {HighThreshold} for AlarmRule {AlarmRuleId}, Tenant: {Tenant}", sensorValue, alarmRule.High?.Value, alarmRuleId, subscriptionData?.Tenant?.Tenant);
+                alarm.Description = new()
+                {
+                    Value = string.Format("Sensor value for probe {0} is above high threshold", prop.Key),
+                };
+                alarm.Status = AlarmModel.StatusValues.Open;
+                alarm.Threshold = alarmRule.High;
+            }
+            else if (sensorValue > alarmRule.PreHigh?.Value)
+            {
+                logger.LogInformation("Sensor value {SensorValue} is above pre-high threshold {PreHighThreshold} for AlarmRule {AlarmRuleId}, Tenant: {Tenant}", sensorValue, alarmRule.PreHigh?.Value, alarmRuleId, subscriptionData?.Tenant?.Tenant);
+                alarm.Description = new()
+                {
+                    Value = string.Format("Sensor value for probe {0} is above pre-high threshold", prop.Key),
+                };
+                alarm.Status = AlarmModel.StatusValues.Open;
+                alarm.Threshold = alarmRule.PreHigh;
+            }
+            else
+            {
+                logger.LogInformation("Sensor value {SensorValue} is within thresholds for AlarmRule {AlarmRuleId}, Tenant: {Tenant}", sensorValue, alarmRuleId, subscriptionData?.Tenant?.Tenant);
+
+                if (isNew)
+                {
+                    queueService.AcknowledgeMessage(deliveryTag);
+                    return;
+                }
+
+                alarm.Description = new()
+                {
+                    Value = string.Format("Sensor value for probe {0} is within thresholds", prop.Key),
+                };
+                alarm.Status = AlarmModel.StatusValues.Close;
+                alarm.Threshold = null;
+            }
+
+            if (!prevStatus.Equals(alarm.Status.Value, StringComparison.OrdinalIgnoreCase))
+            {
+                logger.LogInformation("Alarm status changed from {PreviousStatus} to {CurrentStatus} for AlarmRule {AlarmRuleId}, Tenant: {Tenant}", prevStatus, alarm.Status.Value, alarmRuleId, subscriptionData?.Tenant?.Tenant);
+                alarm.TriggeredAt = new ValuePropertyModel<DateTimeOffset>
+                {
+                    Value = DateTimeOffset.UtcNow
+                };
+                logger.LogInformation("Alarm triggered at {TriggeredAt} for AlarmRule {AlarmRuleId}, Tenant: {Tenant}", alarm.TriggeredAt.Value, alarmRuleId, subscriptionData?.Tenant?.Tenant);
+            }
+
+            alarm.Monitors = alarm.Monitors ?? new();
+            alarm.Monitors.Value ??= new List<RelationshipModel>();
+
+            var existingMonitorRelation = alarm.Monitors.Value.FirstOrDefault(s => s.Object.FirstOrDefault()?.Equals(entity.Id, StringComparison.OrdinalIgnoreCase) == true);
+            if (existingMonitorRelation == null || existingMonitorRelation.MonitoredAttribute?.Value?.Equals(prop.Key, StringComparison.OrdinalIgnoreCase) != true)
+            {
+                alarm.Monitors.Value.Add(new RelationshipModel
+                {
+                    Object = [entity.Id],
+                    MonitoredAttribute = new()
                     {
-                        { "observedAt", prop.Value.GetProperty("observedAt") },
-                        { "unit", unit },
+                        Value = prop.Key
+                    }
+                });
+            }
+
+            alarm.MeasuredValue ??= new();
+            alarm.MeasuredValue.Value ??= [];
+            alarm.MeasuredValue.Value.Add(new ObservedValuePropertyModel<double>
+            {
+                Value = sensorValue.Value,
+                ObservedAt = propertyData.ObservedAt!.Value
+            });
+
+            if (isNew)
+            {
+                await orionLd.CreateEntityAsync(alarm);
+            }
+            else
+            {
+                await orionLd.UpdateEntityAsync(alarmId, alarm);
+            }
+
+            if (propertyData.Alarm?.Object.FirstOrDefault()?.Equals(alarmId, StringComparison.OrdinalIgnoreCase) != true)
+            {
+                var relationshipUpdate = new Dictionary<string, object>
+                {
+                    [prop.Key] = new Dictionary<string, object>
+                    {
+                        ["Alarm"] = new RelationshipModel
                         {
-                            "status", JsonSerializer.SerializeToElement(new PropertyModel
-                            {
-                                Type = PropertyModelBase.PropertyType.Property,
-                                Value = JsonSerializer.SerializeToElement("open")
-                            })
-                        },
-                        {
-                            "previousStatus", JsonSerializer.SerializeToElement(new PropertyModel
-                            {
-                                Type = PropertyModelBase.PropertyType.Property,
-                                Value = JsonSerializer.SerializeToElement(prevStatus)
-                            })
+                            Object = [alarmId]
                         }
                     }
                 };
 
-                foreach (var kv in additionalData)
-                    updatedProp.AdditionalData[kv.Key] = kv.Value;
-
-                var status = "close";
-                var alarmtype = string.Empty;
-
-                if (low.TryGetProperty("value", out var lowValue) && lowValue.GetDouble() > value)
-                {
-                    logger.LogInformation("Value {Value} is below low threshold {Low}. Triggering alarm rule {AlarmRuleId}", value, lowValue.GetDouble(), alarmRuleId);
-                    status = "open";
-                    alarmtype = "low";
-                }
-                else if (high.TryGetProperty("value", out var highValue) && highValue.GetDouble() < value)
-                {
-                    logger.LogInformation("Value {Value} is above high threshold {High}. Triggering alarm rule {AlarmRuleId}", value, highValue.GetDouble(), alarmRuleId);
-                    status = "open";
-                    alarmtype = "high";
-                }
-                else if (preLow.TryGetProperty("value", out var preLowValue) && preLowValue.GetDouble() > value)
-                {
-                    logger.LogInformation("Value {Value} is below pre-low threshold {PreLow}. Triggering alarm rule {AlarmRuleId}", value, preLowValue.GetDouble(), alarmRuleId);
-                    status = "open";
-                    alarmtype = "prelow";
-                }
-                else if (preHigh.TryGetProperty("value", out var preHighValue) && preHighValue.GetDouble() < value)
-                {
-                    logger.LogInformation("Value {Value} is above pre-high threshold {PreHigh}. Triggering alarm rule {AlarmRuleId}", value, preHighValue.GetDouble(), alarmRuleId);
-                    status = "open";
-                    alarmtype = "prehigh";
-        }
-        else
-        {
-                    logger.LogInformation("Value {Value} is within thresholds. No action needed for alarm rule {AlarmRuleId}", value, alarmRuleId);
-                }
-
-                updatedProp.AdditionalData["status"] = JsonSerializer.SerializeToElement(new PropertyModel
-                {
-                    Type = PropertyModelBase.PropertyType.Property,
-                    Value = JsonSerializer.SerializeToElement(status)
-                });
-
-                updatedProp.AdditionalData["alarmType"] = JsonSerializer.SerializeToElement(new PropertyModel
-                {
-                    Type = PropertyModelBase.PropertyType.Property,
-                    Value = JsonSerializer.SerializeToElement(alarmtype)
-                });
-
-                alarm.Properties[prop.Key] = JsonSerializer.SerializeToElement(updatedProp);
-
-                if (isNewAlarm)
-                {
-                    logger.LogInformation("Creating new alarm {AlarmId}", alarm.Id);
-                    await orionLd.CreateEntityAsync(alarm);
-                }
-                else
-                {
-                    logger.LogInformation("Updating existing alarm {AlarmId}", alarm.Id);
-                    await orionLd.UpdateEntityAsync(alarmId, alarm);
-                }
-
-                if (prop.Value.TryGetProperty("Alarm", out var alarmElement) &&
-                    alarmElement.TryGetProperty("object", out var relationshipAlarmId) &&
-                    relationshipAlarmId.GetString()?.Equals(alarmId, StringComparison.OrdinalIgnoreCase) == false)
-                {
-                    var relationshipUpdate = new Dictionary<string, object>
-                    {
-                        [prop.Key] = new Dictionary<string, object>
-                        {
-                            ["Alarm"] = new RelationshipModel
-                            {
-                                Type = PropertyModelBase.PropertyType.Relationship,
-                                Object = [alarmId]
-                            }
-                        }
-                    };
-
-                    await orionLd.UpdateEntityAsync(entity.Id, relationshipUpdate);
-                }
+                await orionLd.UpdateEntityAsync(entity.Id!, relationshipUpdate);
             }
-
-
-            queueService.AcknowledgeMessage(deliveryTag);
         }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "An error occurred while processing the message: {Message}", message);
-            queueService.RejectMessage(deliveryTag, requeue: false);
-        }
+
+        queueService.AcknowledgeMessage(deliveryTag);
     }
 
 
@@ -287,3 +357,130 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
     }
 }
 
+public class AlarmRulePropertyModel : PropertyModelBase
+{
+    [JsonPropertyName("value")]
+    public double? Value { get; set; }
+    [JsonPropertyName("observedAt")]
+    public DateTimeOffset? ObservedAt { get; set; }
+    [JsonPropertyName("unit")]
+    public ValuePropertyModel<string>? Unit { get; set; }
+    [JsonPropertyName("AlarmRule")]
+    public RelationshipModel? AlarmRule { get; set; }
+    [JsonPropertyName("Alarm")]
+    public RelationshipModel? Alarm { get; set; }
+}
+
+public partial class AlarmRuleModel : EntityModel
+{
+    [JsonPropertyName("name")]
+    public AlarmNamePropertyModel? Name { get; set; }
+
+    [JsonPropertyName("unit")]
+    public ValuePropertyModel<string>? Unit { get; set; }
+    [JsonPropertyName("low")]
+    public ValuePropertyModel<double>? Low { get; set; }
+    [JsonPropertyName("prelow")]
+    public ValuePropertyModel<double>? PreLow { get; set; }
+    [JsonPropertyName("prehigh")]
+    public ValuePropertyModel<double>? PreHigh { get; set; }
+    [JsonPropertyName("high")]
+    public ValuePropertyModel<double>? High { get; set; }
+    [JsonPropertyName("status")]
+    public ValuePropertyModel<string>? Status { get; set; }
+}
+
+public class AlarmNamePropertyModel : ValuePropertyModel<string>
+{
+    [JsonPropertyName("attributeDetails")]
+    public ValuePropertyModel<string>? AttributeDetails { get; set; }
+
+    [JsonPropertyName("value")]
+    public new string? Value { get; set; }
+}
+
+public partial class AlarmModel : EntityModel
+{
+    [JsonPropertyName("description")]
+    public ValuePropertyModel<string>? Description { get; set; }
+
+    [JsonPropertyName("status")]
+    public ValuePropertyModel<string>? Status { get; set; }
+
+    [JsonPropertyName("severity")]
+    public ValuePropertyModel<string>? Severity { get; set; } = AlarmModel.SeverityLevels.None;
+
+    [JsonPropertyName("triggeredAt")]
+    public ValuePropertyModel<DateTimeOffset>? TriggeredAt { get; set; }
+
+    [JsonPropertyName("monitors")]
+    public RelationshipValuesModel? Monitors { get; set; }
+
+    [JsonPropertyName("threshold")]
+    public ValuePropertyModel<double>? Threshold { get; set; }
+
+    [JsonPropertyName("measuredValue")]
+    public ValuePropertyModel<List<ObservedValuePropertyModel<double>>>? MeasuredValue { get; set; }
+
+    [JsonPropertyName("location")]
+    public ValuePropertyModel<Point>? Location { get; set; }
+}
+
+public partial class AlarmModel
+{
+    public static class SeverityLevels
+    {
+        public readonly static ValuePropertyModel<string> None = new()
+        {
+            Value = "none"
+        };
+
+        public readonly static ValuePropertyModel<string> High = new()
+        {
+            Value = "high"
+        };
+
+        public readonly static ValuePropertyModel<string> Medium = new()
+        {
+            Value = "medium"
+        };
+
+        public readonly static ValuePropertyModel<string> Low = new()
+        {
+            Value = "low"
+        };
+    }
+
+    public static class StatusValues
+    {
+        public readonly static ValuePropertyModel<string> Open = new()
+        {
+            Value = "open"
+        };
+        public readonly static ValuePropertyModel<string> Close = new()
+        {
+            Value = "close"
+        };
+    }
+}
+
+public partial class AlarmRuleModel
+{
+    public static class StatusValues
+    {
+        public readonly static ValuePropertyModel<string> Active = new()
+        {
+            Value = "active"
+        };
+
+        public readonly static ValuePropertyModel<string> Deleted = new()
+        {
+            Value = "deleted"
+        };
+
+        public readonly static ValuePropertyModel<string> Disabled = new()
+        {
+            Value = "disabled"
+        };
+    }
+}

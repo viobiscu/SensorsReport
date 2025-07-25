@@ -39,7 +39,7 @@ public class WebhookController : ControllerBase
         var tenant = tenantRetriever.CurrentTenantInfo;
         if (!payload.TryGetProperty("id", out var notificationId) ||
             !payload.TryGetProperty("type", out var typeElement) ||
-            !payload.TryGetProperty("subscriptionId", out var subIdElement) ||
+            !payload.TryGetProperty("subscriptionId", out var subscriptionIdElement) ||
             !payload.TryGetProperty("data", out var dataElement))
         {
             return BadRequest("Invalid webhook notification format");
@@ -51,12 +51,12 @@ public class WebhookController : ControllerBase
             return BadRequest($"Unknown notification type: {type}");
         }
 
-        if (string.IsNullOrEmpty(subscriptionId) || subIdElement.GetString() != subscriptionId)
+        if (string.IsNullOrEmpty(subscriptionId) || subscriptionIdElement.GetString() != subscriptionId)
         {
             return BadRequest("Query parameter subscriptionId does not match payload subscriptionId");
         }
 
-        await notifyRuleQueueService.EnqueueNotificationAsync(dataElement, tenant, notificationId.GetString()!);
+        await notifyRuleQueueService.EnqueueNotificationAsync(dataElement, tenant, subscriptionIdElement.GetString()!);
         _logger.LogInformation("Webhook notification enqueued successfully for subscriptionId: {SubscriptionId}", subscriptionId);
         return NoContent();
     }
