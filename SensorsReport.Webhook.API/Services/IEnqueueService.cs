@@ -2,7 +2,7 @@
 
 namespace SensorsReport.Webhook.API.Services;
 
-public interface INotifyRuleQueueService
+public interface IEnqueueService
 {
     Task EnqueueNotificationAsync(JsonElement notification, TenantInfo tenant, string subscriptionId);
 }

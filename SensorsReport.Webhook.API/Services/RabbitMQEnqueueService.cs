@@ -6,14 +6,14 @@ using System.Text.Json;
 
 namespace SensorsReport.Webhook.API.Services;
 
-public class RabbitMQNotifyRuleService : INotifyRuleQueueService
+public class RabbitMQEnqueueService : IEnqueueService
 {
     private readonly RabbitMQExchangeConfig _config;
-    private readonly ILogger<RabbitMQNotifyRuleService> _logger;
+    private readonly ILogger<RabbitMQEnqueueService> _logger;
     private IConnection? _connection;
     private IModel? _channel;
 
-    public RabbitMQNotifyRuleService(IOptions<RabbitMQExchangeConfig> config, ILogger<RabbitMQNotifyRuleService> logger)
+    public RabbitMQEnqueueService(IOptions<RabbitMQExchangeConfig> config, ILogger<RabbitMQEnqueueService> logger)
     {
         _config = config.Value ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -37,7 +37,7 @@ public class RabbitMQNotifyRuleService : INotifyRuleQueueService
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
 
-            RabbitMqHelpers.InitializeExchange(_channel, _config.RabbitMQExchange!, ExchangeType.Fanout); // broadcast for every queue
+            RabbitMqHelpers.InitializeExchange(_channel, _config.RabbitMQExchange!, ExchangeType.Direct);
 
             _logger.LogInformation("RabbitMQ connection established successfully");
         }

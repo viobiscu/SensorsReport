@@ -27,7 +27,7 @@ public class WebhookController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
     public async Task<IActionResult> ReceiveWebhook(
-        [FromServices] INotifyRuleQueueService notifyRuleQueueService,
+        [FromServices] IEnqueueService notifyRuleQueueService,
         [FromServices] ITenantRetriever tenantRetriever,
         [FromBody] JsonElement payload,
         [FromQuery] string? subscriptionId = null)

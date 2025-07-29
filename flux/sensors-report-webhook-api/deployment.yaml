@@ -39,4 +39,4 @@ spec:
                   name: rabbitmq-default-default-user
                   key: connection_string
             - name: SR_RabbitMQExchangeConfig__RabbitMQExchange
-              value: sensorsreport.exchange.notification.webhook
+              value: sensorsreport.exchange.notification.logrule

@@ -103,7 +103,7 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
 
         try
         {
-            var propertyData = prop.Value.Deserialize<AlarmRulePropertyModel>();
+            var propertyData = prop.Value.Deserialize<EntityPropertyModel>();
             if (propertyData == null || propertyData.Value == null || propertyData.ObservedAt == null)
                 return (false, string.Format("Received property {0} with invalid data.", prop.Key));
 
@@ -175,7 +175,7 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
                 continue;
             }
 
-            var propertyData = prop.Value.Deserialize<AlarmRulePropertyModel>()!;
+            var propertyData = prop.Value.Deserialize<EntityPropertyModel>()!;
             var alarmRuleId = propertyData.AlarmRule?.Object.FirstOrDefault()!;
 
             logger.LogInformation("Processing alarm rule {AlarmRuleId} for property {Property}, Tenant: {Tenant}", alarmRuleId, prop.Key, subscriptionData?.Tenant?.Tenant);
@@ -357,7 +357,7 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
     }
 }
 
-public class AlarmRulePropertyModel : PropertyModelBase
+public class EntityPropertyModel : PropertyModelBase
 {
     [JsonPropertyName("value")]
     public double? Value { get; set; }

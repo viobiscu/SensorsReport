@@ -24,7 +24,7 @@ void Configure(IConfigurationManager configuration, IServiceCollection services)
     services.Configure<AppConfiguration>(configuration.GetSection("AppConfiguration"));
     logger.LogSection(configuration, "AppConfiguration");
     services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<AppConfiguration>>().Value);
-    services.AddSingleton<INotifyRuleQueueService, RabbitMQNotifyRuleService>();
+    services.AddSingleton<IEnqueueService, RabbitMQEnqueueService>();
     services.AddTenantServices();
     services.AddHostedService<AutoRegisterAlarmSubscriptions>();
 }
