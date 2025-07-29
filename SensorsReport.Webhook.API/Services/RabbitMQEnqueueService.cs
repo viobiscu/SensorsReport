@@ -83,7 +83,7 @@ public class RabbitMQEnqueueService : IEnqueueService
             properties.Persistent = true;
             _channel.BasicPublish(
                 exchange: _config.RabbitMQExchange,
-                routingKey: string.Empty,
+                routingKey: _config.RabbitMQRoutingKey,
                 basicProperties: properties,
                 body: body);
             _logger.LogInformation("Notification enqueued successfully");

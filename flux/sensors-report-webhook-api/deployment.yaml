@@ -40,3 +40,5 @@ spec:
                   key: connection_string
             - name: SR_RabbitMQExchangeConfig__RabbitMQExchange
               value: sensorsreport.exchange.notification.logrule
+            - name: SR_RabbitMQExchangeConfig__RabbitMQRoutingKey
+              value: sensorsreport.exchange.notification.logrule
