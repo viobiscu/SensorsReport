@@ -87,7 +87,7 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
         return true;
     }
 
-    private (bool isValid, string? errorMessage) IsValidProperty(KeyValuePair<string, JsonElement> prop)
+    private (bool isValid, string? errorMessage) IsValidProperty(KeyValuePair<string, JsonElement> prop, KeyValuePair<string, JsonElement> metaProp)
     {
         if (string.IsNullOrEmpty(prop.Key))
             return (false, "Received property with null or empty key.");
@@ -95,7 +95,7 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
         if (prop.Value.ValueKind != JsonValueKind.Object)
             return (false, string.Format("Received property {0} with non-object value.", prop.Key));
 
-        if (!prop.Value.TryGetProperty("AlarmRule", out var alarmRuleElement) || alarmRuleElement.ValueKind != JsonValueKind.Object)
+        if (!metaProp.Value.TryGetProperty("AlarmRule", out var alarmRuleElement) || alarmRuleElement.ValueKind != JsonValueKind.Object)
             return (false, string.Format("Received property {0} without valid AlarmRule object.", prop.Key));
 
         if (!alarmRuleElement.TryGetProperty("object", out var alarmRuleIdElement) || alarmRuleIdElement.ValueKind != JsonValueKind.String || string.IsNullOrEmpty(alarmRuleIdElement.GetString()))
@@ -104,10 +104,11 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
         try
         {
             var propertyData = prop.Value.Deserialize<EntityPropertyModel>();
+            var metadata = metaProp.Value.Deserialize<MetaPropertyModel>();
             if (propertyData == null || propertyData.Value == null || propertyData.ObservedAt == null)
                 return (false, string.Format("Received property {0} with invalid data.", prop.Key));
 
-            if (string.IsNullOrEmpty(propertyData.AlarmRule?.Object.FirstOrDefault()))
+            if (string.IsNullOrEmpty(metadata!.AlarmRule?.Object.FirstOrDefault()))
                 return (false, string.Format("There is no AlarmRule for {0}.", prop.Key));
         }
         catch (JsonException ex)
@@ -132,6 +133,8 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
         return (true, null);
     }
 
+    private string GetMetaPropertyName(string propName) => $"metadata_{propName}";
+
     private async Task ProcessMessageAsync(string message, ulong deliveryTag)
     {
         using var scope = serviceProvider.CreateScope();
@@ -143,10 +146,7 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
             return;
         }
 
-        var subscriptionData = JsonSerializer.Deserialize<SubscriptionEventModel>(message, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        })!;
+        var subscriptionData = JsonSerializer.Deserialize<SubscriptionEventModel>(message)!;
 
         var orionLd = scope.ServiceProvider.GetRequiredService<IOrionLdService>();
         if (!string.IsNullOrEmpty(subscriptionData.Tenant?.Tenant))
@@ -164,11 +164,17 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
         }
 
         // ensure only watched attributes by subscription are processed
-        var properties = entity.Properties.Where(p => subscription.WatchedAttributes!.Contains(p.Key));
+        var properties = (subscription.WatchedAttributes != null && subscription.WatchedAttributes.Count > 0) ? entity.Properties.Where(p => subscription.WatchedAttributes!.Contains(p.Key)) : entity.Properties;
+
+        var metaProperties = properties.Where(s => s.Key.StartsWith("metadata_"));
+        var propKeys = metaProperties.Select(s => s.Key.Replace("metadata_", "")).ToList();
+
+        properties = properties.Where(p => propKeys.Contains(p.Key));
 
         foreach (var prop in properties)
         {
-            var (isValid, errorMessage) = IsValidProperty(prop);
+            var metaProp = metaProperties.FirstOrDefault(m => m.Key == GetMetaPropertyName(prop.Key));
+            var (isValid, errorMessage) = IsValidProperty(prop, metaProp);
             if (!isValid)
             {
                 logger.LogWarning("Skipping property {Property} in Entity Id: {EntityId}, Tenant: {Tenant}, Message: {Message} ", prop.Key, entity.Id, subscriptionData?.Tenant?.Tenant, errorMessage);
@@ -176,7 +182,8 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
             }
 
             var propertyData = prop.Value.Deserialize<EntityPropertyModel>()!;
-            var alarmRuleId = propertyData.AlarmRule?.Object.FirstOrDefault()!;
+            var metadata = metaProp.Value.Deserialize<MetaPropertyModel>()!;
+            var alarmRuleId = metadata.AlarmRule?.Object.FirstOrDefault()!;
 
             logger.LogInformation("Processing alarm rule {AlarmRuleId} for property {Property}, Tenant: {Tenant}", alarmRuleId, prop.Key, subscriptionData?.Tenant?.Tenant);
 
@@ -190,7 +197,7 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
                 continue;
             }
 
-            var alarmId = propertyData.Alarm?.Object?.FirstOrDefault();
+            var alarmId = metadata.Alarm?.Object?.FirstOrDefault();
             var alarm = new AlarmModel();
             var isNew = true;
 
@@ -329,11 +336,11 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
                 await orionLd.UpdateEntityAsync(alarmId, alarm);
             }
 
-            if (propertyData.Alarm?.Object.FirstOrDefault()?.Equals(alarmId, StringComparison.OrdinalIgnoreCase) != true)
+            if (metadata.Alarm?.Object.FirstOrDefault()?.Equals(alarmId, StringComparison.OrdinalIgnoreCase) != true)
             {
                 var relationshipUpdate = new Dictionary<string, object>
                 {
-                    [prop.Key] = new Dictionary<string, object>
+                    [GetMetaPropertyName(prop.Key)] = new Dictionary<string, object>
                     {
                         ["Alarm"] = new RelationshipModel
                         {
@@ -367,11 +374,20 @@ public class EntityPropertyModel : PropertyModelBase
     public DateTimeOffset? ObservedAt { get; set; }
     [JsonPropertyName("unit")]
     public ValuePropertyModel<string>? Unit { get; set; }
+}
+
+public partial class MetaPropertyModel : PropertyModelBase
+{
     [JsonPropertyName("AlarmRule")]
     public RelationshipModel? AlarmRule { get; set; }
     [JsonPropertyName("Alarm")]
     public RelationshipModel? Alarm { get; set; }
+    [JsonPropertyName("previousValue")]
+    public double? PreviousValue { get; set; }
+    [JsonPropertyName("previousValueObservedAt")]
+    public DateTimeOffset? PreviousValueObservedAt { get; set; }
 }
+
 
 public partial class AlarmRuleModel : EntityModel
 {

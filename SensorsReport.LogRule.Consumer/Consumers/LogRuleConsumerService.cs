@@ -81,7 +81,7 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
         return true;
     }
 
-    private (bool isValid, string? errorMessage) IsValidProperty(KeyValuePair<string, JsonElement> prop)
+    private (bool isValid, string? errorMessage) IsValidProperty(KeyValuePair<string, JsonElement> prop, KeyValuePair<string, JsonElement> metaProp)
     {
         if (string.IsNullOrEmpty(prop.Key))
             return (false, "Received property with null or empty key.");
@@ -89,21 +89,22 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
         if (prop.Value.ValueKind != JsonValueKind.Object)
             return (false, string.Format("Received property {0} with non-object value.", prop.Key));
 
-        if (prop.Value.TryGetProperty("LogRule", out var logRuleElement))
+        if (metaProp.Value.TryGetProperty("LogRule", out var logRuleElement))
         {
             if (logRuleElement.ValueKind != JsonValueKind.Object)
-                return (false, string.Format("Received property {0} with invalid LogRule format.", prop.Key));
+                return (false, string.Format("Received property {0} with invalid LogRule format.", metaProp.Key));
 
             if (!logRuleElement.TryGetProperty("object", out var logRuleIdElement) || logRuleIdElement.ValueKind != JsonValueKind.String || string.IsNullOrEmpty(logRuleIdElement.GetString()))
-                return (false, string.Format("Received property {0} without valid LogRule object ID.", prop.Key));
+                return (false, string.Format("Received property {0} without valid LogRule object ID.", metaProp.Key));
         }
         try
         {
             var propertyData = prop.Value.Deserialize<EntityPropertyModel>();
+            var metadata = metaProp.Value.Deserialize<MetaPropertyModel>();
             if (propertyData == null || propertyData.Value == null || propertyData.ObservedAt == null)
                 return (false, string.Format("Received property {0} with invalid data.", prop.Key));
 
-            if (string.IsNullOrEmpty(propertyData.LogRule?.Object.FirstOrDefault()))
+            if (string.IsNullOrEmpty(metadata!.LogRule?.Object.FirstOrDefault()))
                 return (false, string.Format("There is no LogRule for {0}.", prop.Key));
         }
         catch (JsonException ex)
@@ -138,6 +139,8 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             await enqueueService.EnqueueAlarmAsync(message);
         }
     }
+
+    private string GetMetaPropertyName(string propName) => $"metadata_{propName}";
 
     private async Task ProcessMessageAsync(string message, ulong deliveryTag)
     {
@@ -184,7 +187,7 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             };
         }
 
-        async Task<(int consecutiveHit, string status)> IncrementConsecutiveHit(string propKey, EntityPropertyModel propertyData, int maxConsecutiveHit, string entityId)
+        async Task<(int consecutiveHit, string status)> IncrementConsecutiveHit(string propKey, MetaPropertyModel propertyData, int maxConsecutiveHit, string entityId)
         {
             if (propertyData.ConsecutiveHit == null)
             {
@@ -197,7 +200,7 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
 
             var consecutiveHitUpdatePatch = new Dictionary<string, Dictionary<string, object>>();
 
-            consecutiveHitUpdatePatch[propKey] = new Dictionary<string, object>
+            consecutiveHitUpdatePatch[GetMetaPropertyName(propKey)] = new Dictionary<string, object>
             {
                 ["consecutiveHit"] = new ValuePropertyModel<int>
                 {
@@ -206,7 +209,7 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             };
 
             var statusText = propertyData.ConsecutiveHit.Value >= maxConsecutiveHit ? "faulty" : "operational";
-            consecutiveHitUpdatePatch[propKey].Add(
+            consecutiveHitUpdatePatch[GetMetaPropertyName(propKey)].Add(
                 "status", new ObservedValuePropertyModel<string>
                 {
                     Value = statusText,
@@ -219,14 +222,14 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             return (propertyData.ConsecutiveHit.Value, statusText);
         }
 
-        async Task ResetConsecutiveHit(string propKey, EntityPropertyModel propertyData, string entityId)
+        async Task ResetConsecutiveHit(string propKey, MetaPropertyModel propertyData, string entityId)
         {
             if (propertyData.ConsecutiveHit != null && propertyData.ConsecutiveHit.Value > 0)
             {
                 propertyData.ConsecutiveHit.Value = 0;
                 var resetPatch = new Dictionary<string, Dictionary<string, object>>
                 {
-                    [propKey] = new Dictionary<string, object>
+                    [GetMetaPropertyName(propKey)] = new Dictionary<string, object>
                     {
                         ["consecutiveHit"] = new ValuePropertyModel<int> { Value = 0 },
                         ["status"] = new ObservedValuePropertyModel<string>
@@ -240,9 +243,15 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             }
         }
 
+        var metaProperties = properties.Where(s => s.Key.StartsWith("metadata_"));
+        var propKeys = metaProperties.Select(s => s.Key.Replace("metadata_", "")).ToList();
+
+        properties = properties.Where(p => propKeys.Contains(p.Key));
+
         foreach (var prop in properties)
         {
-            var (isValid, errorMessage) = IsValidProperty(prop);
+            var metaProp = metaProperties.FirstOrDefault(m => m.Key == GetMetaPropertyName(prop.Key));
+            var (isValid, errorMessage) = IsValidProperty(prop, metaProp);
             if (!isValid)
             {
                 logger.LogWarning("Skipping property {Property} in Entity Id: {EntityId}, Tenant: {Tenant}, Message: {Message} ", prop.Key, entity.Id, subscriptionData.Tenant?.Tenant, errorMessage);
@@ -251,7 +260,8 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             }
 
             var propertyData = prop.Value.Deserialize<EntityPropertyModel>()!;
-            var logRuleId = propertyData.LogRule?.Object.FirstOrDefault()!;
+            var metadata = metaProp.Value.Deserialize<MetaPropertyModel>()!;
+            var logRuleId = metadata.LogRule?.Object.FirstOrDefault()!;
 
             logger.LogInformation("Processing log rule {LogRuleId} for property {Property}, Tenant: {Tenant}", logRuleId, prop.Key, subscriptionData.Tenant?.Tenant);
 
@@ -271,19 +281,19 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             if (logRule.Low!.Value > propertyData.Value)
             {
                 logger.LogInformation("LogRule {LogRuleId} is below range for property {Property}, Entity Id: {EntityId}, Tenant: {Tenant}", logRuleId, prop.Key, entity.Id, subscriptionData.Tenant?.Tenant);
-                await IncrementConsecutiveHit(prop.Key, propertyData, logRule.ConsecutiveHit!.Value, entity.Id!);
+                await IncrementConsecutiveHit(prop.Key, metadata, logRule.ConsecutiveHit!.Value, entity.Id!);
             }
             else if (logRule.High!.Value < propertyData.Value)
             {
                 logger.LogInformation("LogRule {LogRuleId} is above range for property {Property}, Entity Id: {EntityId}, Tenant: {Tenant}", logRuleId, prop.Key, entity.Id, subscriptionData.Tenant?.Tenant);
-                await IncrementConsecutiveHit(prop.Key, propertyData, logRule.ConsecutiveHit!.Value, entity.Id!);
+                await IncrementConsecutiveHit(prop.Key, metadata, logRule.ConsecutiveHit!.Value, entity.Id!);
             }
             else
             {
-                if (!string.IsNullOrEmpty(propertyData.Status?.Value) && propertyData.Status.Value.Equals(EntityPropertyModel.StatusValues.Faulty, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(metadata.Status?.Value) && metadata.Status.Value.Equals(EntityPropertyModel.StatusValues.Faulty, StringComparison.OrdinalIgnoreCase))
                 {
                     logger.LogInformation("LogRule {LogRuleId} is faulty for property {Property}, Entity Id: {EntityId}, Tenant: {Tenant}. Resetting consecutive hit.", logRuleId, prop.Key, entity.Id, subscriptionData.Tenant?.Tenant);
-                    await ResetConsecutiveHit(prop.Key, propertyData, entity.Id!);
+                    await ResetConsecutiveHit(prop.Key, metadata, entity.Id!);
                 }
                 else
                 {
@@ -313,6 +323,10 @@ public partial class EntityPropertyModel : PropertyModelBase
     public DateTimeOffset? ObservedAt { get; set; }
     [JsonPropertyName("unit")]
     public ValuePropertyModel<string>? Unit { get; set; }
+}
+
+public partial class MetaPropertyModel : PropertyModelBase
+{
     [JsonPropertyName("LogRule")]
     public RelationshipModel? LogRule { get; set; }
     [JsonPropertyName("consecutiveHit")]

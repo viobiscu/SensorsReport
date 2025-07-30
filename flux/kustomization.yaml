@@ -41,4 +41,5 @@ resources:
   - sensors-report-workflow-api/service.yaml
   - sensors-report-alarmrule-consumer/deployment.yaml
   - sensors-report-alarmrule-consumer/service.yaml
-
+  - sensors-report-logrule-consumer/deployment.yaml
+  - sensors-report-logrule-consumer/service.yaml
