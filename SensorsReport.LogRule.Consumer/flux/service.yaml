@@ -1,10 +1,10 @@
 ﻿apiVersion: v1
 kind: Service
 metadata:
-  name: sensors-report-alarmrule-consumer
+  name: sensors-report-logrule-consumer
 spec:
   selector:
-    app: sensors-report-alarmrule-consumer
+    app: sensors-report-logrule-consumer
   ports:
     - protocol: TCP
       port: 80
