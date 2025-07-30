@@ -162,6 +162,8 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
         var entity = subscriptionData!.Data!.FirstOrDefault();
         logger.LogInformation("Processing message for Entity Id: {EntityId}, DeliveryTag: {DeliveryTag}, Tenant: {Tenant}", entity!.Id, deliveryTag, subscriptionData.Tenant?.Tenant);
 
+        entity = await orionLd.GetEntityByIdAsync<EntityModel>(entity.Id!);
+
         var subscription = await orionLd.GetSubscriptionByIdAsync<SubscriptionModel>(subscriptionData.SubscriptionId!)!;
         if (subscription == null)
         {
@@ -169,8 +171,6 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             queueService.AcknowledgeMessage(deliveryTag);
             return;
         }
-
-        var properties = (subscription.WatchedAttributes != null && subscription.WatchedAttributes.Count > 0) ? entity.Properties.Where(p => subscription.WatchedAttributes!.Contains(p.Key)) : entity.Properties;
 
         SubscriptionEventModel createSubscriptionEventModel(KeyValuePair<string, JsonElement> prop)
         {
@@ -189,26 +189,26 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
 
         async Task<(int consecutiveHit, string status)> IncrementConsecutiveHit(string propKey, MetaPropertyModel propertyData, int maxConsecutiveHit, string entityId)
         {
-            if (propertyData.ConsecutiveHit == null)
+            if (propertyData.LogRuleConsecutiveHit == null)
             {
-                propertyData.ConsecutiveHit = new ValuePropertyModel<int> { Value = 1 };
+                propertyData.LogRuleConsecutiveHit = new ValuePropertyModel<int> { Value = 1 };
             }
             else
             {
-                propertyData.ConsecutiveHit.Value++;
+                propertyData.LogRuleConsecutiveHit.Value++;
             }
 
             var consecutiveHitUpdatePatch = new Dictionary<string, Dictionary<string, object>>();
 
             consecutiveHitUpdatePatch[GetMetaPropertyName(propKey)] = new Dictionary<string, object>
             {
-                ["consecutiveHit"] = new ValuePropertyModel<int>
+                ["logRuleConsecutiveHit"] = new ValuePropertyModel<int>
                 {
-                    Value = propertyData.ConsecutiveHit.Value
+                    Value = propertyData.LogRuleConsecutiveHit.Value
                 }
             };
 
-            var statusText = propertyData.ConsecutiveHit.Value >= maxConsecutiveHit ? "faulty" : "operational";
+            var statusText = propertyData.LogRuleConsecutiveHit.Value >= maxConsecutiveHit ? "faulty" : "operational";
             consecutiveHitUpdatePatch[GetMetaPropertyName(propKey)].Add(
                 "status", new ObservedValuePropertyModel<string>
                 {
@@ -219,19 +219,19 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
 
             await orionLd.UpdateEntityAsync(entity.Id!, consecutiveHitUpdatePatch);
 
-            return (propertyData.ConsecutiveHit.Value, statusText);
+            return (propertyData.LogRuleConsecutiveHit.Value, statusText);
         }
 
         async Task ResetConsecutiveHit(string propKey, MetaPropertyModel propertyData, string entityId)
         {
-            if (propertyData.ConsecutiveHit != null && propertyData.ConsecutiveHit.Value > 0)
+            if (propertyData.LogRuleConsecutiveHit != null && propertyData.LogRuleConsecutiveHit.Value > 0)
             {
-                propertyData.ConsecutiveHit.Value = 0;
+                propertyData.LogRuleConsecutiveHit.Value = 0;
                 var resetPatch = new Dictionary<string, Dictionary<string, object>>
                 {
                     [GetMetaPropertyName(propKey)] = new Dictionary<string, object>
                     {
-                        ["consecutiveHit"] = new ValuePropertyModel<int> { Value = 0 },
+                        ["logRuleConsecutiveHit"] = new ValuePropertyModel<int> { Value = 0 },
                         ["status"] = new ObservedValuePropertyModel<string>
                         {
                             Value = "operational",
@@ -243,7 +243,8 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             }
         }
 
-        var metaProperties = properties.Where(s => s.Key.StartsWith("metadata_"));
+        var properties = (subscription.WatchedAttributes != null && subscription.WatchedAttributes.Count > 0) ? entity!.Properties.Where(p => subscription.WatchedAttributes!.Contains(p.Key)) : entity!.Properties;
+        var metaProperties = entity.Properties.Where(s => s.Key.StartsWith("metadata_"));
         var propKeys = metaProperties.Select(s => s.Key.Replace("metadata_", "")).ToList();
 
         properties = properties.Where(p => propKeys.Contains(p.Key));
@@ -329,8 +330,8 @@ public partial class MetaPropertyModel : PropertyModelBase
 {
     [JsonPropertyName("LogRule")]
     public RelationshipModel? LogRule { get; set; }
-    [JsonPropertyName("consecutiveHit")]
-    public ValuePropertyModel<int>? ConsecutiveHit { get; set; }
+    [JsonPropertyName("logRuleConsecutiveHit")]
+    public ValuePropertyModel<int>? LogRuleConsecutiveHit { get; set; }
     [JsonPropertyName("status")]
     public ObservedValuePropertyModel<string>? Status { get; set; }
 }

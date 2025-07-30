@@ -155,6 +155,8 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
         var entity = subscriptionData!.Data!.FirstOrDefault();
         logger.LogInformation("Processing message for Entity Id: {EntityId}, DeliveryTag: {DeliveryTag}, Tenant: {Tenant}", entity!.Id, deliveryTag, subscriptionData.Tenant?.Tenant);
 
+        entity = await orionLd.GetEntityByIdAsync<EntityModel>(entity.Id!);
+
         var subscription = await orionLd.GetSubscriptionByIdAsync<SubscriptionModel>(subscriptionData.SubscriptionId!)!;
         if (subscription == null)
         {
@@ -164,9 +166,8 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
         }
 
         // ensure only watched attributes by subscription are processed
-        var properties = (subscription.WatchedAttributes != null && subscription.WatchedAttributes.Count > 0) ? entity.Properties.Where(p => subscription.WatchedAttributes!.Contains(p.Key)) : entity.Properties;
-
-        var metaProperties = properties.Where(s => s.Key.StartsWith("metadata_"));
+        var properties = (subscription.WatchedAttributes != null && subscription.WatchedAttributes.Count > 0) ? entity!.Properties.Where(p => subscription.WatchedAttributes!.Contains(p.Key)) : entity!.Properties;
+        var metaProperties = entity.Properties.Where(s => s.Key.StartsWith("metadata_"));
         var propKeys = metaProperties.Select(s => s.Key.Replace("metadata_", "")).ToList();
 
         properties = properties.Where(p => propKeys.Contains(p.Key));
@@ -382,10 +383,6 @@ public partial class MetaPropertyModel : PropertyModelBase
     public RelationshipModel? AlarmRule { get; set; }
     [JsonPropertyName("Alarm")]
     public RelationshipModel? Alarm { get; set; }
-    [JsonPropertyName("previousValue")]
-    public double? PreviousValue { get; set; }
-    [JsonPropertyName("previousValueObservedAt")]
-    public DateTimeOffset? PreviousValueObservedAt { get; set; }
 }
 
 
