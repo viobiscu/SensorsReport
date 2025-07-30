@@ -42,7 +42,11 @@ spec:
           value: sensorsreport.exchange.notification.logrule
         - name: SR_RabbitMQTargetQueueConfig__NotificationExchange
           value: sensorsreport.exchange.notification.notification
+        - name: SR_RabbitMQTargetQueueConfig__NotificationRoutingKey
+          value: sensorsreport.exchange.notification.notification
         - name: SR_RabbitMQTargetQueueConfig__AlarmExchange
+          value: sensorsreport.exchange.notification.alarmrule
+        - name: SR_RabbitMQTargetQueueConfig__AlarmRoutingKey
           value: sensorsreport.exchange.notification.alarmrule
         - name: SR_OrionLdConfig__OrionContextBrokerUrl
           value: "http://orion-ld-broker:1026"
