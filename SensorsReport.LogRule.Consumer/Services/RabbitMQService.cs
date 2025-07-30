@@ -4,7 +4,7 @@ using RabbitMQ.Client.Events;
 using SensorsReport.Api;
 using System.Text;
 
-namespace SensorsReport.AlarmRule.Consumer;
+namespace SensorsReport.LogRule.Consumer;
 
 public class RabbitMQService : IQueueService, IDisposable
 {

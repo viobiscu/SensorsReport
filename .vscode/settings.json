@@ -1,12 +1,11 @@
 {
-    "files.exclude": {
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.hg": true,
-        "**/.DS_Store": true,
-        "**/Thumbs.db": true,
-        "**/bin": true,
-        "**/node_modules": true,
-        "**/obj": true
-    }
+  "omnisharp.useModernNet": true,
+  "terminal.integrated.shellArgs.linux": ["--login"],
+  "csharp.semanticHighlighting.enabled": true,
+  "editor.formatOnType": true,
+  "editor.formatOnPaste": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "dotnet-test-explorer.testProjectPath": "**/*.csproj"
 }

@@ -52,6 +52,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.LogRule.API",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.AlarmRule.Consumer", "SensorsReport.AlarmRule.Consumer\SensorsReport.AlarmRule.Consumer.csproj", "{1DD87FF8-78ED-4209-BD30-0EAA11DDD911}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorsReport.LogRule.Consumer", "SensorsReport.LogRule.Consumer\SensorsReport.LogRule.Consumer.csproj", "{38B581D3-2298-33AA-AEA9-D52D63411574}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -254,6 +256,18 @@ Global
 		{1DD87FF8-78ED-4209-BD30-0EAA11DDD911}.Release|x64.Build.0 = Release|Any CPU
 		{1DD87FF8-78ED-4209-BD30-0EAA11DDD911}.Release|x86.ActiveCfg = Release|Any CPU
 		{1DD87FF8-78ED-4209-BD30-0EAA11DDD911}.Release|x86.Build.0 = Release|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Debug|x64.Build.0 = Debug|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Debug|x86.Build.0 = Debug|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Release|x64.ActiveCfg = Release|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Release|x64.Build.0 = Release|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Release|x86.ActiveCfg = Release|Any CPU
+		{38B581D3-2298-33AA-AEA9-D52D63411574}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -343,6 +343,8 @@ public class AlarmRuleConsumerService : BackgroundService, IDisposable
                 };
 
                 await orionLd.UpdateEntityAsync(entity.Id!, relationshipUpdate);
+                var latestEntity = await orionLd.GetEntityByIdAsync<EntityModel>(entity.Id!);
+                logger.LogInformation("Updated Entity {EntityId} with new Alarm relationship for property {Property}, Tenant: {Tenant}, Value: {Value}", entity.Id, prop.Key, subscriptionData?.Tenant?.Tenant, JsonSerializer.Serialize(latestEntity));
             }
         }
 
