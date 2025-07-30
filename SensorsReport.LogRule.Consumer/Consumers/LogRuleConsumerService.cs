@@ -129,17 +129,6 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
         return (true, null);
     }
 
-    private async Task PassToNextQueue(SubscriptionEventModel message, string propName, ulong deliveryTag)
-    {
-        var data = message.Data!.First();
-        if (data == null) return;
-        if (data.Properties[propName].TryGetProperty("Alarm", out var alarm) && alarm.ValueKind == JsonValueKind.Object)
-        {
-            logger.LogInformation("Passing message to Alarm queue for Entity Id: {EntityId}, Tenant: {Tenant}", data.Id, message.Tenant?.Tenant);
-            await enqueueService.EnqueueAlarmAsync(message);
-        }
-    }
-
     private string GetMetaPropertyName(string propName) => $"metadata_{propName}";
 
     private async Task ProcessMessageAsync(string message, ulong deliveryTag)
@@ -170,21 +159,6 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             logger.LogWarning("Subscription with Id {SubscriptionId} not found. Skipping message. DeliveryTag: {DeliveryTag}", subscriptionData.SubscriptionId, deliveryTag);
             queueService.AcknowledgeMessage(deliveryTag);
             return;
-        }
-
-        SubscriptionEventModel createSubscriptionEventModel(KeyValuePair<string, JsonElement> prop)
-        {
-            return new SubscriptionEventModel
-            {
-                SubscriptionId = subscriptionData.SubscriptionId,
-                Tenant = subscriptionData.Tenant,
-                Data = [new EntityModel
-                {
-                    Id = entity.Id,
-                    Type = entity.Type,
-                    Properties = new Dictionary<string, JsonElement> { [prop.Key] = prop.Value }
-                }],
-            };
         }
 
         async Task<(int consecutiveHit, string status)> IncrementConsecutiveHit(string propKey, MetaPropertyModel propertyData, int maxConsecutiveHit, string entityId)
@@ -248,6 +222,13 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
         var propKeys = metaProperties.Select(s => s.Key.Replace("metadata_", "")).ToList();
 
         properties = properties.Where(p => propKeys.Contains(p.Key));
+        if (!properties.Any())
+        {
+            logger.LogWarning("No valid properties found for Entity Id: {EntityId}, Tenant: {Tenant}. Skipping message.", entity.Id, subscriptionData.Tenant?.Tenant);
+            await enqueueService.EnqueueAlarmAsync(subscriptionData);
+            queueService.AcknowledgeMessage(deliveryTag);
+            return;
+        }
 
         foreach (var prop in properties)
         {
@@ -256,7 +237,7 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             if (!isValid)
             {
                 logger.LogWarning("Skipping property {Property} in Entity Id: {EntityId}, Tenant: {Tenant}, Message: {Message} ", prop.Key, entity.Id, subscriptionData.Tenant?.Tenant, errorMessage);
-                await PassToNextQueue(createSubscriptionEventModel(prop), prop.Key, deliveryTag);
+                await enqueueService.EnqueueAlarmAsync(subscriptionData);
                 continue;
             }
 
@@ -273,7 +254,7 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
             if (!isValid)
             {
                 logger.LogWarning("Skipping processing for LogRule {LogRuleId} in Entity Id: {EntityId}, Tenant: {Tenant}, Message: {Message}", logRuleId, entity.Id, subscriptionData.Tenant?.Tenant, errorMessage);
-                await PassToNextQueue(createSubscriptionEventModel(prop), prop.Key, deliveryTag);
+                await enqueueService.EnqueueAlarmAsync(subscriptionData);
                 continue;
             }
 
@@ -301,7 +282,7 @@ public class LogRuleConsumerService : BackgroundService, IDisposable
                     logger.LogInformation("LogRule {LogRuleId} is within range for property {Property}, Entity Id: {EntityId}, Tenant: {Tenant}, but no status change needed.", logRuleId, prop.Key, entity.Id, subscriptionData.Tenant?.Tenant);
                 }
 
-                await PassToNextQueue(createSubscriptionEventModel(prop), prop.Key, deliveryTag);
+                await enqueueService.EnqueueAlarmAsync(subscriptionData);
             }
         }
 
