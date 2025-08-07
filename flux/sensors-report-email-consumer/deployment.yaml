@@ -40,7 +40,7 @@ spec:
           value: email
         envFrom:
         - secretRef:
-            name: rabbitmq-default-user
+            name: rabbitmq-default-default-user
             prefix: "SR_EventBusOptions__"
         - secretRef:
             name: email-smtp-secret

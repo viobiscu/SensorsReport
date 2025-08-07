@@ -33,5 +33,5 @@ spec:
               value: "http://orion-ld-broker:1026"
           envFrom:
             - secretRef:
-                name: rabbitmq-default-user
+                name: rabbitmq-default-default-user
               prefix: "SR_EventBusOptions__"
