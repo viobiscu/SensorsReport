@@ -40,7 +40,7 @@ spec:
           value: Production
         envFrom:
         - secretRef:
-            name: rabbitmq-default-default-user
+            name: rabbitmq-default-user
             prefix: "SR_EventBusOptions__"
         volumeMounts:
         - name: logs
