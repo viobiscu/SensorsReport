@@ -48,7 +48,14 @@ public class WebhookController : ControllerBase
             payload.SubscriptionId.Equals(subscriptionId, StringComparison.OrdinalIgnoreCase))
             return BadRequest("Query parameter subscriptionId does not match payload subscriptionId");
 
-        await eventBus.PublishAsync((SensorDataChangedEvent)payload);
+        await eventBus.PublishAsync(new SensorDataChangedEvent
+        {
+            Id = payload.Id,
+            Type = payload.Type,
+            SubscriptionId = payload.SubscriptionId,
+            Tenant = payload.Tenant,
+            Data = payload.Data
+        });
         return NoContent();
     }
 

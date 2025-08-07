@@ -17,12 +17,12 @@ public class EmailService : IEmailService
 
     public async Task SendEmailAsync(EmailModel emailModel)
     {
-        var replyToAddress = $"{emailModel.Id}+{emailModel.FromEmail}";
+        var replyToAddress = $"{emailModel.Id}+{emailModel.FromEmail ?? smtpOptions.FromAddress}";
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress(emailModel.FromName, emailModel.FromEmail));
-        message.To.Add(new MailboxAddress(emailModel.ToName, emailModel.ToEmail));
+        message.From.Add(new MailboxAddress(emailModel.FromName ?? smtpOptions.FromName, emailModel.FromEmail ?? smtpOptions.FromAddress));
+        message.To.Add(new MailboxAddress(emailModel.ToName ?? emailModel.ToEmail, emailModel.ToEmail));
         message.Headers.Add("X-Email-Id", emailModel.Id);
-        message.ReplyTo.Add(new MailboxAddress(emailModel.FromName, replyToAddress));
+        message.ReplyTo.Add(new MailboxAddress(emailModel.FromName ?? smtpOptions.FromName, replyToAddress));
 
         if (!string.IsNullOrEmpty(emailModel.CcEmail))
             message.Cc.Add(new MailboxAddress(emailModel.CcName, emailModel.CcEmail));

@@ -1,5 +1,4 @@
 ﻿using MassTransit;
-
 using SensorsReport.Api.Core.MassTransit;
 using SensorsReport.OrionLD;
 using System;
@@ -7,11 +6,12 @@ using System.Text.Json;
 
 namespace SensorsReport.LogRule.Consumer.Consumers;
 
-public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger, IServiceProvider serviceProvider, IEventBus eventBus) : IConsumer<SensorDataChangedEvent>
+public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger, JsonSerializerOptions jsonSerializerOptions, IServiceProvider serviceProvider, IEventBus eventBus) : IConsumer<SensorDataChangedEvent>
 {
     private readonly ILogger<SensorDataChangedConsumer> logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IServiceProvider serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly IEventBus eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+    private readonly JsonSerializerOptions JsonSerializerOptions = jsonSerializerOptions;
 
     public async Task Consume(ConsumeContext<SensorDataChangedEvent> context)
     {
@@ -52,14 +52,14 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
         logger.LogInformation("Processing SensorDataChangedEvent for sensor {SensorId} with subscription {SubscriptionId}",
             sensorDataChangedEvent.Item.Id, sensorDataChangedEvent.SubscriptionId);
 
-        var properties = sensor.Properties.GetProcessableProperties();
+        var properties = sensor.Properties!.GetProcessableProperties();
 
         if (subscription.WatchedAttributes is not null)
             properties = properties.Where(s => subscription.WatchedAttributes.Contains(s.property));
 
         foreach (var (propertyKey, metadataKey) in properties)
         {
-            var sensorMetadataPropertyJson = sensor.Properties.TryGetValue(metadataKey, out var metadataValue) ? metadataValue : default;
+            var sensorMetadataPropertyJson = sensor.Properties!.TryGetValue(metadataKey, out var metadataValue) ? metadataValue : default;
             if (sensorMetadataPropertyJson.ValueKind != JsonValueKind.Object)
             {
                 logger.LogWarning("Metadata for attribute {Attribute} is not an object", propertyKey);
@@ -73,20 +73,14 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
                 continue;
             }
 
-            var sensorPropertyMetadata = sensorMetadataPropertyJson.Deserialize<MetaPropertyModel>();
+            var sensorPropertyMetadata = sensorMetadataPropertyJson.Deserialize<MetaPropertyModel>(JsonSerializerOptions);
             if (sensorPropertyMetadata?.LogRule is null)
             {
                 logger.LogWarning("LogRule metadata for property {Property} is null", propertyKey);
                 continue;
             }
 
-            if (sensorPropertyMetadata.LogRule.Enable?.Value != true)
-            {
-                logger.LogInformation("LogRule for property {Property} is disabled", propertyKey);
-                continue;
-            }
-
-            var sensorProperty = sensorPropertyJson.Deserialize<EntityPropertyModel>();
+            var sensorProperty = sensorPropertyJson.Deserialize<EntityPropertyModel>(JsonSerializerOptions);
             if (sensorProperty is null)
             {
                 logger.LogWarning("Property {Property} deserialization failed", propertyKey);
@@ -110,6 +104,14 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
                 continue;
             }
 
+            if (logRule.Enabled?.Value == false)
+            {
+                logger.LogInformation("LogRule {LogRuleId} is disabled, skipping processing", logRule.Id);
+                await ResetConsecutiveHit(sensor.Id!, propertyKey, metadataKey);
+                await eventBus.PublishAsync(updateAlarmEvent);
+                continue;
+            }
+
             var isAboveLow = logRule.Low?.Value is null || sensorProperty.Value > logRule.Low.Value;
             var isBelowHigh = logRule.High?.Value is null || sensorProperty.Value < logRule.High.Value;
             var isInRange = isAboveLow && isBelowHigh;
@@ -119,27 +121,26 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
                 logger.LogInformation("Sensor property {Property} value {Value} is within the defined thresholds", propertyKey, sensorProperty.Value);
                 await ResetConsecutiveHit(sensor.Id!, propertyKey, metadataKey);
                 await eventBus.PublishAsync(updateAlarmEvent);
+                continue;
             }
-            else
+
+            if (!isAboveLow)
+                logger.LogWarning("Sensor property {Property} value {Value} is below the low threshold {LowThreshold}", propertyKey, sensorProperty.Value, logRule.Low?.Value);
+
+            if (!isBelowHigh)
+                logger.LogWarning("Sensor property {Property} value {Value} is above the high threshold {HighThreshold}", propertyKey, sensorProperty.Value, logRule.High?.Value);
+
+            var consecutiveHit = (sensorPropertyMetadata?.LogRuleConsecutiveHit?.Value ?? 0) + 1;
+            var isFaulty = consecutiveHit >= logRule.ConsecutiveHit?.Value;
+            await SetConsecutiveHit(sensor.Id!, propertyKey, metadataKey, consecutiveHit, isFaulty);
+
+            if (!isFaulty)
             {
-                if (isAboveLow)
-                    logger.LogWarning("Sensor property {Property} value {Value} is above the low threshold {LowThreshold}", propertyKey, sensorProperty.Value, logRule.Low?.Value);
-
-                if (isBelowHigh)
-                    logger.LogWarning("Sensor property {Property} value {Value} is below the high threshold {HighThreshold}", propertyKey, sensorProperty.Value, logRule.High?.Value);
-
-                var consecutiveHit = (sensorPropertyMetadata?.LogRuleConsecutiveHit?.Value ?? 0) + 1;
-                var isFaulty = consecutiveHit <= logRule.ConsecutiveHit?.Value;
-                await SetConsecutiveHit(sensor.Id!, propertyKey, metadataKey, consecutiveHit, isFaulty);
-
-                if (!isFaulty)
-                {
-                    logger.LogInformation("Sensor property {Property} value {Value} has not yet reached the consecutive violations threshold", propertyKey, sensorProperty.Value);
-                    continue;
-                }
-
-                logger.LogWarning("Sensor property {Property} value {Value} has exceeded the consecutive violations threshold {ConsecutiveHits}", propertyKey, sensorProperty.Value, logRule.ConsecutiveHit);
+                logger.LogInformation("Sensor property {Property} value {Value} has not yet reached the consecutive violations threshold", propertyKey, sensorProperty.Value);
+                continue;
             }
+
+            logger.LogWarning("Sensor property {Property} value {Value} has exceeded the consecutive violations threshold {ConsecutiveHits}", propertyKey, sensorProperty.Value, consecutiveHit);
         }
 
         async Task SetConsecutiveHit(string entityId, string propKey, string metaPropKey, int consecutiveHit, bool isFaulty)

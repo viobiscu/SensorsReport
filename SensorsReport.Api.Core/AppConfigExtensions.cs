@@ -2,11 +2,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using NLog;
 using NLog.Config;
 using NLog.Web;
@@ -16,6 +19,7 @@ using SensorsReport.Extensions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SensorsReport;
 
@@ -99,7 +103,7 @@ public static partial class AppConfig
         return string.IsNullOrEmpty(value) ? defaultValue : value;
     }
 
-    public static WebApplicationBuilder GetDefaultWebAppBuilder(string apiVersion = "v1", bool useBearerTokenAuthForSwagger = false, bool useTenantHeader = false)
+    public static WebApplicationBuilder GetDefaultWebAppBuilder(string apiVersion = "v1", bool useBearerTokenAuthForSwagger = false, bool useTenantHeader = false, Action<IRegistrationConfigurator>? configureConsumers = null)
     {
         var app = GetDefaultWebAppBuilder(c =>
         {
@@ -136,7 +140,7 @@ public static partial class AppConfig
                     }
                 });
             }
-        });
+        }, configureConsumers);
 
         if (useTenantHeader)
             app.Services.AddTenantServices();
@@ -270,7 +274,8 @@ public static partial class AppConfig
         return value;
     }
 
-    public static WebApplicationBuilder GetDefaultWebAppBuilder(Action<SwaggerGenOptions> swaggerSetupAction)
+    public static WebApplicationBuilder GetDefaultWebAppBuilder(Action<SwaggerGenOptions> swaggerSetupAction,
+            Action<IRegistrationConfigurator>? configureConsumers = null)
     {
         var args = Environment.GetCommandLineArgs();
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -298,9 +303,12 @@ public static partial class AppConfig
             options.Filters.Add<NotFoundStringToJsonFilter>();
         }).AddJsonOptions(options =>
         {
+            options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
             options.JsonSerializerOptions.PropertyNamingPolicy = null;
             options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
         });
+
+        builder.Services.AddSingleton<JsonSerializerOptions>(sp => sp.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions);
 
         builder.Services.AutoConfig(builder.Configuration);
         builder.Services.AddTenantServices();
@@ -338,7 +346,10 @@ public static partial class AppConfig
         {
             builder.Services.AddEventBus(s =>
             {
-                s.AddConsumersFromNamespaceContaining(Assembly.GetCallingAssembly().EntryPoint?.DeclaringType ?? Assembly.GetCallingAssembly().GetTypes().FirstOrDefault());
+
+                var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly() ?? Assembly.GetCallingAssembly();
+                s.AddConsumers(assembly);
+                configureConsumers?.Invoke(s);
             });
 
             var connectionString = $"amqp://{eventBusOptions.Username}:{eventBusOptions.Password}@{eventBusOptions.Host}:{eventBusOptions.Port}{eventBusOptions.VirtualHost}";
@@ -391,7 +402,7 @@ public static partial class AppConfig
                     Message = "The requested resource was not found."
                 };
 
-                await context.HttpContext.Response.WriteAsync(JsonSerializer.Serialize(errorResponse));
+                await context.HttpContext.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(errorResponse, context.HttpContext.RequestServices.GetRequiredService<JsonSerializerOptions>()));
             }
         });
 

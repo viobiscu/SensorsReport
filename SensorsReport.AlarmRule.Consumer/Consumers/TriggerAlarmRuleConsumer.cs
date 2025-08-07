@@ -5,12 +5,12 @@ using System.Text.Json;
 
 namespace SensorsReport.AlarmRule.Consumer.Consumers;
 
-public class TriggerAlarmRuleConsumer(ILogger<TriggerAlarmRuleConsumer> logger, IServiceProvider serviceProvider, IEventBus eventBus) : IConsumer<TriggerAlarmRuleEvent>
+public class TriggerAlarmRuleConsumer(ILogger<TriggerAlarmRuleConsumer> logger, JsonSerializerOptions jsonSerializerOptions, IServiceProvider serviceProvider, IEventBus eventBus) : IConsumer<TriggerAlarmRuleEvent>
 {
     private readonly ILogger<TriggerAlarmRuleConsumer> logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IServiceProvider serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly IEventBus eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
-
+    private readonly JsonSerializerOptions JsonSerializerOptions = jsonSerializerOptions;
     public async Task Consume(ConsumeContext<TriggerAlarmRuleEvent> context)
     {
         ArgumentNullException.ThrowIfNull(context, nameof(context));
@@ -36,8 +36,8 @@ public class TriggerAlarmRuleConsumer(ILogger<TriggerAlarmRuleConsumer> logger, 
         logger.LogInformation("Processing TriggerAlarmRuleEvent for sensor {SensorId} with property {PropertyKey} and metadata {MetadataKey}",
             triggerAlarmRuleEvent.SensorId, triggerAlarmRuleEvent.PropertyKey, triggerAlarmRuleEvent.MetadataKey);
 
-        var propertyJson = sensor.Properties.FirstOrDefault(s => s.Key.Equals(triggerAlarmRuleEvent.PropertyKey, StringComparison.OrdinalIgnoreCase)).Value;
-        var metadataJson = sensor.Properties.FirstOrDefault(s => s.Key.Equals(triggerAlarmRuleEvent.MetadataKey, StringComparison.OrdinalIgnoreCase)).Value;
+        var propertyJson = sensor.Properties!.FirstOrDefault(s => s.Key.Equals(triggerAlarmRuleEvent.PropertyKey, StringComparison.OrdinalIgnoreCase)).Value;
+        var metadataJson = sensor.Properties!.FirstOrDefault(s => s.Key.Equals(triggerAlarmRuleEvent.MetadataKey, StringComparison.OrdinalIgnoreCase)).Value;
 
         if (propertyJson.ValueKind != JsonValueKind.Object || metadataJson.ValueKind != JsonValueKind.Object)
         {
@@ -46,7 +46,7 @@ public class TriggerAlarmRuleConsumer(ILogger<TriggerAlarmRuleConsumer> logger, 
             return;
         }
 
-        var sensorProperty = propertyJson.Deserialize<EntityPropertyModel>();
+        var sensorProperty = propertyJson.Deserialize<EntityPropertyModel>(JsonSerializerOptions);
         if (sensorProperty is null)
         {
             logger.LogError("Deserialization of property for sensor {SensorId} with property {PropertyKey} failed",
@@ -54,7 +54,7 @@ public class TriggerAlarmRuleConsumer(ILogger<TriggerAlarmRuleConsumer> logger, 
             return;
         }
 
-        var sensorMetadata = metadataJson.Deserialize<MetaPropertyModel>();
+        var sensorMetadata = metadataJson.Deserialize<MetaPropertyModel>(JsonSerializerOptions);
         if (sensorMetadata?.AlarmRule is null)
         {
             logger.LogWarning("AlarmRule metadata for property {PropertyKey} is null", triggerAlarmRuleEvent.PropertyKey);

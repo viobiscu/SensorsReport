@@ -13,5 +13,5 @@ public class EntityModel
     public string? Type { get; set; }
 
     [JsonExtensionData]
-    public Dictionary<string, JsonElement> Properties { get; set; } = [];
+    public Dictionary<string, JsonElement>? Properties { get; set; }
 }

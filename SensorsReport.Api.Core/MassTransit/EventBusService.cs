@@ -1,11 +1,12 @@
 ﻿using MassTransit;
+using MassTransit.Transports;
 
 namespace SensorsReport.Api.Core.MassTransit;
 
-internal class EventBusService(IPublishEndpoint publishEndpoint, ISendEndpoint sendEndpoint) : IEventBus
+internal class EventBusService(IPublishEndpoint publishEndpoint, ISendEndpointProvider sendEndpointProvider) : IEventBus
 {
     public IPublishEndpoint PublishEndpoint { get; } = publishEndpoint;
-    public ISendEndpoint SendEndpoint { get; } = sendEndpoint;
+    public ISendEndpointProvider SendEndpointProvider { get; } = sendEndpointProvider;
 
     public async Task PublishAsync<T>(T eventMessage, CancellationToken cancellationToken = default) where T : class
     {
@@ -14,6 +15,6 @@ internal class EventBusService(IPublishEndpoint publishEndpoint, ISendEndpoint s
 
     public async Task SendAsync<T>(T command, CancellationToken cancellationToken = default) where T : class
     {
-        await SendEndpoint.Send(command, cancellationToken);
+        await SendEndpointProvider.Send(command, cancellationToken);
     }
 }

@@ -40,7 +40,7 @@ public class AutoRegisterAlarmSubscriptions : BackgroundService
                     {
                         var tenantName = string.Empty;
 
-                        if (tenant.Properties.TryGetValue("TenantID", out var value) &&
+                        if (tenant.Properties?.TryGetValue("TenantID", out var value) == true &&
                             value.TryGetProperty("value", out var tenantIdNode))
                             tenantName = tenantIdNode.GetString() ?? string.Empty;
 

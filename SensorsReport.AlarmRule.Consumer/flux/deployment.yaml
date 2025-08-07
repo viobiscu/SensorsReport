@@ -29,7 +29,7 @@ spec:
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: Production
-        - name: SR_OrionLdConfig__OrionContextBrokerUrl
+        - name: SR_OrionLdOptions__OrionContextBrokerUrl
           value: "http://orion-ld-broker:1026"
         - name: SR_EventBusOptions__Host
           valueFrom:

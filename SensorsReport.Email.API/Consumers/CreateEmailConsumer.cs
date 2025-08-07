@@ -55,11 +55,13 @@ public class CreateEmailConsumer(IEmailRepository emailRepository, ILogger<Creat
             Subject = emailEvent.Subject,
             BodyHtml = emailEvent.BodyHtml,
             Tenant = emailEvent.Tenant,
+            Status = EmailStatusEnum.Queued
         });
 
         await eventBus.PublishAsync(new EmailCreatedEvent
         {
             Id = createdEmail.Id
         });
+        logger.LogInformation("Email queued successfully to {ToEmail}", emailEvent.ToEmail);
     }
 }

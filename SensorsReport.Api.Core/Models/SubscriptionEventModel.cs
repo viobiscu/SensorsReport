@@ -17,5 +17,6 @@ public class SubscriptionEventModel
     [JsonPropertyName("data")]
     public EntityModel[]? Data { get; set; }
 
+    [JsonIgnore]
     public EntityModel? Item => Data?.FirstOrDefault();
 }

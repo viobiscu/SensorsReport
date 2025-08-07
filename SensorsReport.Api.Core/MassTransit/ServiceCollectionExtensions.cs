@@ -18,6 +18,8 @@ public static class ServiceCollectionExtensions
             {
                 var options = context.GetRequiredService<IOptions<EventBusOptions>>().Value;
 
+                cfg.UseNewtonsoftJsonSerializer();
+
                 cfg.Host(options.Host, options.Port, options.VirtualHost, Assembly.GetExecutingAssembly()?.GetName().Name, config =>
                 {
                     config.Username(options.Username);

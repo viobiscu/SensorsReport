@@ -7,11 +7,12 @@ using System.Text.Json;
 
 namespace SensorsReport.AlarmRule.Consumer.Consumers;
 
-public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleConsumer> logger, IServiceProvider serviceProvider, IEventBus eventBus) : IConsumer<TriggerNotificationRuleEvent>
+public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleConsumer> logger, JsonSerializerOptions jsonSerializerOptions, IServiceProvider serviceProvider, IEventBus eventBus) : IConsumer<TriggerNotificationRuleEvent>
 {
     private readonly ILogger<TriggerNotificationRuleConsumer> logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IServiceProvider serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly IEventBus eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+    private readonly JsonSerializerOptions JsonSerializerOptions = jsonSerializerOptions;
 
     public async Task Consume(ConsumeContext<TriggerNotificationRuleEvent> context)
     {
@@ -38,8 +39,8 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
         logger.LogInformation("Processing TriggerNotificationRuleEvent for sensor {SensorId} with property {PropertyKey} and metadata {MetadataKey}",
             triggerNotificationRuleEvent.SensorId, triggerNotificationRuleEvent.PropertyKey, triggerNotificationRuleEvent.MetadataKey);
 
-        var propertyJson = sensor.Properties.FirstOrDefault(s => s.Key.Equals(triggerNotificationRuleEvent.PropertyKey, StringComparison.OrdinalIgnoreCase)).Value;
-        var metadataJson = sensor.Properties.FirstOrDefault(s => s.Key.Equals(triggerNotificationRuleEvent.MetadataKey, StringComparison.OrdinalIgnoreCase)).Value;
+        var propertyJson = sensor.Properties!.FirstOrDefault(s => s.Key.Equals(triggerNotificationRuleEvent.PropertyKey, StringComparison.OrdinalIgnoreCase)).Value;
+        var metadataJson = sensor.Properties!.FirstOrDefault(s => s.Key.Equals(triggerNotificationRuleEvent.MetadataKey, StringComparison.OrdinalIgnoreCase)).Value;
 
         if (propertyJson.ValueKind != JsonValueKind.Object || metadataJson.ValueKind != JsonValueKind.Object)
         {
@@ -48,7 +49,7 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
             return;
         }
 
-        var sensorProperty = propertyJson.Deserialize<EntityPropertyModel>();
+        var sensorProperty = propertyJson.Deserialize<EntityPropertyModel>(JsonSerializerOptions);
         if (sensorProperty is null)
         {
             logger.LogError("Deserialization of property for sensor {SensorId} with property {PropertyKey} failed",
@@ -56,7 +57,7 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
             return;
         }
 
-        var sensorMetadata = metadataJson.Deserialize<MetaPropertyModel>();
+        var sensorMetadata = metadataJson.Deserialize<MetaPropertyModel>(JsonSerializerOptions);
         if (sensorMetadata?.AlarmRule is null)
         {
             logger.LogWarning("AlarmRule metadata for property {PropertyKey} is null", triggerNotificationRuleEvent.PropertyKey);
@@ -154,7 +155,8 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
                 userIds
                 .Select(userId => orionLdService.GetEntityByIdAsync<UserModel>(userId!))))
                 .Where(u => u != null)
-                .Cast<UserModel>()];
+                .Cast<UserModel>()
+                .DistinctBy(s => s.Id)];
         }
 
         if (users.Count == 0)
@@ -177,16 +179,16 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
             { "UserName", string.Join(", ", users.Select(u => $"{u.FirstName} {u.LastName}")) }
         };
 
-        if (alarm.Status.Value?.Equals(AlarmModel.StatusValues.Close) == true && notificationRule.NotifyIfClose?.Value != true)
+        if (alarm.Status.Value?.Equals(AlarmModel.StatusValues.Close.Value, StringComparison.OrdinalIgnoreCase) == true && notificationRule.NotifyIfClose?.Value != true)
         {
             logger.LogInformation("Alarm with ID {AlarmId} is closed and NotifyIfClose is false, skipping notification", triggerNotificationRuleEvent.AlarmId);
             return;
         }
 
-        if (notificationRule.NotificationChannel?.Value?.Contains("Email") == true)
-            await Task.WhenAll(users.Select(user => SendEmail(orionLdService, user, EmailTemplateKeys.SensorFirstAlarm, parameters)));
+        if (notificationRule.NotificationChannel?.Value?.Any(s => s.Equals("Email", StringComparison.OrdinalIgnoreCase)) == true)
+            await Task.WhenAll(users.Select(user => SendEmail(orionLdService, user, EmailTemplateKeys.SensorFirstAlarm, triggerNotificationRuleEvent.Tenant!.Tenant, parameters)));
 
-        if (notificationRule.NotificationChannel?.Value?.Contains("Sms") == true)
+        if (notificationRule.NotificationChannel?.Value?.Any(s => s.Equals("Sms", StringComparison.OrdinalIgnoreCase)) == true)
             await Task.WhenAll(users.Select(user => SendSms(orionLdService, user, SmsTemplateKeys.SmsSensorFirstAlarm, triggerNotificationRuleEvent.Tenant!.Tenant, parameters)));
 
         logger.LogInformation("Sending notification for alarm with ID {AlarmId}", triggerNotificationRuleEvent.AlarmId);
@@ -210,7 +212,7 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
         });
     }
 
-    private async Task SendEmail(IOrionLdService orionLdService, UserModel user, string emailTemplateKey, Dictionary<string, string> parameters)
+    private async Task SendEmail(IOrionLdService orionLdService, UserModel user, string emailTemplateKey, string tenant, Dictionary<string, string> parameters)
     {
         if (user.Email?.Value is null)
         {
@@ -223,12 +225,14 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
         var subject = TemplateHelper.FormatString(emailTemplate?.Subject?.Value ?? DefaultEmailSubject, parameters);
         var body = TemplateHelper.FormatString(emailTemplate?.Body?.Value ?? DefaultEmailBody, parameters);
 
+        logger.LogInformation("Creating email to {ToEmail} with subject: {Subject}", user.Email.Value, subject);
         await eventBus.PublishAsync<CreateEmailCommand>(new CreateEmailCommand
         {
             ToEmail = user.Email?.Value,
-            ToName = $"{user.FirstName} {user.LastName}",
+            ToName = $"{user.FirstName?.Value} {user.LastName?.Value}",
             Subject = subject,
-            BodyHtml = body
+            BodyHtml = body,
+            Tenant = tenant
         });
     }
 

@@ -29,13 +29,12 @@ public class ReconciliationEmailTask : BackgroundService
                 {
                     foreach (var email in emails)
                     {
+                        logger.LogInformation("Queued email with ID: {Id} for processing.", email.Id);
+                        await emailRepository.UpdateStatusAsync(email.Id, EmailStatusEnum.Queued);
                         await eventBus.PublishAsync(new EmailCreatedEvent
                         {
                             Id = email.Id,
                         }, stoppingToken);
-
-                        logger.LogInformation("Queued email with ID: {Id} for processing.", email.Id);
-                        await emailRepository.UpdateStatusAsync(email.Id, EmailStatusEnum.Queued);
                         logger.LogInformation("Updated status of email with ID: {Id} to Queued.", email.Id);
                     }
                 }

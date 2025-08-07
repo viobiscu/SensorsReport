@@ -38,15 +38,13 @@ namespace SensorsReport.Email.API
 
             logger.LogInformation("Email record created with ID: {Id}", createdEmail.Id);
 
+            logger.LogInformation("Email record with ID: {Id} queued for processing.", createdEmail.Id);
+            await emailRepository.UpdateStatusAsync(createdEmail.Id, EmailStatusEnum.Queued);
             await eventBus.PublishAsync(new EmailCreatedEvent
             {
                 Id = createdEmail.Id
             });
-
-            logger.LogInformation("Email record with ID: {Id} queued for processing.", createdEmail.Id);
-            await emailRepository.UpdateStatusAsync(createdEmail.Id, EmailStatusEnum.Queued);
             logger.LogInformation("Email record with ID: {Id} status updated to Queued.", createdEmail.Id);
-
             return CreatedAtAction(nameof(Get), new { id = createdEmail.Id }, createdEmail);
         }
 
