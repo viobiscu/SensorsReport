@@ -56,8 +56,8 @@ spec:
         - name: SR_EventBusOptions__Password
           valueFrom:
             secretKeyRef:
-            name: rabbitmq-default-default-user
-            key: password
+              name: rabbitmq-default-default-user
+              key: password
         - name: SR_SmtpOptions__Server
           valueFrom:
             secretKeyRef:
