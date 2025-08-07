@@ -70,10 +70,10 @@ spec:
               name: rabbitmq-default-default-user
               key: username
         - name: SR_EventBusOptions__Password
-            valueFrom:
-                secretKeyRef:
-                name: rabbitmq-default-default-user
-                key: password
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: password
         volumeMounts:
         - name: logs
           mountPath: /app/logs
