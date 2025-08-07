@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SensorsReport.SMS.API.Models;
 using SensorsReport.SMS.API.Repositories;
-using SensorsReport;
 
 namespace SensorsReport.SMS.API.Controllers;
 
@@ -67,7 +66,7 @@ public class ProviderController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), 400)]
     [ProducesResponseType(typeof(JsonErrorResponse), 500)]
     [Produces("application/json")]
-    public async Task<IActionResult> GetNext([FromServices] ISmsRepository repository, [FromServices] IProviderRepository providerRepository, string provider)
+    public async Task<IActionResult> GetNextProvider([FromServices] ISmsRepository repository, [FromServices] IProviderRepository providerRepository, string provider)
     {
         ArgumentNullException.ThrowIfNull(repository, nameof(repository));
         ArgumentNullException.ThrowIfNull(providerRepository, nameof(providerRepository));
@@ -76,12 +75,44 @@ public class ProviderController : ControllerBase
 
         await providerRepository.UpdateLastSeenAsync(provider);
 
+        var providerSupportedCountryCodes = (await providerRepository.GetByNameAsync(provider))?.SupportedCountryCodes ?? [];
+
         var entity = await repository.GetNextAsync(
-            provider
+            provider,
+            [..providerSupportedCountryCodes]
         );
 
         if (entity == null)
             return NotFound($"No SMS records found with provider '{provider}'.");
+
+        return Ok(entity);
+    }
+
+    [HttpGet("next/{provider}/{CountryCode}")]
+    [ProducesResponseType(typeof(SmsModel), 200)]
+    [ProducesResponseType(typeof(JsonMessageResponse), 404)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 400)]
+    [ProducesResponseType(typeof(JsonErrorResponse), 500)]
+    [Produces("application/json")]
+    public async Task<IActionResult> GetNextCountryCode([FromServices] ISmsRepository repository, [FromServices] IProviderRepository providerRepository, string provider, string countryCode)
+    {
+        ArgumentNullException.ThrowIfNull(repository, nameof(repository));
+        ArgumentNullException.ThrowIfNull(providerRepository, nameof(providerRepository));
+        if (string.IsNullOrWhiteSpace(countryCode))
+            return BadRequest("Provider cannot be null or empty.");
+
+        if (string.IsNullOrWhiteSpace(provider))
+            return BadRequest("Provider cannot be null or empty.");
+
+        await providerRepository.UpdateLastSeenAsync(provider);
+
+        var entity = await repository.GetNextAsync(
+            provider,
+            [countryCode]
+        );
+
+        if (entity == null)
+            return NotFound($"No SMS records found with country code '{countryCode}'.");
 
         return Ok(entity);
     }

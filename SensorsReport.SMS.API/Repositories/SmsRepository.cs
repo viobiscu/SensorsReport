@@ -1,44 +1,55 @@
-﻿using System;
-using System.Text.Json;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using SensorsReport.SMS.API.Models;
-using SensorsReport.Api.Core.Helpers;
+using System.Text.Json;
 
 namespace SensorsReport.SMS.API.Repositories;
 
 public class SmsRepository : ISmsRepository
 {
-    private readonly AppConfiguration appConfig;
+    private readonly SmsMongoDbConnectionOptions smsDbConfig;
     private readonly MongoClient mongoClient;
     private readonly ILogger<SmsRepository> logger;
 
-    private IMongoDatabase Database => mongoClient.GetDatabase(appConfig.DatabaseName);
-    private IMongoCollection<SmsModel> Collection => Database.GetCollection<SmsModel>(appConfig.SmsCollectionName);
+    private IMongoDatabase Database => mongoClient.GetDatabase(smsDbConfig.DatabaseName);
+    private IMongoCollection<SmsModel> Collection => Database.GetCollection<SmsModel>(smsDbConfig.CollectionName);
 
-    public SmsRepository(ILogger<SmsRepository> logger, IOptions<AppConfiguration> appConfig)
+    public SmsRepository(ILogger<SmsRepository> logger, IOptions<SmsMongoDbConnectionOptions> smsMongoDbOptions)
     {
-        ArgumentNullException.ThrowIfNull(appConfig);
-        ArgumentNullException.ThrowIfNull(appConfig.Value.ConnectionString, nameof(appConfig.Value.ConnectionString));
-        ArgumentNullException.ThrowIfNull(appConfig.Value.SmsCollectionName, nameof(appConfig.Value.SmsCollectionName));
-        ArgumentNullException.ThrowIfNull(appConfig.Value.DatabaseName, nameof(appConfig.Value.DatabaseName));
+        ArgumentNullException.ThrowIfNull(smsMongoDbOptions);
+        ArgumentNullException.ThrowIfNull(smsMongoDbOptions.Value.ConnectionString, nameof(smsMongoDbOptions.Value.ConnectionString));
+        ArgumentNullException.ThrowIfNull(smsMongoDbOptions.Value.CollectionName, nameof(smsMongoDbOptions.Value.CollectionName));
+        ArgumentNullException.ThrowIfNull(smsMongoDbOptions.Value.DatabaseName, nameof(smsMongoDbOptions.Value.DatabaseName));
 
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
-        this.appConfig = appConfig.Value ?? throw new ArgumentNullException(nameof(appConfig.Value), "AppConfiguration cannot be null");
-        this.mongoClient = new MongoClient(this.appConfig.ConnectionString);
+        this.smsDbConfig = smsMongoDbOptions.Value ?? throw new ArgumentNullException(nameof(smsMongoDbOptions.Value), "AppConfiguration cannot be null");
+        this.mongoClient = new MongoClient(this.smsDbConfig.ConnectionString);
     }
 
-    public async Task<SmsModel?> GetNextAsync(string provider)
+    public async Task<SmsModel?> GetNextAsync(string provider, string[]? countryCodes = null, string? tenant = null)
     {
         logger.LogInformation("Retrieving next SMS record for provider: {Provider}, status: {Status}", provider, SmsStatusEnum.Pending);
         if (string.IsNullOrEmpty(provider))
             throw new ArgumentException("Provider cannot be null or empty", nameof(provider));
 
-        var filter = Builders<SmsModel>.Filter.And(
-            Builders<SmsModel>.Filter.Eq(s => s.Provider, provider),
-            Builders<SmsModel>.Filter.Eq(s => s.Status, SmsStatusEnum.Pending)
-        );
+        var filter = Builders<SmsModel>.Filter.Eq(s => s.Status, SmsStatusEnum.Pending);
+
+        if (!string.IsNullOrEmpty(tenant))
+        {
+            filter &= Builders<SmsModel>.Filter.Eq(s => s.Tenant, tenant);
+        }
+
+        if (countryCodes?.Length > 0)
+        {
+            filter &= Builders<SmsModel>.Filter.In(s => s.CountryCode, countryCodes);
+            filter &= Builders<SmsModel>.Filter.Or(Builders<SmsModel>.Filter.Eq(s => s.Provider, provider),
+                Builders<SmsModel>.Filter.Eq(s => s.Provider, null));
+        }
+        else
+        {
+            filter &= Builders<SmsModel>.Filter.Eq(s => s.Provider, provider);
+        }
 
         var result = await Collection.Find(filter).FirstOrDefaultAsync();
         if (result == null)
@@ -60,7 +71,7 @@ public class SmsRepository : ISmsRepository
         return result;
     }
 
-    public async Task<List<SmsModel>> GetAsync(string? tenant, string? fromDate, string? toDate, int limit = 100, int offset = 0, SmsStatusEnum? status = null)
+    public async Task<List<SmsModel>> GetAsync(string? tenant, string? fromDate, string? toDate, int limit = 100, int offset = 0, SmsStatusEnum? status = null, string? countryCode = null)
     {
         logger.LogInformation("Retrieving SMS records for tenant: {Tenant}, from: {FromDate}, to: {ToDate}, limit: {Limit}, offset: {Offset}",
             tenant, fromDate, toDate, limit, offset);
@@ -79,6 +90,11 @@ public class SmsRepository : ISmsRepository
         if (!string.IsNullOrEmpty(toDate) && DateTime.TryParse(toDate, out var to))
         {
             filter &= Builders<SmsModel>.Filter.Lte(s => s.Timestamp, to);
+        }
+
+        if (!string.IsNullOrEmpty(countryCode))
+        {
+            filter &= Builders<SmsModel>.Filter.Eq(s => s.CountryCode, countryCode);
         }
 
         if (status.HasValue)
@@ -121,7 +137,7 @@ public class SmsRepository : ISmsRepository
         return result;
     }
 
-    public async Task<SmsModel> CreateAsync(SmsModel sms)
+    public async Task<SmsModel> CreateAsync(SmsModel sms, string tenant)
     {
         logger.LogInformation("Creating new SMS record for tenant: {Tenant}", sms.Tenant);
         if (sms == null)
@@ -131,12 +147,16 @@ public class SmsRepository : ISmsRepository
             throw new ArgumentException("Tenant cannot be null or empty", nameof(sms.Tenant));
 
         sms.Id = ObjectId.GenerateNewId().ToString();
+        sms.Tenant = tenant;
+        if (string.IsNullOrEmpty(sms.CountryCode))
+            sms.CountryCode = PhoneNumberHelper.GetCountryCode(sms.PhoneNumber);
+
         await Collection.InsertOneAsync(sms);
         logger.LogInformation("Created new SMS record with ID: {Id} for tenant: {Tenant}", sms.Id, sms.Tenant);
         return sms;
     }
 
-    public async Task<SmsModel> UpdateAsync(string id, SmsModel sms)
+    public async Task<SmsModel> UpdateAsync(string id, SmsModel sms, string tenant)
     {
         logger.LogInformation("Updating SMS record with ID: {Id}", id);
         if (string.IsNullOrEmpty(id))
@@ -145,7 +165,11 @@ public class SmsRepository : ISmsRepository
         if (sms == null)
             throw new ArgumentNullException(nameof(sms), "SMS model cannot be null");
 
-        var filter = Builders<SmsModel>.Filter.Eq(s => s.Id, id);
+        if (string.IsNullOrEmpty(sms.CountryCode))
+            sms.CountryCode = PhoneNumberHelper.GetCountryCode(sms.PhoneNumber);
+
+        var filter = Builders<SmsModel>.Filter.And(Builders<SmsModel>.Filter.Eq(s => s.Id, id),
+                     Builders<SmsModel>.Filter.Eq(s => s.Tenant, tenant));
         var update = Builders<SmsModel>.Update
             .Set(s => s.PhoneNumber, sms.PhoneNumber)
             .Set(s => s.Message, sms.Message)
@@ -158,10 +182,7 @@ public class SmsRepository : ISmsRepository
             .Set(s => s.CustomData, sms.CustomData)
             .Set(s => s.RetryCount, sms.RetryCount);
 
-        var result = await Collection.FindOneAndUpdateAsync(filter, update);
-
-        if (result == null)
-            throw new Exception($"SMS with ID {id} not found");
+        var result = await Collection.FindOneAndUpdateAsync(filter, update) ?? throw new Exception($"SMS with ID {id} not found");
 
         result = await Collection.Find(filter).FirstOrDefaultAsync();
         if (result == null)
@@ -208,6 +229,6 @@ public class SmsRepository : ISmsRepository
         sms.PatchModel(patchDoc);
 
         logger.LogInformation("Applying patch to SMS record with ID: {Id} for tenant: {Tenant}", id, tenant);
-        return await UpdateAsync(id, sms);
+        return await UpdateAsync(id, sms, tenant);
     }
 }

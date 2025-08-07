@@ -5,16 +5,14 @@ namespace SensorsReport.Email.Consumer;
 
 public class EmailService : IEmailService
 {
-    private AppConfiguration AppConfiguration { get; }
+    private SmtpOptions smtpOptions { get; }
     private ILogger<EmailService> Logger { get; }
 
-
-    public EmailService(IOptions<AppConfiguration> appConfig, ILogger<EmailService> logger)
+    public EmailService(IOptions<SmtpOptions> smtpOptions, ILogger<EmailService> logger)
     {
-        ArgumentNullException.ThrowIfNull(appConfig);
-        this.AppConfiguration = appConfig.Value ?? throw new ArgumentNullException(nameof(appConfig.Value), "AppConfiguration cannot be null");
+        ArgumentNullException.ThrowIfNull(smtpOptions);
+        this.smtpOptions = smtpOptions.Value ?? throw new ArgumentNullException(nameof(smtpOptions.Value), "AppConfiguration cannot be null");
         this.Logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
-
     }
 
     public async Task SendEmailAsync(EmailModel emailModel)
@@ -38,8 +36,8 @@ public class EmailService : IEmailService
         try
         {
             using var client = new MailKit.Net.Smtp.SmtpClient();
-            await client.ConnectAsync(AppConfiguration.SmtpServer, AppConfiguration.SmtpPort, AppConfiguration.UseSsl);
-            await client.AuthenticateAsync(AppConfiguration.SmtpUsername, AppConfiguration.SmtpPassword);
+            await client.ConnectAsync(smtpOptions.Server, smtpOptions.Port, smtpOptions.UseSSL);
+            await client.AuthenticateAsync(smtpOptions.Username, smtpOptions.Password);
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
             Logger.LogInformation("Email sent successfully to {ToEmail}", emailModel.ToEmail);

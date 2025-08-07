@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="libphonenumber-csharp" Version="9.0.11" />
     <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.3.1" />

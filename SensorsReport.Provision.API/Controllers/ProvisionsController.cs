@@ -18,13 +18,13 @@ public class ProvisionRequest
 public class ProvisionsController(
     IServiceProvider serviceProvider,
     ILogger<ProvisionsController> logger,
-    IOptions<OrionLdConfig> config) : ControllerBase
+    IOptions<OrionLdOptions> config) : ControllerBase
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider
         ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly ILogger<ProvisionsController> _logger = logger
         ?? throw new ArgumentNullException(nameof(logger));
-    private readonly OrionLdConfig _config = config?.Value
+    private readonly OrionLdOptions _config = config?.Value
         ?? throw new ArgumentNullException(nameof(config));
 
     [HttpPost]

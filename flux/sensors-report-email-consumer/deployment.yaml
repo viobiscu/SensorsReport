@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sensors-report-email-consumer
@@ -29,52 +29,22 @@ spec:
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: Production
-        - name: SR_AppConfiguration__ConnectionString
+        - name: SR_EmailMongoDbConnectionOptions__ConnectionString
           valueFrom:
             secretKeyRef:
               name: notification-api-mongodb-connection
               key: MONGODB_URI
-        - name: SR_AppConfiguration__RabbitMQConnectionString
-          valueFrom:
-            secretKeyRef:
-              name: rabbitmq-default-default-user
-              key: connection_string
-        - name: SR_AppConfiguration__DatabaseName
+        - name: SR_EmailMongoDbConnectionOptions__DatabaseName
           value: email-db
-        - name: SR_AppConfiguration__EmailCollectionName
+        - name: SR_EmailMongoDbConnectionOptions__CollectionName
           value: email
-        - name: SR_AppConfiguration__RabbitMQExchangeName
-          value: sensorsreport.exchange.notification.email
-        - name: SR_AppConfiguration__RabbitMQQueueName
-          value: sensorsreport.queue.notification.email
-        - name: SR_AppConfiguration__RabbitMQRoutingKey
-          value: sensorsreport.routingkey.notification.email
-
-        - name: SR_AppConfiguration__SmtpServer
-          valueFrom:
-            secretKeyRef:
-              name: email-smtp-secret
-              key: Server
-        - name: SR_AppConfiguration__SmtpPort
-          valueFrom:
-            secretKeyRef:
-              name: email-smtp-secret
-              key: Port
-        - name: SR_AppConfiguration__SmtpUseSSL
-          valueFrom:
-            secretKeyRef:
-              name: email-smtp-secret
-              key: UseSSL
-        - name: SR_AppConfiguration__SmtpUsername
-          valueFrom:
-            secretKeyRef:
-              name: email-smtp-secret
-              key: Username
-        - name: SR_AppConfiguration__SmtpPassword
-          valueFrom:
-            secretKeyRef:
-              name: email-smtp-secret
-              key: Password
+        envFrom:
+        - secretRef:
+            name: rabbitmq-default-default-user
+            prefix: "SR_EventBusOptions__"
+        - secretRef:
+            name: email-smtp-secret
+            prefix: "SR_SmtpOptions__"
       volumes:
       - name: logs
         emptyDir: {}

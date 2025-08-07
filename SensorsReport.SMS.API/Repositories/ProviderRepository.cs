@@ -6,35 +6,26 @@ using SensorsReport.SMS.API.Models;
 
 namespace SensorsReport.SMS.API.Repositories;
 
-public interface IProviderRepository
-{
-    Task<ProviderModel> CreateAsync(ProviderModel provider);
-    Task<ProviderModel?> GetByNameAsync(string providerId);
-    Task<ProviderModel?> SetProviderStatusAsync(string providerName, ProviderStatusEnum status);
-    Task<ProviderModel?> UpdateLastSeenAsync(string providerName);
-    Task<ProviderModel?> GetByStatusAsync(ProviderStatusEnum status);
-}
-
 public class ProviderRepository : IProviderRepository
 {
 
-    private readonly AppConfiguration appConfig;
+    private readonly ProviderMongoDbConnectionOptions mongoDbConfig;
     private readonly MongoClient mongoClient;
     private readonly ILogger<ProviderRepository> logger;
 
-    private IMongoDatabase Database => mongoClient.GetDatabase(appConfig.DatabaseName);
-    private IMongoCollection<ProviderModel> Collection => Database.GetCollection<ProviderModel>(appConfig.ProviderCollectionName);
+    private IMongoDatabase Database => mongoClient.GetDatabase(mongoDbConfig.DatabaseName);
+    private IMongoCollection<ProviderModel> Collection => Database.GetCollection<ProviderModel>(mongoDbConfig.CollectionName);
 
-    public ProviderRepository(ILogger<ProviderRepository> logger, IOptions<AppConfiguration> appConfig)
+    public ProviderRepository(ILogger<ProviderRepository> logger, IOptions<ProviderMongoDbConnectionOptions> appConfigOptions)
     {
-        ArgumentNullException.ThrowIfNull(appConfig);
-        ArgumentNullException.ThrowIfNull(appConfig.Value.ConnectionString, nameof(appConfig.Value.ConnectionString));
-        ArgumentNullException.ThrowIfNull(appConfig.Value.ProviderCollectionName, nameof(appConfig.Value.ProviderCollectionName));
-        ArgumentNullException.ThrowIfNull(appConfig.Value.DatabaseName, nameof(appConfig.Value.DatabaseName));
+        ArgumentNullException.ThrowIfNull(appConfigOptions);
+        ArgumentNullException.ThrowIfNull(appConfigOptions.Value.ConnectionString, nameof(appConfigOptions.Value.ConnectionString));
+        ArgumentNullException.ThrowIfNull(appConfigOptions.Value.CollectionName, nameof(appConfigOptions.Value.CollectionName));
+        ArgumentNullException.ThrowIfNull(appConfigOptions.Value.DatabaseName, nameof(appConfigOptions.Value.DatabaseName));
 
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
-        this.appConfig = appConfig.Value ?? throw new ArgumentNullException(nameof(appConfig.Value), "AppConfiguration cannot be null");
-        this.mongoClient = new MongoClient(this.appConfig.ConnectionString);
+        this.mongoDbConfig = appConfigOptions.Value ?? throw new ArgumentNullException(nameof(appConfigOptions.Value), "AppConfiguration cannot be null");
+        this.mongoClient = new MongoClient(this.mongoDbConfig.ConnectionString);
     }
 
     public async Task<ProviderModel?> GetByStatusAsync(ProviderStatusEnum status)
@@ -105,5 +96,13 @@ public class ProviderRepository : IProviderRepository
             .Set(p => p.LastSeen, DateTime.UtcNow);
 
         return await Collection.FindOneAndUpdateAsync(filter, update);
+    }
+
+    public async Task<List<ProviderModel>> GetProvidersByCountryCode(string countryCode)
+    {
+        if (string.IsNullOrEmpty(countryCode))
+            throw new ArgumentException("Country code cannot be null or empty", nameof(countryCode));
+        var filter = Builders<ProviderModel>.Filter.AnyEq(p => p.SupportedCountryCodes, countryCode);
+        return await Collection.Find(filter).ToListAsync();
     }
 }

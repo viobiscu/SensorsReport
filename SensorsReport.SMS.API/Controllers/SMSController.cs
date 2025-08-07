@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SensorsReport.SMS.API.Models;
 using SensorsReport.SMS.API.Repositories;
-using SensorsReport;
 using System.Text.Json;
 
 namespace SensorsReport.SMS.API.Controllers;
@@ -17,7 +16,7 @@ public class SmsController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
-    public async Task<IActionResult> Get([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, [FromQuery] string? fromDate, [FromQuery] string? toDate, [FromQuery] int limit = 100, [FromQuery] int offset = 0, [FromQuery] SmsStatusEnum? status = null)
+    public async Task<IActionResult> Get([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, [FromQuery] string? fromDate, [FromQuery] string? toDate, [FromQuery] int limit = 100, [FromQuery] int offset = 0, [FromQuery] SmsStatusEnum? status = null, [FromQuery] string countryCode = null)
     {
         ArgumentNullException.ThrowIfNull(tenantRetriever, nameof(tenantRetriever));
         ArgumentNullException.ThrowIfNull(repository, nameof(repository));
@@ -30,7 +29,8 @@ public class SmsController : ControllerBase
             toDate,
             limit,
             offset,
-            status
+            status,
+            countryCode
         );
 
         if (entities == null || entities.Count == 0)
@@ -70,8 +70,7 @@ public class SmsController : ControllerBase
         if (sms == null)
             return BadRequest("SMS model cannot be null.");
 
-        sms.Tenant = tenantInfo.Tenant;
-        var createdSms = await repository.CreateAsync(sms);
+        var createdSms = await repository.CreateAsync(sms, tenantInfo.Tenant);
         return CreatedAtAction(nameof(Get), new { smsId = createdSms.Id }, createdSms);
     }
 
@@ -94,8 +93,7 @@ public class SmsController : ControllerBase
         if (existingSms == null)
             return NotFound($"SMS with ID {smsId} not found.");
 
-        sms.Tenant = tenantInfo.Tenant; // Ensure the tenant is set for the update
-        var updatedSms = await repository.UpdateAsync(smsId, sms);
+        var updatedSms = await repository.UpdateAsync(smsId, sms, tenantInfo.Tenant);
         return Ok(updatedSms);
     }
 

@@ -1,10 +1,6 @@
-﻿using Microsoft.Extensions.Options;
-using NLog;
+﻿using NLog;
 using SensorsReport;
-using SensorsReport.Extensions;
 using SensorsReport.OrionLD.Extensions;
-using System.Reflection;
-using Microsoft.AspNetCore.Http;
 
 LogManager.Setup((config) => config.ConfigureLogger());
 var logger = LogManager.GetLogger("SensorsReport.Provision.API");;

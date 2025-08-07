@@ -11,7 +11,7 @@ public class OrionLdService : BaseHttpService<OrionLdService>, IOrionLdService
 {
     private string _tenant = "synchro";
 
-    public OrionLdConfig Config { get; }
+    public OrionLdOptions Config { get; }
 
     private static class Endpoints
     {
@@ -19,7 +19,7 @@ public class OrionLdService : BaseHttpService<OrionLdService>, IOrionLdService
         public const string Entities = "/ngsi-ld/v1/entities";
     }
 
-    public OrionLdService(IOptions<OrionLdConfig> config, IHttpClientFactory httpClientFactory, JsonSerializerOptions? jsonOptions = null)
+    public OrionLdService(IOptions<OrionLdOptions> config, IHttpClientFactory httpClientFactory, JsonSerializerOptions? jsonOptions = null)
         : base(httpClientFactory, jsonOptions)
     {
         Config = config?.Value ?? throw new ArgumentNullException(nameof(config), "AppConfig cannot be null");

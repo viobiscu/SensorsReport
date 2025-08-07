@@ -19,4 +19,5 @@ public class ProviderModel
     [ValidateNever]
     [ExcludeFromRequest]
     public ProviderStatusEnum Status { get; set; } = ProviderStatusEnum.Active;
+    public List<string> SupportedCountryCodes { get; set; } = [];
 }

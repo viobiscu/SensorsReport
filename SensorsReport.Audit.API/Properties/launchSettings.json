@@ -1,12 +1,11 @@
-{
+﻿{
   "profiles": {
     "SensorsReportAudit.API": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:61184;http://localhost:61189"
+      }
     }
   }
 }

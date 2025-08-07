@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using SensorsReport.OrionLD;
-using System.Text.Json.Nodes;
+﻿using SensorsReport.OrionLD;
 
 namespace SensorsReport.Webhook.API.Tasks;
 

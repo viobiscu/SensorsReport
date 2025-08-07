@@ -29,16 +29,9 @@ spec:
           env:
             - name: ASPNETCORE_ENVIRONMENT
               value: "Production"
-            - name: SR_OrionLdConfig__BrokerUrl
+            - name: SR_OrionLdOptions__BrokerUrl
               value: "http://orion-ld-broker:1026"
-            - name: SR_QuantumLeapConfig__QuantumLeapHost
-              value: "http://quantum.sensorsreport.net:8668"
-            - name: SR_RabbitMQExchangeConfig__RabbitMQConnectionString
-              valueFrom:
-                secretKeyRef:
-                  name: rabbitmq-default-default-user
-                  key: connection_string
-            - name: SR_RabbitMQExchangeConfig__RabbitMQExchange
-              value: sensorsreport.exchange.notification.logrule
-            - name: SR_RabbitMQExchangeConfig__RabbitMQRoutingKey
-              value: sensorsreport.exchange.notification.logrule
+          envFrom:
+            - secretRef:
+                name: rabbitmq-default-default-user
+              prefix: "SR_EventBusOptions__"

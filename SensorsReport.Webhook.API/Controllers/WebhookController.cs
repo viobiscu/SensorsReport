@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using SensorsReport.Webhook.API.Services;
-using System;
+using SensorsReport.Api.Core.MassTransit;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace SensorsReport.Webhook.API.Controllers;
 
@@ -27,41 +24,35 @@ public class WebhookController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
     public async Task<IActionResult> ReceiveWebhook(
-        [FromServices] IEnqueueService notifyRuleQueueService,
         [FromServices] ITenantRetriever tenantRetriever,
-        [FromBody] JsonElement payload,
+        [FromServices] IEventBus eventBus,
+        [FromBody] SubscriptionEventModel payload,
         [FromQuery] string? subscriptionId = null)
     {
         await LogCompleteHttpRequestAsync(payload);
 
-        _logger.LogInformation("Webhook notification received: {Payload}", JsonSerializer.Serialize(payload));
+        _logger.LogInformation("Webhook notification received: {Payload}", payload.Id);
 
-        var tenant = tenantRetriever.CurrentTenantInfo;
-        if (!payload.TryGetProperty("id", out var notificationId) ||
-            !payload.TryGetProperty("type", out var typeElement) ||
-            !payload.TryGetProperty("subscriptionId", out var subscriptionIdElement) ||
-            !payload.TryGetProperty("data", out var dataElement))
-        {
+        payload.Tenant = tenantRetriever.CurrentTenantInfo;
+
+        if (string.IsNullOrEmpty(payload.Id) ||
+            string.IsNullOrEmpty(payload.Type) ||
+            string.IsNullOrEmpty(payload.SubscriptionId) ||
+            payload.Data == null || payload.Data.Length == 0)
             return BadRequest("Invalid webhook notification format");
-        }
 
-        string type = typeElement.GetString()!;
-        if (type != "Notification")
-        {
-            return BadRequest($"Unknown notification type: {type}");
-        }
+        if (!payload.Type.Equals("Notification", StringComparison.OrdinalIgnoreCase))
+            return BadRequest($"Invalid notification type: {payload.Type}");
 
-        if (string.IsNullOrEmpty(subscriptionId) || subscriptionIdElement.GetString() != subscriptionId)
-        {
+        if (string.IsNullOrEmpty(subscriptionId) || !
+            payload.SubscriptionId.Equals(subscriptionId, StringComparison.OrdinalIgnoreCase))
             return BadRequest("Query parameter subscriptionId does not match payload subscriptionId");
-        }
 
-        await notifyRuleQueueService.EnqueueNotificationAsync(dataElement, tenant, subscriptionIdElement.GetString()!);
-        _logger.LogInformation("Webhook notification enqueued successfully for subscriptionId: {SubscriptionId}", subscriptionId);
+        await eventBus.PublishAsync((SensorDataChangedEvent)payload);
         return NoContent();
     }
 
-    private async Task LogCompleteHttpRequestAsync(JsonElement payload)
+    private async Task LogCompleteHttpRequestAsync(SubscriptionEventModel payload)
     {
         var requestDetails = new StringBuilder();
         requestDetails.AppendLine("=== COMPLETE HTTP REQUEST DUMP ===");

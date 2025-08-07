@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sensors-report-sms-api
@@ -30,23 +30,34 @@ spec:
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: Production
-        - name: SR_AppConfiguration__ConnectionString
+        - name: SR_SmsMongoDbConnectionOptions__ConnectionString
           valueFrom:
             secretKeyRef:
               name: notification-api-mongodb-connection
               key: MONGODB_URI
-        - name: SR_AppConfiguration__DatabaseName
+        - name: SR_SmsMongoDbConnectionOptions__DatabaseName
           value: sms-db
-        - name: SR_AppConfiguration__SmsCollectionName
+        - name: SR_SmsMongoDbConnectionOptions__CollectionName
           value: sms
-        - name: SR_AppConfiguration__ProviderCollectionName
+        - name: SR_ProviderMongoDbConnectionOptions__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: notification-api-mongodb-connection
+              key: MONGODB_URI
+        - name: SR_ProviderMongoDbConnectionOptions__DatabaseName
+          value: sms-db
+        - name: SR_ProviderMongoDbConnectionOptions__CollectionName
           value: providers
-        - name: SR_AppConfiguration__ProviderTrustTimeoutInSecond
+        - name: SR_SmsOptions__ProviderTrustTimeoutInSecond
           value: "1800"  # 30 minutes
-        - name: SR_AppConfiguration__MaxRetryCount
+        - name: SR_SmsOptions__MaxRetryCount
           value: "3"
-        - name: SR_AppConfiguration__DefaultTtlInMinutes
-          value: "30"  # Default TTL for SMS messages 
+        - name: SR_SmsOptions__DefaultTtlInMinutes
+          value: "30"  # Default TTL for SMS messages
+        envFrom:
+        - secretRef:
+            name: rabbitmq-default-default-user
+            prefix: "SR_EventBusOptions__"
         volumeMounts:
         - name: logs
           mountPath: /app/logs

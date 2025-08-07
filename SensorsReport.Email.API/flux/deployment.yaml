@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sensors-report-email-api
@@ -27,26 +27,21 @@ spec:
             cpu: "500m"
             memory: "512Mi"
         env:
-        - name: SR_AppConfiguration__ConnectionString
+        - name: SR_EmailMongoDbConnectionOptions__ConnectionString
           valueFrom:
             secretKeyRef:
               name: notification-api-mongodb-connection
               key: MONGODB_URI
-        - name: SR_AppConfiguration__DatabaseName
+        - name: SR_EmailMongoDbConnectionOptions__DatabaseName
           value: email-db
-        - name: SR_AppConfiguration__EmailCollectionName
+        - name: SR_EmailMongoDbConnectionOptions__CollectionName
           value: email
-        - name: SR_AppConfiguration__RabbitMQConnectionString
-          valueFrom:
-            secretKeyRef:
-              name: rabbitmq-default-default-user
-              key: connection_string
-        - name: SR_AppConfiguration__RabbitMQExchangeName
-          value: sensorsreport.exchange.notification.email
-        - name: SR_AppConfiguration__RabbitMQRoutingKey
-          value: sensorsreport.routingkey.notification.email
         - name: ASPNETCORE_ENVIRONMENT
           value: Production
+        envFrom:
+        - secretRef:
+            name: rabbitmq-default-default-user
+            prefix: "SR_EventBusOptions__"
         volumeMounts:
         - name: logs
           mountPath: /app/logs

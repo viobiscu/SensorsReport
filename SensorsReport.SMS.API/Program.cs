@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using NLog;
 using SensorsReport;
-using NLog;
-using System.Reflection;
+using SensorsReport.Extensions;
 using SensorsReport.SMS.API.Repositories;
 using SensorsReport.SMS.API.Tasks;
-using SensorsReport.Extensions;
 
 LogManager.Setup((config) => config.ConfigureLogger());
 var logger = LogManager.GetLogger("SensorsReport.SMS.API");;
@@ -13,17 +11,11 @@ logger.LogProgramInfo(AppDomain.CurrentDomain, args);
 
 var builder = AppConfig.GetDefaultWebAppBuilder(useTenantHeader: true);
 
-ConfigureConfigs(builder.Configuration, builder.Services);
 ConfigureServices(builder.Services);
 
 var app = builder.Build();
 app.ConfigureAppAndRun();
 
-void ConfigureConfigs(IConfigurationManager configuration, IServiceCollection services)
-{
-    services.Configure<AppConfiguration>(configuration.GetSection("AppConfiguration"));
-    logger.LogSection(configuration, "AppConfiguration");
-}
 
 void ConfigureServices(IServiceCollection services)
 {
@@ -33,12 +25,23 @@ void ConfigureServices(IServiceCollection services)
     services.AddHostedService<UpdateSmsStatusBackgroundService>();
 }
 
-public class AppConfiguration
+[ConfigName(SectionName)]
+public class SmsMongoDbConnectionOptions : MongoDbConnectionOptions
 {
-    public string? ConnectionString { get; set; }
-    public string? DatabaseName { get; set; }
-    public string? SmsCollectionName { get; set; }
-    public string? ProviderCollectionName { get; set; }
+    public new const string SectionName = nameof(SmsMongoDbConnectionOptions);
+}
+
+[ConfigName(SectionName)]
+public class ProviderMongoDbConnectionOptions : MongoDbConnectionOptions
+{
+    public new const string SectionName = nameof(ProviderMongoDbConnectionOptions);
+}
+
+
+[ConfigName(SectionName)]
+public class SmsOptions
+{
+    public const string SectionName = "SmsOptions";
     public int ProviderTrustTimeoutInSecond { get; set; } = 60 * 30; // Default to 30 minutes
     public int MaxRetryCount { get; set; } = 3; // Default to 3 retries
     public int DefaultTtlInMinutes { get; set; } = 30; // Default TTL for SMS messages

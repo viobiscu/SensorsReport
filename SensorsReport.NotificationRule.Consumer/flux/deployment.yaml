@@ -1,0 +1,40 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-notificationrule-consumer
+  labels:
+    app: sensors-report-notificationrule-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-notificationrule-consumer
+  template:
+    metadata:
+      labels:
+        app: sensors-report-notificationrule-consumer
+    spec:
+      containers:
+      - name: sensors-report-notificationrule-consumer
+        image: viobiscu/sensors-report-notificationrule-consumer:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "96Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: SR_OrionLdConfig__OrionContextBrokerUrl
+          value: "http://orion-ld-broker:1026"
+        envFrom:
+        - secretRef:
+            name: rabbitmq-default-default-user
+            prefix: "SR_EventBusOptions__"
+      volumes:
+      - name: logs
+        emptyDir: {}

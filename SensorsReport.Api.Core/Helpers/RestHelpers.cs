@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Text.Json;
 
-namespace SensorsReport.Api.Core.Helpers;
+namespace SensorsReport;
 
 public static class RestHelpers
 {

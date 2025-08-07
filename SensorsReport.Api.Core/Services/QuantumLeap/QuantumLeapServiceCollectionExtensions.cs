@@ -7,9 +7,9 @@ namespace SensorsReport.Extensions;
 
 public static class QuantumLeapServiceCollectionExtensions
 {
-    public static IServiceCollection AddQuantumLeapService(this IServiceCollection services, IConfigurationManager configuration, string configName = nameof(QuantumLeapConfig))
+    public static IServiceCollection AddQuantumLeapService(this IServiceCollection services, IConfigurationManager configuration, string configName = nameof(QuantumLeapOptions))
     {
-        services.Configure<QuantumLeapConfig>(configuration.GetSection(configName));
+        services.Configure<QuantumLeapOptions>(configuration.GetSection(configName));
 
         return services;
     }

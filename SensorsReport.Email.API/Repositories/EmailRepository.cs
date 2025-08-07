@@ -1,31 +1,30 @@
-﻿using System.Text.Json;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using SensorsReport.Api.Core.Helpers;
 using MongoDB.Driver.Linq;
+using System.Text.Json;
 
 namespace SensorsReport.Email.API;
 
 public class EmailRepository : IEmailRepository
 {
-    private readonly AppConfiguration appConfig;
+    private readonly EmailMongoDbConnectionOptions emailDbOptions;
     private readonly MongoClient mongoClient;
     private readonly ILogger<EmailRepository> logger;
 
-    private IMongoDatabase Database => mongoClient.GetDatabase(appConfig.DatabaseName);
-    private IMongoCollection<EmailModel> Collection => Database.GetCollection<EmailModel>(appConfig.EmailCollectionName);
+    private IMongoDatabase Database => mongoClient.GetDatabase(emailDbOptions.DatabaseName);
+    private IMongoCollection<EmailModel> Collection => Database.GetCollection<EmailModel>(emailDbOptions.CollectionName);
 
-    public EmailRepository(ILogger<EmailRepository> logger, IOptions<AppConfiguration> appConfig)
+    public EmailRepository(ILogger<EmailRepository> logger, IOptions<EmailMongoDbConnectionOptions> emailDbOptions)
     {
-        ArgumentNullException.ThrowIfNull(appConfig);
-        ArgumentNullException.ThrowIfNull(appConfig.Value.ConnectionString, nameof(appConfig.Value.ConnectionString));
-        ArgumentNullException.ThrowIfNull(appConfig.Value.EmailCollectionName, nameof(appConfig.Value.EmailCollectionName));
-        ArgumentNullException.ThrowIfNull(appConfig.Value.DatabaseName, nameof(appConfig.Value.DatabaseName));
+        ArgumentNullException.ThrowIfNull(emailDbOptions);
+        ArgumentNullException.ThrowIfNull(emailDbOptions.Value.ConnectionString, nameof(emailDbOptions.Value.ConnectionString));
+        ArgumentNullException.ThrowIfNull(emailDbOptions.Value.CollectionName, nameof(emailDbOptions.Value.CollectionName));
+        ArgumentNullException.ThrowIfNull(emailDbOptions.Value.DatabaseName, nameof(emailDbOptions.Value.DatabaseName));
 
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
-        this.appConfig = appConfig.Value ?? throw new ArgumentNullException(nameof(appConfig.Value), "AppConfiguration cannot be null");
-        this.mongoClient = new MongoClient(this.appConfig.ConnectionString);
+        this.emailDbOptions = emailDbOptions.Value ?? throw new ArgumentNullException(nameof(emailDbOptions.Value), "EmailMongoDbConnectionOptions cannot be null");
+        this.mongoClient = new MongoClient(this.emailDbOptions.ConnectionString);
     }
 
     public async Task<EmailModel> CreateAsync(EmailModel email)

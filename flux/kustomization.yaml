@@ -43,3 +43,5 @@ resources:
   - sensors-report-alarmrule-consumer/service.yaml
   - sensors-report-logrule-consumer/deployment.yaml
   - sensors-report-logrule-consumer/service.yaml
+  - sensors-report-notificationrule-consumer/deployment.yaml
+  - sensors-report-notificationrule-consumer/service.yaml

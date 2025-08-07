@@ -9,15 +9,15 @@ public class UpdateSmsStatusBackgroundService : BackgroundService
     private readonly ILogger<UpdateSmsStatusBackgroundService> logger;
     private readonly ISmsRepository smsRepository;
     private readonly IProviderRepository providerRepository;
-    private readonly IOptions<AppConfiguration> appConfig;
+    private readonly IOptions<SmsOptions> smsOptions;
 
-    public UpdateSmsStatusBackgroundService(ILogger<UpdateSmsStatusBackgroundService> logger, IServiceScopeFactory factory, IOptions<AppConfiguration> appConfig)
+    public UpdateSmsStatusBackgroundService(ILogger<UpdateSmsStatusBackgroundService> logger, IServiceScopeFactory factory, IOptions<SmsOptions> smsOptions)
     {
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
         var scope = factory.CreateScope();
         this.smsRepository = scope.ServiceProvider.GetRequiredService<ISmsRepository>();
         this.providerRepository = scope.ServiceProvider.GetRequiredService<IProviderRepository>();
-        this.appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig), "AppConfiguration cannot be null");
+        this.smsOptions = smsOptions ?? throw new ArgumentNullException(nameof(smsOptions), "SmsOptions cannot be null");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -50,9 +50,9 @@ public class UpdateSmsStatusBackgroundService : BackgroundService
 
                         logger.LogInformation("Processing SMS with ID {SmsId}, status '{Status}' and tenant '{Tenant}'", sms.Id, Enum.GetName(sms.Status), sms.Tenant);
                         var currentStatus = sms.Status;
-                        if (sms.SentAt <= DateTime.UtcNow.AddSeconds(-appConfig.Value.ProviderTrustTimeoutInSecond))
+                        if (sms.SentAt <= DateTime.UtcNow.AddSeconds(-smsOptions.Value.ProviderTrustTimeoutInSecond))
                         {
-                            logger.LogInformation("Updating SMS with ID {SmsId} to 'Pending' status due to timeout. SentAt: {SentAt}, Provider Trust Timeout: {ProviderTrustTimeout} second", sms.Id, sms.SentAt, appConfig.Value.ProviderTrustTimeoutInSecond);
+                            logger.LogInformation("Updating SMS with ID {SmsId} to 'Pending' status due to timeout. SentAt: {SentAt}, Provider Trust Timeout: {ProviderTrustTimeout} second", sms.Id, sms.SentAt, smsOptions.Value.ProviderTrustTimeoutInSecond);
                             sms.Status = SmsStatusEnum.Pending;
                             sms.RetryCount++;
                             logger.LogInformation("SMS with ID {SmsId} has been retried {RetryCount} times.", sms.Id, sms.RetryCount);
@@ -67,13 +67,13 @@ public class UpdateSmsStatusBackgroundService : BackgroundService
                             }
                         }
 
-                        if (sms.RetryCount >= appConfig.Value.MaxRetryCount)
+                        if (sms.RetryCount >= smsOptions.Value.MaxRetryCount)
                         {
-                            logger.LogInformation("Updating SMS with ID {SmsId} to 'Failed' status due to max retry count (MaxRetry: {MaxRetry}).", sms.Id, appConfig.Value.MaxRetryCount);
+                            logger.LogInformation("Updating SMS with ID {SmsId} to 'Failed' status due to max retry count (MaxRetry: {MaxRetry}).", sms.Id, smsOptions.Value.MaxRetryCount);
                             sms.Status = SmsStatusEnum.Failed;
                         }
 
-                        var actualTtl = TimeSpan.FromMinutes(sms.Ttl ?? appConfig.Value.DefaultTtlInMinutes);
+                        var actualTtl = TimeSpan.FromMinutes(sms.Ttl ?? smsOptions.Value.DefaultTtlInMinutes);
                         if (sms.Timestamp.Add(actualTtl) < DateTime.UtcNow)
                         {
                             logger.LogInformation("Updating SMS with ID {SmsId} to 'Expired' status due to TTL expiration (TTL: {TTL}).", sms.Id, actualTtl);
@@ -87,7 +87,7 @@ public class UpdateSmsStatusBackgroundService : BackgroundService
                         }
 
                         logger.LogInformation("Updating SMS with ID {SmsId} to '{status}' status.", sms.Id, Enum.GetName(sms.Status));
-                        await smsRepository.UpdateAsync(sms.Id!, sms);
+                        await smsRepository.UpdateAsync(sms.Id!, sms, sms.Tenant);
                     }
                 }
 
@@ -111,7 +111,7 @@ public class UpdateSmsStatusBackgroundService : BackgroundService
 
                         var currentStatus = sms.Status;
 
-                        var actualTtl = TimeSpan.FromMinutes(sms.Ttl ?? appConfig.Value.DefaultTtlInMinutes);
+                        var actualTtl = TimeSpan.FromMinutes(sms.Ttl ?? smsOptions.Value.DefaultTtlInMinutes);
                         if (sms.Timestamp <= DateTime.UtcNow.Add(-actualTtl))
                         {
                             logger.LogInformation("Updating SMS with ID {SmsId} to 'Expired' status due to TTL expiration (TTL: {TTL}).", sms.Id, actualTtl);
@@ -125,7 +125,7 @@ public class UpdateSmsStatusBackgroundService : BackgroundService
                         }
 
                         logger.LogInformation("Updating SMS with ID {SmsId} to '{status}' status.", sms.Id, Enum.GetName(sms.Status));
-                        await smsRepository.UpdateAsync(sms.Id!, sms);
+                        await smsRepository.UpdateAsync(sms.Id!, sms, sms.Tenant);
                     }
                 }
             }

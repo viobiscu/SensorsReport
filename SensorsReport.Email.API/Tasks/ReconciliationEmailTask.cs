@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+﻿using SensorsReport.Api.Core.MassTransit;
 
 namespace SensorsReport.Email.API.Tasks;
 
@@ -6,21 +6,15 @@ public class ReconciliationEmailTask : BackgroundService
 {
     private readonly ILogger<ReconciliationEmailTask> logger;
     private readonly IEmailRepository emailRepository;
-    private readonly IEmailQueueService queueService;
-    private readonly IOptions<AppConfiguration> appConfig;
+    private readonly IEventBus eventBus;
 
     public ReconciliationEmailTask(ILogger<ReconciliationEmailTask> logger,
-        IServiceScopeFactory factory,
-        IOptions<AppConfiguration> appConfig)
+        IServiceScopeFactory factory)
     {
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
         var scope = factory.CreateScope();
-        this.emailRepository = scope.ServiceProvider.GetRequiredService<IEmailRepository>()
-            ?? throw new ArgumentNullException(nameof(emailRepository), "EmailRepository cannot be null");
-        this.queueService = scope.ServiceProvider.GetRequiredService<IEmailQueueService>()
-            ?? throw new ArgumentNullException(nameof(queueService), "QueueService cannot be null");
-
-        this.appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig), "AppConfiguration cannot be null");
+        this.emailRepository = scope.ServiceProvider.GetRequiredService<IEmailRepository>() ?? throw new ArgumentNullException(nameof(emailRepository), "EmailRepository cannot be null");
+        this.eventBus = scope.ServiceProvider.GetRequiredService<IEventBus>() ?? throw new ArgumentNullException(nameof(eventBus), "EventBus cannot be null");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,7 +29,11 @@ public class ReconciliationEmailTask : BackgroundService
                 {
                     foreach (var email in emails)
                     {
-                        await queueService.QueueEmailAsync(email);
+                        await eventBus.PublishAsync(new EmailCreatedEvent
+                        {
+                            Id = email.Id,
+                        }, stoppingToken);
+
                         logger.LogInformation("Queued email with ID: {Id} for processing.", email.Id);
                         await emailRepository.UpdateStatusAsync(email.Id, EmailStatusEnum.Queued);
                         logger.LogInformation("Updated status of email with ID: {Id} to Queued.", email.Id);

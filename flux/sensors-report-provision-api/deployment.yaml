@@ -28,7 +28,7 @@ spec:
         env:
           - name: ASPNETCORE_ENVIRONMENT
             value: "Production"
-          - name: SR_OrionLdConfig__OrionContextBrokerUrl
+          - name: SR_OrionLdOptions__OrionContextBrokerUrl
             value: "http://orion-ld-broker:1026"
-          - name: SR_OrionLdConfig__MainTenant
+          - name: SR_OrionLdOptions__MainTenant
             value: "synchro"

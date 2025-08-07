@@ -1,6 +1,6 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using MassTransit;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,10 +10,12 @@ using Microsoft.OpenApi.Models;
 using NLog;
 using NLog.Config;
 using NLog.Web;
-using SensorsReport;
+using RabbitMQ.Client;
+using SensorsReport.Api.Core.MassTransit;
 using SensorsReport.Extensions;
-using SensorsReport.OrionLD.Extensions;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
+using System.Text.Json;
 
 namespace SensorsReport;
 
@@ -319,6 +321,39 @@ public static partial class AppConfig
             logging.ResponseBodyLogLimit = 4096;
         });
 
+
+        var eventBusOptions = builder.Configuration.GetSection(EventBusOptions.SectionName).Get<EventBusOptions>();
+        if (builder.Environment.IsDevelopment() && eventBusOptions != null)
+        {
+            builder.Services.PostConfigure<MassTransitHostOptions>(options =>
+            {
+                options.WaitUntilStarted = true;
+                options.StartTimeout = TimeSpan.FromSeconds(30);
+            });
+        }
+
+        var healthCheckBuilder = builder.Services.AddHealthChecks();
+
+        if (eventBusOptions != null)
+        {
+            builder.Services.AddEventBus(s =>
+            {
+                s.AddConsumersFromNamespaceContaining(Assembly.GetCallingAssembly().EntryPoint?.DeclaringType ?? Assembly.GetCallingAssembly().GetTypes().FirstOrDefault());
+            });
+
+            var connectionString = $"amqp://{eventBusOptions.Username}:{eventBusOptions.Password}@{eventBusOptions.Host}:{eventBusOptions.Port}{eventBusOptions.VirtualHost}";
+            builder.Services.AddSingleton<IConnection>(sp =>
+            {
+                var factory = new ConnectionFactory
+                {
+                    Uri = new Uri(connectionString),
+                };
+                return factory.CreateConnectionAsync().GetAwaiter().GetResult();
+            });
+
+            healthCheckBuilder.AddRabbitMQ();
+        }
+
         return builder;
     }
 
@@ -373,7 +408,11 @@ public static partial class AppConfig
 
     public static WebApplication ConfigureDefaultEndpoints(this WebApplication app)
     {
-        app.MapGet("/health", () => "OK");
+        app.MapHealthChecks("/health");
+        app.MapHealthChecks("/health/ready", new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains("ready")
+        });
         app.MapGet("/version", () => AppDomain.CurrentDomain.GetVersion());
         return app;
     }
