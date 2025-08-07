@@ -83,6 +83,16 @@ spec:
             secretKeyRef:
               name: email-smtp-secret
               key: UseSSL
+        - name: SR_SmtpOptions__FromAddress
+          valueFrom:
+            secretKeyRef:
+              name: email-smtp-secret
+              key: FromAddress
+        - name: SR_SmtpOptions__FromName
+          valueFrom:
+            secretKeyRef:
+              name: email-smtp-secret
+              key: FromName
       volumes:
       - name: logs
         emptyDir: {}
