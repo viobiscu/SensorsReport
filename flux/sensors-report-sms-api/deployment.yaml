@@ -54,10 +54,26 @@ spec:
           value: "3"
         - name: SR_SmsOptions__DefaultTtlInMinutes
           value: "30"  # Default TTL for SMS messages
-        envFrom:
-        - secretRef:
-            name: rabbitmq-default-default-user
-            prefix: "SR_EventBusOptions__"
+        - name: SR_EventBusOptions__Host
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: host
+        - name: SR_EventBusOptions__Port
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: port
+        - name: SR_EventBusOptions__Username
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: username
+        - name: SR_EventBusOptions__Password
+            valueFrom:
+                secretKeyRef:
+                name: rabbitmq-default-default-user
+                key: password
         volumeMounts:
         - name: logs
           mountPath: /app/logs

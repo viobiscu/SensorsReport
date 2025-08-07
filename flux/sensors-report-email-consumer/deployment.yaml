@@ -38,13 +38,51 @@ spec:
           value: email-db
         - name: SR_EmailMongoDbConnectionOptions__CollectionName
           value: email
-        envFrom:
-        - secretRef:
-            name: rabbitmq-default-default-user
-            prefix: "SR_EventBusOptions__"
-        - secretRef:
-            name: email-smtp-secret
-            prefix: "SR_SmtpOptions__"
+        - name: SR_EventBusOptions__Host
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: host
+        - name: SR_EventBusOptions__Port
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: port
+        - name: SR_EventBusOptions__Username
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-default-user
+              key: username
+        - name: SR_EventBusOptions__Password
+            valueFrom:
+                secretKeyRef:
+                name: rabbitmq-default-default-user
+                key: password
+        - name: SR_SmtpOptions__Server
+          valueFrom:
+            secretKeyRef:
+              name: email-smtp-secret
+              key: Server
+        - name: SR_SmtpOptions__Port
+            valueFrom:
+                secretKeyRef:
+                name: email-smtp-secret
+                key: Port
+        - name: SR_SmtpOptions__Username
+            valueFrom:
+                secretKeyRef:
+                name: email-smtp-secret
+                key: Username
+        - name: SR_SmtpOptions__Password
+            valueFrom:
+                secretKeyRef:
+                name: email-smtp-secret
+                key: Password
+        - name: SR_SmtpOptions__UseSSL
+            valueFrom:
+                secretKeyRef:
+                name: email-smtp-secret
+                key: UseSSL
       volumes:
       - name: logs
         emptyDir: {}

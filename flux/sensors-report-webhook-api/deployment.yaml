@@ -31,7 +31,23 @@ spec:
               value: "Production"
             - name: SR_OrionLdOptions__BrokerUrl
               value: "http://orion-ld-broker:1026"
-          envFrom:
-            - secretRef:
-                name: rabbitmq-default-default-user
-              prefix: "SR_EventBusOptions__"
+            - name: SR_EventBusOptions__Host
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-default-user
+                  key: host
+            - name: SR_EventBusOptions__Port
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-default-user
+                  key: port
+            - name: SR_EventBusOptions__Username
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-default-user
+                  key: username
+            - name: SR_EventBusOptions__Password
+                valueFrom:
+                    secretKeyRef:
+                    name: rabbitmq-default-default-user
+                    key: password
