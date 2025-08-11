@@ -109,16 +109,28 @@ public class CheckNotificationsBackgroundService : BackgroundService
                             if (notification.AlarmId != alarmId)
                             {
                                 logger.LogWarning("Notification AlarmId: {NotificationAlarmId} does not match entity AlarmId: {AlarmId}, skipping notification processing.", notification.AlarmId, alarmId);
-                               await repository.UpdateStatusAsync(notification.Id, NotificationMonitorStatusEnum.Error, "AlarmId mismatch");
+                                await repository.UpdateStatusAsync(notification.Id, NotificationMonitorStatusEnum.Error, "AlarmId mismatch");
                                 continue;
+                            }
+
+                            var alarm = await orionLdService.GetEntityByIdAsync<AlarmModel>(alarmId);
+                            if (alarm == null)
+                            {
+                                logger.LogWarning("Alarm with ID: {AlarmId} not found, skipping notification processing.", alarmId);
+                                await repository.UpdateStatusAsync(notification.Id, NotificationMonitorStatusEnum.Error, "Alarm not found");
+                                continue;
+                            }
+
+                            if (string.Equals(alarm.Status?.Value, AlarmModel.StatusValues.Close.Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                logger.LogInformation("Alarm with ID: {AlarmId} is already closed, skipping notification processing.", alarmId);
+                                await repository.UpdateStatusAsync(notification.Id, NotificationMonitorStatusEnum.Completed, "Alarm is closed");
+                                return;
                             }
 
                             await NotifyIfTimeout(serviceScope, repository, notification, stoppingToken);
                             await RepeatAcknowledgmentIfNeeded(serviceScope, repository, notification, stoppingToken);
                             await RepeatNotificationIfNeeded(serviceScope, repository, notification, stoppingToken);
-
-                            var status = notification.Status == NotificationMonitorStatusEnum.Acknowledged ? NotificationMonitorStatusEnum.Acknowledged : NotificationMonitorStatusEnum.Watching;
-                            await repository.UpdateStatusAsync(notification.Id, status, notification.Message);
                         }
                         catch (Exception ex)
                         {
@@ -170,7 +182,7 @@ public class CheckNotificationsBackgroundService : BackgroundService
             notificationMonitor.TimedOutAt = DateTime.UtcNow;
             notificationMonitor.Status = NotificationMonitorStatusEnum.TimedOut;
             notificationMonitor.Message = $"Notification timed out after {notificationRule.NotifyIfTimeOut} minutes.";
-            logger.LogInformation("Notification with ID: {NotificationId} has timed out after {Timeout} minutes.", notificationMonitor.Id, notificationRule.NotifyIfTimeOut);
+            logger.LogInformation("Notification with ID: {NotificationId} has timed out after {Timeout} minutes.", notificationMonitor.Id, notificationRule.NotifyIfTimeOut.ToTimeSpan().TotalMinutes);
 
             var users = await userService.GetNotificationUsers(notificationMonitor.Tenant!, notificationMonitor.NotificationId!);
             if (users == null || users.Count == 0)

@@ -139,7 +139,7 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
         var parameters = new Dictionary<string, string>
         {
             { "EventType", "First Alarm" },
-            { "SensorId", sensor.Id! },
+            { "SensorId", triggerNotificationRuleEvent.SensorId! },
             { "SensorName", triggerNotificationRuleEvent.PropertyKey! },
             { "SensorLocation", alarm.Location?.Value?.Coordinates?.ToString() ?? "Unknown" },
             { "AlarmType", alarm.Condition?.Value ?? "Unknown" },
@@ -183,17 +183,7 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
         existingMonitoringModel.Status = NotificationMonitorStatusEnum.Watching;
         existingMonitoringModel.LastUpdatedAt = DateTime.UtcNow;
 
-        if (isCreate)
-        {
-            if (isEmailChannelActive)
-                await messageService.SendSms(orionLdService, users, SmsTemplateKeys.SmsSensorFirstAlarm, triggerNotificationRuleEvent.Tenant, parameters);
-
-            if (isSmsChannelActive)
-                await messageService.SendEmail(orionLdService, users, EmailTemplateKeys.SensorFirstAlarm, triggerNotificationRuleEvent.Tenant, parameters);
-
-            logger.LogInformation("Sending notification for alarm with ID {AlarmId}", triggerNotificationRuleEvent.AlarmId);
-        }
-        else if (alarm.Status.Value?.Equals(AlarmModel.StatusValues.Close.Value, StringComparison.OrdinalIgnoreCase) == true && notificationRule.NotifyIfClose?.Value == true)
+        if (alarm.Status.Value?.Equals(AlarmModel.StatusValues.Close.Value, StringComparison.OrdinalIgnoreCase) == true && notificationRule.NotifyIfClose?.Value == true)
         {
             logger.LogInformation("Alarm with ID {AlarmId} is closed, proceeding with notification", triggerNotificationRuleEvent.AlarmId);
             if (isEmailChannelActive)
@@ -219,9 +209,19 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
 
             logger.LogInformation("Sending notification for acknowledged alarm with ID {AlarmId}", triggerNotificationRuleEvent.AlarmId);
         }
+        else if (isCreate)
+        {
+            if (isEmailChannelActive)
+                await messageService.SendEmail(orionLdService, users, EmailTemplateKeys.SensorFirstAlarm, triggerNotificationRuleEvent.Tenant, parameters);
+
+            if (isSmsChannelActive)
+                await messageService.SendSms(orionLdService, users, SmsTemplateKeys.SmsSensorFirstAlarm, triggerNotificationRuleEvent.Tenant, parameters);
+
+            logger.LogInformation("Sending notification for alarm with ID {AlarmId}", triggerNotificationRuleEvent.AlarmId);
+        }
 
         await repository.UpdateAsync(existingMonitoringModel.Id, existingMonitoringModel);
-
-        logger.LogInformation("Alarm with ID {AlarmId} does not meet the criteria for notification", triggerNotificationRuleEvent.AlarmId);
+        logger.LogInformation("Notification processing completed for Alarm ID {AlarmId}, monitoring: {MonitoringJson}",
+            triggerNotificationRuleEvent.AlarmId, JsonSerializer.Serialize(existingMonitoringModel, JsonSerializerOptions));
     }
 }

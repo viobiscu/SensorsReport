@@ -1,5 +1,6 @@
 ﻿using SensorsReport.Api.Core.MassTransit;
 using SensorsReport.OrionLD;
+using System.Text.Json;
 
 namespace SensorsReport.NotificationRule.Consumer;
 
@@ -51,9 +52,9 @@ public class MessageService(ILogger<MessageService> logger, IEventBus eventBus) 
                 { "UserName", $"{user.FirstName?.Value} {user.LastName?.Value}" }
             };
 
-            var subject = TemplateHelper.FormatString(emailTemplate?.Subject?.Value ?? DefaultEmailSubject, parameters);
+            var subject = TemplateHelper.FormatString(UnescapeJsonString(emailTemplate?.Subject?.Value ?? DefaultEmailSubject), parameters);
             subject = TemplateHelper.FormatString(subject, userParameters);
-            var body = TemplateHelper.FormatString(emailTemplate?.Body?.Value ?? DefaultEmailBody, parameters);
+            var body = TemplateHelper.FormatString(UnescapeJsonString(emailTemplate?.Body?.Value ?? DefaultEmailBody), parameters);
             body = TemplateHelper.FormatString(body, userParameters);
 
             logger.LogInformation("Creating email to {ToEmail} with subject: {Subject}", user.Email.Value, subject);
@@ -65,6 +66,28 @@ public class MessageService(ILogger<MessageService> logger, IEventBus eventBus) 
                 BodyHtml = body,
                 Tenant = tenant?.Tenant
             });
+        }
+    }
+
+    private string UnescapeJsonString(string jsonEscapedString)
+    {
+        if (string.IsNullOrEmpty(jsonEscapedString))
+            return jsonEscapedString;
+
+        try
+        {
+            string wrappedJson = $"\"{jsonEscapedString}\"";
+            return JsonSerializer.Deserialize<string>(wrappedJson)!;
+        }
+        catch
+        {
+            return jsonEscapedString
+                .Replace("\\\"", "\"")      // Unescape quotes
+                .Replace("\\\\", "\\")      // Unescape backslashes
+                .Replace("\\n", "\n")       // Unescape newlines
+                .Replace("\\r", "\r")       // Unescape carriage returns
+                .Replace("\\t", "\t")       // Unescape tabs
+                .Replace("\\/", "/");
         }
     }
 
