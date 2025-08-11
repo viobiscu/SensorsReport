@@ -16,7 +16,7 @@ public class SmsController : ControllerBase
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(JsonErrorResponse), StatusCodes.Status500InternalServerError)]
     [Produces("application/json")]
-    public async Task<IActionResult> Get([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, [FromQuery] string? fromDate, [FromQuery] string? toDate, [FromQuery] int limit = 100, [FromQuery] int offset = 0, [FromQuery] SmsStatusEnum? status = null, [FromQuery] string countryCode = null)
+    public async Task<IActionResult> Get([FromServices] ITenantRetriever tenantRetriever, [FromServices] ISmsRepository repository, [FromQuery] string? fromDate, [FromQuery] string? toDate, [FromQuery] int limit = 100, [FromQuery] int offset = 0, [FromQuery] SmsStatusEnum? status = null, [FromQuery] string? countryCode = null)
     {
         ArgumentNullException.ThrowIfNull(tenantRetriever, nameof(tenantRetriever));
         ArgumentNullException.ThrowIfNull(repository, nameof(repository));

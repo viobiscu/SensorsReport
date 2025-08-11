@@ -14,15 +14,15 @@ public partial class NotificationRuleModel : EntityModel
     [JsonPropertyName("consecutiveHits")]
     public ValuePropertyModel<int>? ConsecutiveHits { get; set; }
     [JsonPropertyName("repetAfter")]
-    public UnitPropertyMode<int>? RepetAfter { get; set; }
+    public UnitPropertyModel<int>? RepetAfter { get; set; }
     [JsonPropertyName("notifyIfTimeOut")]
-    public UnitPropertyMode<int>? NotifyIfTimeOut { get; set; }
+    public UnitPropertyModel<int>? NotifyIfTimeOut { get; set; }
     [JsonPropertyName("notifyIfClose")]
     public ValuePropertyModel<bool>? NotifyIfClose { get; set; }
     [JsonPropertyName("notifyIfAcknowledged")]
     public ValuePropertyModel<bool>? NotifyIfAcknowledged { get; set; }
     [JsonPropertyName("repetIfAcknowledged")]
-    public UnitPropertyMode<int>? RepetIfAcknowledged { get; set; }
+    public UnitPropertyModel<int>? RepetIfAcknowledged { get; set; }
 }
 
 

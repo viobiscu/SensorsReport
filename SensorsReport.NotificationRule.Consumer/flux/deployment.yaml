@@ -29,6 +29,15 @@ spec:
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: Production
+        - name: SR_NotificationMongoDbConnectionOptions__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: notification-api-mongodb-connection
+              key: MONGODB_URI
+        - name: SR_NotificationMongoDbConnectionOptions__DatabaseName
+          value: notification-db
+        - name: SR_NotificationMongoDbConnectionOptions__CollectionName
+          value: notification
         - name: SR_OrionLdOptions__OrionContextBrokerUrl
           value: "http://orion-ld-broker:1026"
         - name: SR_EventBusOptions__Host

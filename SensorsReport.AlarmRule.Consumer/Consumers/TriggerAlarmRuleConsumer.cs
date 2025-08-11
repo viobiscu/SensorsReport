@@ -182,6 +182,7 @@ public class TriggerAlarmRuleConsumer(ILogger<TriggerAlarmRuleConsumer> logger, 
         var observedValue = new ObservedValuePropertyModel<double>
         {
             Value = sensorProperty.Value.GetValueOrDefault(),
+            Unit = sensorProperty.Unit,
             ObservedAt = sensorProperty.ObservedAt.GetValueOrDefault(DateTime.UtcNow),
         };
         alarm.MeasuredValue.Value.Add(observedValue);

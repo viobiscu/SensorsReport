@@ -1,17 +1,19 @@
 ﻿using MassTransit;
 using SensorsReport.Api.Core.MassTransit;
+using SensorsReport.NotificationRule.Consumer;
 using SensorsReport.OrionLD;
-using System;
-using System.Linq;
 using System.Text.Json;
 
 namespace SensorsReport.AlarmRule.Consumer.Consumers;
 
-public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleConsumer> logger, JsonSerializerOptions jsonSerializerOptions, IServiceProvider serviceProvider, IEventBus eventBus) : IConsumer<TriggerNotificationRuleEvent>
+public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleConsumer> logger,
+    JsonSerializerOptions jsonSerializerOptions,
+    IServiceProvider serviceProvider,
+    INotificationRepository repository) : IConsumer<TriggerNotificationRuleEvent>
 {
     private readonly ILogger<TriggerNotificationRuleConsumer> logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IServiceProvider serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-    private readonly IEventBus eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+    private readonly INotificationRepository repository = repository ?? throw new ArgumentNullException(nameof(repository));
     private readonly JsonSerializerOptions JsonSerializerOptions = jsonSerializerOptions;
 
     public async Task Consume(ConsumeContext<TriggerNotificationRuleEvent> context)
@@ -26,8 +28,11 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
         }
 
         var scope = serviceProvider.CreateScope();
+        var usersService = scope.ServiceProvider.GetRequiredService<IUsersService>();
+        var messageService = scope.ServiceProvider.GetRequiredService<IMessageService>();
         var orionLdService = scope.ServiceProvider.GetRequiredService<IOrionLdService>();
-        orionLdService.SetTenant(triggerNotificationRuleEvent.Tenant!.Tenant);
+        orionLdService.SetTenant(triggerNotificationRuleEvent.Tenant!);
+
         var sensor = await orionLdService.GetEntityByIdAsync<EntityModel>(triggerNotificationRuleEvent.SensorId!);
 
         if (sensor is null)
@@ -122,42 +127,8 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
             logger.LogInformation("Alarm with ID {AlarmId} has not reached the required consecutive hits for notification", triggerNotificationRuleEvent.AlarmId);
             return;
         }
-        var notificationUserIds = notification?.NotificationUser?.Object;
 
-        if (notificationUserIds is null || notificationUserIds.Count == 0)
-        {
-            logger.LogWarning("No notification users found for Notification with ID {NotificationId}", notificationId);
-            return;
-        }
-
-        IEnumerable<NotificationUsersModel?> notificationUsers = (await Task.WhenAll(notificationUserIds.Select(userId => orionLdService.GetEntityByIdAsync<NotificationUsersModel>(userId)))) ?? Array.Empty<NotificationUsersModel?>();
-
-        notificationUsers = notificationUsers.Where(user => user?.Enable?.Value == true).DistinctBy(s => s!.Id);
-
-        if (!notificationUsers.Any())
-        {
-            logger.LogWarning("No enabled notification users found for Notification with ID {NotificationId}", notificationId);
-            return;
-        }
-
-        List<UserModel> users = [];
-
-        foreach (var notificationUser in notificationUsers)
-        {
-            var groupIds = notificationUser?.Groups?.Value?.Select(s => s.Object.FirstOrDefault()) ?? [];
-            var groups = await Task.WhenAll(groupIds.Select(groupId => orionLdService.GetEntityByIdAsync<GroupModel>(groupId!)));
-            var groupUserIds = groups.SelectMany(g => g?.Users?.Object ?? []).Distinct().ToList();
-            var userIds = notificationUser?.Users?.Value?.Select(s => s.Object.FirstOrDefault()) ?? [];
-
-            userIds = [.. userIds, .. groupUserIds];
-
-            users = [.. (await Task.WhenAll(
-                userIds
-                .Select(userId => orionLdService.GetEntityByIdAsync<UserModel>(userId!))))
-                .Where(u => u != null)
-                .Cast<UserModel>()
-                .DistinctBy(s => s.Id)];
-        }
+        List<UserModel> users = await usersService.GetNotificationUsers(triggerNotificationRuleEvent.Tenant!, notificationId);
 
         if (users.Count == 0)
         {
@@ -175,80 +146,82 @@ public class TriggerNotificationRuleConsumer(ILogger<TriggerNotificationRuleCons
             { "AlarmDescription", alarm.Description?.Value ?? "No description" },
             { "AlarmStatus", alarm.Status!.Value! },
             { "AttributeValue", sensorProperty.Value?.ToString() ?? "N/A" },
-            { "AttributeUnit", sensorProperty.Unit?.Value ?? "N/A" },
-            { "UserName", string.Join(", ", users.Select(u => $"{u.FirstName} {u.LastName}")) }
+            { "AttributeUnit", sensorProperty.Unit?.Value ?? "N/A" }
         };
 
-        if (alarm.Status.Value?.Equals(AlarmModel.StatusValues.Close.Value, StringComparison.OrdinalIgnoreCase) == true && notificationRule.NotifyIfClose?.Value != true)
+        var isEmailChannelActive = notificationRule.NotificationChannel?.Value?.Any(s => s.Equals("Email", StringComparison.OrdinalIgnoreCase)) == true;
+        var isSmsChannelActive = notificationRule.NotificationChannel?.Value?.Any(s => s.Equals("Sms", StringComparison.OrdinalIgnoreCase)) == true;
+
+        var existingMonitoringModel = await repository.GetByAlarmForProcessingAsync(triggerNotificationRuleEvent.AlarmId!);
+        var isCreate = false;
+        if (existingMonitoringModel == null)
         {
-            logger.LogInformation("Alarm with ID {AlarmId} is closed and NotifyIfClose is false, skipping notification", triggerNotificationRuleEvent.AlarmId);
-            return;
+            existingMonitoringModel = new NotificationMonitorModel
+            {
+                AlarmId = triggerNotificationRuleEvent.AlarmId,
+                RuleId = notificationRule.Id,
+                NotificationId = notificationId,
+                SensorId = triggerNotificationRuleEvent.SensorId,
+                SensorName = triggerNotificationRuleEvent.PropertyKey,
+                Status = NotificationMonitorStatusEnum.Processing,
+                Tenant = triggerNotificationRuleEvent.Tenant,
+                LastUpdatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                EmailChannelActive = isEmailChannelActive,
+                SmsChannelActive = isSmsChannelActive
+            };
+
+            isCreate = true;
         }
 
-        if (notificationRule.NotificationChannel?.Value?.Any(s => s.Equals("Email", StringComparison.OrdinalIgnoreCase)) == true)
-            await Task.WhenAll(users.Select(user => SendEmail(orionLdService, user, EmailTemplateKeys.SensorFirstAlarm, triggerNotificationRuleEvent.Tenant!.Tenant, parameters)));
-
-        if (notificationRule.NotificationChannel?.Value?.Any(s => s.Equals("Sms", StringComparison.OrdinalIgnoreCase)) == true)
-            await Task.WhenAll(users.Select(user => SendSms(orionLdService, user, SmsTemplateKeys.SmsSensorFirstAlarm, triggerNotificationRuleEvent.Tenant!.Tenant, parameters)));
-
-        logger.LogInformation("Sending notification for alarm with ID {AlarmId}", triggerNotificationRuleEvent.AlarmId);
-    }
-
-    private async Task SendSms(IOrionLdService orionLdService, UserModel user, string smsTemplateKey, string tenant, Dictionary<string, string> parameters)
-    {
-        if (user.Mobile?.Value is null)
+        if (isCreate)
         {
-            logger.LogWarning("User {UserId} does not have a mobile number", user.Id);
-            return;
-        }
-        var smsTemplate = await orionLdService.GetEntityByIdAsync<SmsTemplateModel>(smsTemplateKey);
-        var body = TemplateHelper.FormatString(smsTemplate?.Message?.Value ?? DefaultSmsMessage, parameters);
-        await eventBus.PublishAsync<CreateSmsCommand>(new CreateSmsCommand
-        {
-            Message = body,
-            PhoneNumber = user.Mobile.Value,
-            Tenant = tenant,
-            MessageType = "Alarm"
-        });
-    }
-
-    private async Task SendEmail(IOrionLdService orionLdService, UserModel user, string emailTemplateKey, string tenant, Dictionary<string, string> parameters)
-    {
-        if (user.Email?.Value is null)
-        {
-            logger.LogWarning("User {UserId} does not have an email address", user.Id);
-            return;
+            logger.LogInformation("Creating new NotificationMonitor record for Alarm ID {AlarmId}", triggerNotificationRuleEvent.AlarmId);
+            await repository.CreateAsync(existingMonitoringModel);
         }
 
-        var emailTemplate = await orionLdService.GetEntityByIdAsync<EmailTemplateModel>(emailTemplateKey);
+        existingMonitoringModel.Status = NotificationMonitorStatusEnum.Watching;
+        existingMonitoringModel.LastUpdatedAt = DateTime.UtcNow;
 
-        var subject = TemplateHelper.FormatString(emailTemplate?.Subject?.Value ?? DefaultEmailSubject, parameters);
-        var body = TemplateHelper.FormatString(emailTemplate?.Body?.Value ?? DefaultEmailBody, parameters);
-
-        logger.LogInformation("Creating email to {ToEmail} with subject: {Subject}", user.Email.Value, subject);
-        await eventBus.PublishAsync<CreateEmailCommand>(new CreateEmailCommand
+        if (isCreate)
         {
-            ToEmail = user.Email?.Value,
-            ToName = $"{user.FirstName?.Value} {user.LastName?.Value}",
-            Subject = subject,
-            BodyHtml = body,
-            Tenant = tenant
-        });
+            if (isEmailChannelActive)
+                await messageService.SendSms(orionLdService, users, SmsTemplateKeys.SmsSensorFirstAlarm, triggerNotificationRuleEvent.Tenant, parameters);
+
+            if (isSmsChannelActive)
+                await messageService.SendEmail(orionLdService, users, EmailTemplateKeys.SensorFirstAlarm, triggerNotificationRuleEvent.Tenant, parameters);
+
+            logger.LogInformation("Sending notification for alarm with ID {AlarmId}", triggerNotificationRuleEvent.AlarmId);
+        }
+        else if (alarm.Status.Value?.Equals(AlarmModel.StatusValues.Close.Value, StringComparison.OrdinalIgnoreCase) == true && notificationRule.NotifyIfClose?.Value == true)
+        {
+            logger.LogInformation("Alarm with ID {AlarmId} is closed, proceeding with notification", triggerNotificationRuleEvent.AlarmId);
+            if (isEmailChannelActive)
+                await messageService.SendEmail(orionLdService, users, EmailTemplateKeys.ReturnToNormal, triggerNotificationRuleEvent.Tenant, parameters);
+
+            if (isSmsChannelActive)
+                await messageService.SendSms(orionLdService, users, SmsTemplateKeys.SmsReturnToNormal, triggerNotificationRuleEvent.Tenant, parameters);
+
+            existingMonitoringModel.Status = NotificationMonitorStatusEnum.Completed;
+
+            logger.LogInformation("Sending notification for closed alarm with ID {AlarmId}", triggerNotificationRuleEvent.AlarmId);
+        }
+        else if (alarm.Status.Value?.Equals(AlarmModel.StatusValues.Acknowledged.Value, StringComparison.OrdinalIgnoreCase) == true && notificationRule.NotifyIfAcknowledged?.Value == true)
+        {
+            logger.LogInformation("Alarm with ID {AlarmId} is acknowledged, proceeding with notification", triggerNotificationRuleEvent.AlarmId);
+            if (isEmailChannelActive)
+                await messageService.SendEmail(orionLdService, users, EmailTemplateKeys.FirstAcknowledgeAlarm, triggerNotificationRuleEvent.Tenant, parameters);
+
+            if (isSmsChannelActive)
+                await messageService.SendSms(orionLdService, users, SmsTemplateKeys.SmsFirstAcknowledgeAlarm, triggerNotificationRuleEvent.Tenant, parameters);
+
+            existingMonitoringModel.Status = NotificationMonitorStatusEnum.Acknowledged;
+
+            logger.LogInformation("Sending notification for acknowledged alarm with ID {AlarmId}", triggerNotificationRuleEvent.AlarmId);
+        }
+
+        await repository.UpdateAsync(existingMonitoringModel.Id, existingMonitoringModel);
+
+        logger.LogInformation("Alarm with ID {AlarmId} does not meet the criteria for notification", triggerNotificationRuleEvent.AlarmId);
     }
-
-    private const string DefaultSmsMessage = "{{AlarmDescription}} {{SensorId}} {{SensorName}} {{SensorLocation}} {{AlarmType}} {{AttributeValue}} {{AttributeUnit}}";
-    private const string DefaultEmailSubject = "SensorsReport - Alarm Notification";
-    private const string DefaultEmailBody = """
-        Dear {{UserName}},
-        The following alarm has occurred:
-        Alarm Description: {{AlarmDescription}}
-        Sensor Location: {{SensorLocation}}
-        Sensor Name: {{SensorName}}
-        Sensor ID: {{SensorId}}
-        Current Value: {{AttributeValue}} {{AttributeUnit}}
-
-        Regards,
-        http://www.sensorsreport.com
-    """;
-
 }

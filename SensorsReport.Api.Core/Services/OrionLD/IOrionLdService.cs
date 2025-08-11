@@ -4,6 +4,7 @@ namespace SensorsReport.OrionLD;
 public interface IOrionLdService
 {
     void SetTenant(string? tenant);
+    void SetTenant(TenantInfo tenant);
     Task<HttpResponseMessage> CreateEntityAsync(object entity);
     Task<HttpResponseMessage> CreateSubscriptionAsync(SubscriptionModel subscription);
     Task<HttpResponseMessage> DeleteEntityAsync(string entityId);

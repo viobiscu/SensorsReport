@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
         services.AddMassTransit(configure =>
         {
             configureConsumers?.Invoke(configure);
+            configure.DisableUsageTelemetry();
 
             configure.UsingRabbitMq((context, cfg) =>
             {
@@ -36,6 +37,7 @@ public static class ServiceCollectionExtensions
                         TimeSpan.FromSeconds(options.RetryIntervalSeconds * 2),
                         TimeSpan.FromSeconds(options.RetryIntervalSeconds * 4)
                     );
+
                     r.Ignore<ArgumentNullException>();
                 });
 
@@ -46,11 +48,14 @@ public static class ServiceCollectionExtensions
                     cb.TrackingPeriod = TimeSpan.FromMinutes(options.CircuitBreakerDurationMinutes);
                 });
 
-                cfg.UseRateLimit(100, TimeSpan.FromSeconds(1));
+                cfg.UseRateLimit(1000, TimeSpan.FromSeconds(1));
 
                 cfg.ConfigureEndpoints(context);
 
-                cfg.UseInMemoryOutbox(context);
+                cfg.UseInMemoryOutbox(context, x =>
+                {
+                    x.ConcurrentMessageDelivery = true;
+                });
             });
         });
 

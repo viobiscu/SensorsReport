@@ -16,7 +16,7 @@ public class AlarmService : IAlarmService
 
             var tenantInfo = tenantRetriever.CurrentTenantInfo;
             if (tenantInfo != null)
-                _orionService.SetTenant(tenantInfo.Tenant);
+                _orionService.SetTenant(tenantInfo);
 
             return _orionService;
         }

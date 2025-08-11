@@ -4,6 +4,7 @@ public class EmailTemplateKeys
 {
     private const string Prefix = "urn:ngsi-ld:EmailTemplate:Email";
 
+    public const string SensorTimeoutAlarm = $"{Prefix}{nameof(SensorTimeoutAlarm)}";
     public const string SensorResumeTransmision = $"{Prefix}{nameof(SensorResumeTransmision)}";
     public const string SensorFirstAlarm = $"{Prefix}{nameof(SensorFirstAlarm)}";
     public const string SensorMissTransmision = $"{Prefix}{nameof(SensorMissTransmision)}";

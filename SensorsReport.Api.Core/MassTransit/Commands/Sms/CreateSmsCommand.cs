@@ -5,7 +5,7 @@ public class CreateSmsCommand
     public string PhoneNumber { get; set; } = null!;
     public string Message { get; set; } = null!;
     public DateTime Timestamp { get; set; } = DateTime.UtcNow; // Default to current UTC time
-    public string Tenant { get; set; } = null!;
+    public string? Tenant { get; set; } = null!;
     public int Status { get; set; } // e.g., "Sent", "Failed", etc.
     public DateTime? SentAt { get; set; } // Timestamp when the SMS was sent
     public int? Ttl { get; set; } // Time to live for the SMS, if applicable

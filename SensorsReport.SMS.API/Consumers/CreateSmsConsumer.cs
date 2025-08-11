@@ -4,10 +4,10 @@ using SensorsReport.SMS.API.Repositories;
 
 namespace SensorsReport.Sms.API.Consumers;
 
-public class CreateEmailConsumer(ISmsRepository smsRepository, ILogger<CreateEmailConsumer> logger) : IConsumer<CreateSmsCommand>
+public class CreateSmsConsumer(ISmsRepository smsRepository, ILogger<CreateSmsConsumer> logger) : IConsumer<CreateSmsCommand>
 {
     private readonly ISmsRepository smsRepository = smsRepository ?? throw new ArgumentNullException(nameof(smsRepository));
-    private readonly ILogger<CreateEmailConsumer> logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<CreateSmsConsumer> logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public Task Consume(ConsumeContext<CreateSmsCommand> context)
     {

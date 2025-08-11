@@ -294,4 +294,9 @@ public class OrionLdService : BaseHttpService<OrionLdService>, IOrionLdService
         SetTenantHeaders(this._tenant, request);
         await base.OnBeforeRequestAsync(request);
     }
+
+    public void SetTenant(TenantInfo tenant)
+    {
+        this.SetTenant(tenant.Tenant);
+    }
 }

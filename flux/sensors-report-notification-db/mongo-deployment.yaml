@@ -27,6 +27,8 @@ spec:
           db: sms-db
         - name: readWrite
           db: email-db
+        - name: readWrite
+          db: notification-db
       scramCredentialsSecretName: notification-db-scram
   additionalMongodConfig:
     storage.wiredTiger.engineConfig.journalCompressor: zlib

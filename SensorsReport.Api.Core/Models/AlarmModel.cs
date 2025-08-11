@@ -67,5 +67,9 @@ public partial class AlarmModel
         {
             Value = "close"
         };
+        public readonly static ValuePropertyModel<string> Acknowledged = new()
+        {
+            Value = "acknowledged"
+        };
     }
 }

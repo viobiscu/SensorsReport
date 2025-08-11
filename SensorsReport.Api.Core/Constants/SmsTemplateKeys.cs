@@ -3,6 +3,8 @@
 public class SmsTemplateKeys
 {
     private const string Prefix = "urn:ngsi-ld:SMSTemplate:Sms";
+
+    public const string SmsTimeoutAlarm = $"{Prefix}{nameof(SmsTimeoutAlarm)}";
     public const string SmsSensorFirstAlarm = $"{Prefix}{nameof(SmsSensorFirstAlarm)}";
     public const string SmsReturnToNormal = $"{Prefix}{nameof(SmsReturnToNormal)}";
     public const string SmsSensorMissTransmision = $"{Prefix}{nameof(SmsSensorMissTransmision)}";
