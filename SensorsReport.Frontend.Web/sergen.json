@@ -1,0 +1,9 @@
+{
+  "Extends": "defaults@6.6.0",
+  "EnableGenerateFields": true,
+  "RootNamespace": "SensorsReport.Frontend",
+  "UpgradeInfo": {
+    "InitialType": "Premium",
+    "InitialVersion": "8.8.6.0"
+  }
+}

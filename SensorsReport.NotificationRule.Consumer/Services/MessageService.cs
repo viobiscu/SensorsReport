@@ -91,16 +91,16 @@ public class MessageService(ILogger<MessageService> logger, IEventBus eventBus) 
         }
     }
 
-    private const string DefaultSmsMessage = "{{AlarmDescription}} {{SensorId}} {{SensorName}} {{SensorLocation}} {{AlarmType}} {{AttributeValue}} {{AttributeUnit}}";
+    private const string DefaultSmsMessage = "{AlarmDescription} {SensorId} {SensorName} {SensorLocation} {AlarmType} {AttributeValue} {AttributeUnit}";
     private const string DefaultEmailSubject = "SensorsReport - Alarm Notification";
     private const string DefaultEmailBody = """
-        Dear {{UserName}},</br>
+        Dear {UserName},</br>
         The following alarm has occurred:</br>
-        Alarm Description: {{AlarmDescription}}</br>
-        Sensor Location: {{SensorLocation}}</br>
-        Sensor Name: {{SensorName}}</br>
-        Sensor ID: {{SensorId}}</br>
-        Current Value: {{AttributeValue}} {{AttributeUnit}}</br>
+        Alarm Description: {AlarmDescription}</br>
+        Sensor Location: {SensorLocation}</br>
+        Sensor Name: {SensorName}</br>
+        Sensor ID: {SensorId}</br>
+        Current Value: {AttributeValue} {AttributeUnit}</br>
         </br>
         Regards,</br>
         http://www.sensorsreport.com

@@ -159,10 +159,11 @@
 
     <!-- Build Docker images -->
     <Message Text="Building Docker images..." Importance="high" />
-    <Exec Command="docker build -f &quot;$(DockerfilePath)&quot; -t &quot;$(DockerImageVersioned)&quot; &quot;$(BuildContext)&quot;"
+    <Message Text="Execute Command docker buildx build --secret id=sensorsreport_secrets,src=$(MSBuildProjectDirectory)/.env -f &quot;$(DockerfilePath)&quot; -t &quot;$(DockerImageVersioned)&quot; &quot;$(BuildContext)&quot;" Importance="high" />
+    <Exec Command="docker buildx build --secret id=sensorsreport_secrets,src=$(MSBuildProjectDirectory)/.env -f &quot;$(DockerfilePath)&quot; -t &quot;$(DockerImageVersioned)&quot; &quot;$(BuildContext)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)" />
 
-    <Exec Command="docker build -f &quot;$(DockerfilePath)&quot; -t &quot;$(DockerImageLatest)&quot; &quot;$(BuildContext)&quot;"
+    <Exec Command="docker buildx build --secret id=sensorsreport_secrets,src=$(MSBuildProjectDirectory)/.env -f &quot;$(DockerfilePath)&quot; -t &quot;$(DockerImageLatest)&quot; &quot;$(BuildContext)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)" />
 
     <Message Text="Built image: $(DockerImageVersioned)" Importance="high" />
