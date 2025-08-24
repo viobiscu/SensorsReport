@@ -72,6 +72,15 @@ namespace texts {
                 export const Username: string;
             }
         }
+
+        namespace SensorsReport {
+
+            namespace ApiKey {
+                export const ApiKey: string;
+                export const Id: string;
+                export const TenantId: string;
+            }
+        }
     }
 
     export declare namespace Forms {
@@ -170,6 +179,9 @@ const Texts: typeof texts = proxyTexts({}, '', {
             UserExternalLogin: {},
             UserPermission: {},
             UserRole: {}
+        },
+        SensorsReport: {
+            ApiKey: {}
         }
     },
     Forms: {

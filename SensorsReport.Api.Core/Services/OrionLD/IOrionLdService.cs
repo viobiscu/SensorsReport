@@ -5,6 +5,7 @@ public interface IOrionLdService
 {
     void SetTenant(string? tenant);
     void SetTenant(TenantInfo tenant);
+    void SetOptions(OrionLDOptions option);
     Task<HttpResponseMessage> CreateEntityAsync(object entity);
     Task<HttpResponseMessage> CreateSubscriptionAsync(SubscriptionModel subscription);
     Task<HttpResponseMessage> DeleteEntityAsync(string entityId);

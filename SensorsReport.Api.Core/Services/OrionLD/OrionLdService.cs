@@ -37,6 +37,16 @@ public class OrionLdService : BaseHttpService<OrionLdService>, IOrionLdService
         }
     }
 
+    private string _options = string.Empty;
+    public void SetOptions(OrionLDOptions option)
+    {
+        _options = option switch
+        {
+            OrionLDOptions.KeyValue => "keyValues",
+            _ => string.Empty,
+        };
+    }
+
     public async Task<HttpResponseMessage> GetSubscriptionsAsync(int offset = 0, int limit = 100)
     {
         return await this.GetAsync($"{Endpoints.Subscriptions}?offset={offset}&limit={limit}");
@@ -292,6 +302,15 @@ public class OrionLdService : BaseHttpService<OrionLdService>, IOrionLdService
         }
 
         SetTenantHeaders(this._tenant, request);
+        if (!string.IsNullOrEmpty(this._options))
+        {
+            var uriBuilder = new UriBuilder(request.RequestUri ?? throw new InvalidOperationException("Request URI cannot be null"));
+            var query = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+            query["options"] = this._options;
+            uriBuilder.Query = query.ToString();
+            request.RequestUri = uriBuilder.Uri;
+        }
+
         await base.OnBeforeRequestAsync(request);
     }
 
@@ -299,4 +318,10 @@ public class OrionLdService : BaseHttpService<OrionLdService>, IOrionLdService
     {
         this.SetTenant(tenant.Tenant);
     }
+}
+
+public enum OrionLDOptions
+{
+    Default = 0,
+    KeyValue = 1,
 }

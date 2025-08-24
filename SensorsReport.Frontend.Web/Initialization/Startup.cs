@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serenity.Extensions.DependencyInjection;
 using OpenIddict.Client.AspNetCore;
 using OpenIddict.Abstractions;
+using SensorsReport.OrionLD.Extensions;
+using SensorsReport.Extensions;
 
 namespace SensorsReport.Frontend;
 public partial class Startup
@@ -111,6 +113,8 @@ public partial class Startup
         services.AddPuppeteerHtmlToPdf();
         services.AddReporting();
         services.AddTwoFactorAuth();
+        services.AddOrionLdServices(Configuration);
+        services.AddTenantServices();
         var openIdSection = Configuration.GetSection(SensorsReportOpenIdSettings.SectionKey);
         var openIdSettings = openIdSection.Get<SensorsReportOpenIdSettings>() ?? new();
         if (openIdSettings.EnableClient)

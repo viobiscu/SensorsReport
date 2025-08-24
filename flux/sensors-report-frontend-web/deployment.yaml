@@ -66,6 +66,8 @@ spec:
           env:
             - name: ASPNETCORE_ENVIRONMENT
               value: "Production"
+            - name: SR_OrionLdOptions__BrokerUrl
+              value: "http://orion-ld-broker:1026"
             - name: SR_Data__Default__ConnectionString
               valueFrom:
                 secretKeyRef:

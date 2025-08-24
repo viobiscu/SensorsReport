@@ -7,7 +7,7 @@ namespace SensorsReport.OrionLD.Extensions;
 
 public static class OrionLdBrokerServiceCollectionExtensions
 {
-    public static IServiceCollection AddOrionLdServices(this IServiceCollection services, IConfigurationManager configuration, string configName = nameof(OrionLdOptions))
+    public static IServiceCollection AddOrionLdServices(this IServiceCollection services, IConfiguration configuration, string configName = nameof(OrionLdOptions))
     {
         services.Configure<OrionLdOptions>(configuration.GetSection(configName));
         services.AddTransient<IOrionLdService, OrionLdService>();
