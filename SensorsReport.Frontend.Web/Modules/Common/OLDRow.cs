@@ -6,4 +6,5 @@ public abstract class OLDRow<TFields> : Row<TFields> where TFields : RowFieldsBa
 {
     [JsonPropertyName("type")]
     public string Type { get => this.GetType().GetAttribute<TableNameAttribute>()!.Name; }
+
 }

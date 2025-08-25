@@ -12,10 +12,15 @@ public class OrionLDDeleteHandler<TRow, TDeleteRequest, TDeleteResponse>(IHttpCo
     private readonly IOrionLdService orionLdService = httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IOrionLdService>();
     private readonly ITenantRetriever tenantRetriever = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<ITenantRetriever>();
 
+    protected virtual TenantInfo GetTenantInfo()
+    {
+        return tenantRetriever.CurrentTenantInfo;
+    }
+
     /// <inheritdoc/>
     protected override void LoadEntity()
     {
-        orionLdService.SetTenant(tenantRetriever.CurrentTenantInfo);
+        orionLdService.SetTenant(GetTenantInfo());
         orionLdService.SetOptions(OrionLDOptions.KeyValue);
 
         Row = orionLdService.GetEntityByIdAsync<TRow>(Request.EntityId.ToString()!).ConfigureAwait(false).GetAwaiter().GetResult()!;
@@ -36,7 +41,7 @@ public class OrionLDDeleteHandler<TRow, TDeleteRequest, TDeleteResponse>(IHttpCo
     {
         InvokeDeleteAction(() =>
         {
-            orionLdService.SetTenant(tenantRetriever.CurrentTenantInfo);
+            orionLdService.SetTenant(GetTenantInfo());
             orionLdService.SetOptions(OrionLDOptions.KeyValue);
 
             var idField = Row.IdField;

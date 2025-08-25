@@ -8,4 +8,5 @@ public interface IApiKeySaveHandler : ISaveHandler<MyRow, MyRequest, MyResponse>
 public class ApiKeySaveHandler(IHttpContextAccessor httpContextAccessor) :
     OrionLDSaveHandler<MyRow, MyRequest, MyResponse>(httpContextAccessor), IApiKeySaveHandler
 {
+    protected override TenantInfo GetTenantInfo() => new();
 }

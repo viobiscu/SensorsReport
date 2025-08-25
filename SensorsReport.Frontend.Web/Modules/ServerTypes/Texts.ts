@@ -80,6 +80,16 @@ namespace texts {
                 export const Id: string;
                 export const TenantId: string;
             }
+
+            namespace User {
+                export const Email: string;
+                export const FirstName: string;
+                export const Id: string;
+                export const Language: string;
+                export const LastName: string;
+                export const Mobile: string;
+                export const Username: string;
+            }
         }
     }
 
@@ -181,7 +191,8 @@ const Texts: typeof texts = proxyTexts({}, '', {
             UserRole: {}
         },
         SensorsReport: {
-            ApiKey: {}
+            ApiKey: {},
+            User: {}
         }
     },
     Forms: {

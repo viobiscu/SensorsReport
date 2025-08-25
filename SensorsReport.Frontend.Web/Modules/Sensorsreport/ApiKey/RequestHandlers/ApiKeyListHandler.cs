@@ -10,4 +10,5 @@ public interface IApiKeyListHandler : IListHandler<MyRow, MyRequest, MyResponse>
 public class ApiKeyListHandler(IHttpContextAccessor httpContextAccessor) :
     OrionLDListHandler<MyRow, MyRequest, MyResponse>(httpContextAccessor), IApiKeyListHandler
 {
+    protected override TenantInfo GetTenantInfo() => new();
 }

@@ -12,10 +12,15 @@ public class OrionLDSaveHandler<TRow, TSaveRequest, TSaveResponse>(IHttpContextA
     private readonly IOrionLdService orionLdService = httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IOrionLdService>();
     private readonly ITenantRetriever tenantRetriever = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<ITenantRetriever>();
 
+    protected virtual TenantInfo GetTenantInfo()
+    {
+        return tenantRetriever.CurrentTenantInfo;
+    }
+
     /// <inheritdoc/>
     protected override void LoadOldEntity()
     {
-        orionLdService.SetTenant(tenantRetriever.CurrentTenantInfo);
+        orionLdService.SetTenant(GetTenantInfo());
         orionLdService.SetOptions(OrionLDOptions.KeyValue);
 
         Old = orionLdService.GetEntityByIdAsync<TRow>(Request.EntityId.ToString()!).ConfigureAwait(false).GetAwaiter().GetResult()!;
@@ -33,7 +38,7 @@ public class OrionLDSaveHandler<TRow, TSaveRequest, TSaveResponse>(IHttpContextA
     /// <inheritdoc/>
     protected override void InvokeSaveAction(Action action)
     {
-        orionLdService.SetTenant(tenantRetriever.CurrentTenantInfo);
+        orionLdService.SetTenant(GetTenantInfo());
         orionLdService.SetOptions(OrionLDOptions.KeyValue);
         base.InvokeSaveAction(action);
     }

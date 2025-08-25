@@ -6,7 +6,7 @@ public class UserPage : Controller
     [Route("Administration/User")]
     public ActionResult Index()
     {
-        return this.GridPage<UserRow>(ESM.UserPage);
+        return this.GridPage<UserRow>(ESM.Modules.Administration.User.UserPage);
     }
 
 #pragma warning disable ASP0018 // Unused route parameter

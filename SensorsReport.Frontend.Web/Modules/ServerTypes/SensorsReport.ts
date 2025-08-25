@@ -2,3 +2,7 @@
 export * from "./SensorsReport/ApiKey.ApiKeyForm"
 export * from "./SensorsReport/ApiKey.ApiKeyRow"
 export * from "./SensorsReport/ApiKey.ApiKeyService"
+export * from "./SensorsReport/User.UserColumns"
+export * from "./SensorsReport/User.UserForm"
+export * from "./SensorsReport/User.UserRow"
+export * from "./SensorsReport/User.UserService"

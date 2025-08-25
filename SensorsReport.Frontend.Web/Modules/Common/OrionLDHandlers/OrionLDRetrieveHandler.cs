@@ -13,6 +13,11 @@ public class OrionLDRetrieveHandler<TRow, TRetrieveRequest, TRetrieveResponse>(I
     protected List<string> columns = [];
     protected string Id = string.Empty;
 
+    protected virtual TenantInfo GetTenantInfo()
+    {
+        return tenantRetriever.CurrentTenantInfo;
+    }
+
     /// <inheritdoc/>
     protected override void SelectField(SqlQuery query, Field field)
     {
@@ -35,7 +40,7 @@ public class OrionLDRetrieveHandler<TRow, TRetrieveRequest, TRetrieveResponse>(I
     {
         try
         {
-            orionLdService.SetTenant(tenantRetriever.CurrentTenantInfo.Tenant);
+            orionLdService.SetTenant(GetTenantInfo());
             orionLdService.SetOptions(OrionLDOptions.KeyValue);
             var entity = orionLdService.GetEntityByIdAsync<TRow>(Id).ConfigureAwait(false).GetAwaiter().GetResult();
 

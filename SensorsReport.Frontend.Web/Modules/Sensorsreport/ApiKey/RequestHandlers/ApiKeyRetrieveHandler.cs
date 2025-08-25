@@ -9,4 +9,5 @@ public interface IApiKeyRetrieveHandler : IRetrieveHandler<MyRow, MyRequest, MyR
 public class ApiKeyRetrieveHandler(IHttpContextAccessor httpContextAccessor) :
     OrionLDRetrieveHandler<MyRow, MyRequest, MyResponse>(httpContextAccessor), IApiKeyRetrieveHandler
 {
+    protected override TenantInfo GetTenantInfo() => new();
 }

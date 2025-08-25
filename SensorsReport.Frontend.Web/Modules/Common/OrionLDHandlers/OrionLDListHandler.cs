@@ -16,6 +16,10 @@ public class OrionLDListHandler<TRow, TListRequest, TListResponse>(IHttpContextA
     protected int skip = 0;
     protected int take = Int32.MaxValue;
 
+    protected virtual TenantInfo GetTenantInfo()
+    {
+        return tenantRetriever.CurrentTenantInfo;
+    }
 
     /// <inheritdoc/>
     protected override void SelectField(SqlQuery query, Field field)
@@ -39,7 +43,7 @@ public class OrionLDListHandler<TRow, TListRequest, TListResponse>(IHttpContextA
     {
         try
         {
-            orionLdService.SetTenant(tenantRetriever.CurrentTenantInfo);
+            orionLdService.SetTenant(GetTenantInfo());
             orionLdService.SetOptions(OrionLDOptions.KeyValue);
 
             var entities = orionLdService.GetEntitiesAsync<List<TRow>>(0, 1000, Row.Table).ConfigureAwait(false).GetAwaiter().GetResult();

@@ -12,6 +12,7 @@ public sealed partial class ApiKeyRow : OLDRow<ApiKeyRow.RowFields>, IIdRow, INa
 {
     [DisplayName("Id"), IdProperty, JsonPropertyName("id")]
     public string? Id { get => fields.Id[this]; set => fields.Id[this] = value; }
+
     [DisplayName("Tenant Id"), Size(50), NotNull, QuickSearch, NameProperty, JsonPropertyName("TenantID")]
     public string? TenantId { get => fields.TenantId[this]; set => fields.TenantId[this] = value; }
     [DisplayName("Api Key"), Size(50), NotNull, QuickSearch, JsonPropertyName("APIKey")]
