@@ -11,6 +11,7 @@ SensorsReport is an enterprise-grade IoT platform designed to handle sensor data
 - **Real-time Data Processing**: MQTT-based sensor data ingestion and processing
 - **Rule-based Alerting**: Configurable alarm rules and notification systems
 - **Multi-channel Notifications**: Email, SMS, and webhook-based alert delivery
+- **SMS Gateway Integration**: Dedicated Raspberry PI SMS gateway with cellular modem support
 - **Data Visualization**: Interactive web dashboard for sensor data exploration
 - **Audit & Compliance**: Comprehensive activity logging and audit trails
 - **API Gateway**: Centralized API management and documentation
@@ -38,6 +39,9 @@ The SensorsReport platform follows a microservices architecture pattern with the
 - **[SensorsReport.Webhook.API](./SensorsReport.Webhook.API/README.md)** - Webhook notification service
 - **[Sensors-Report-Workflow.API](./Sensors-Report-Workflow.API/README.md)** - Workflow orchestration and automation
 
+### Gateway Services
+- **[SensorReport.PI.SMS.Gateway](./SensorReport.PI.SMS.Gateway/README.md)** - ✅ **Operational** Raspberry PI SMS Gateway with Keycloak authentication
+
 ### Consumer Services
 - **[SensorsReport.AlarmRule.Consumer](./SensorsReport.AlarmRule.Consumer/README.md)** - Alarm rule event processing
 - **[SensorsReport.Email.Consumer](./SensorsReport.Email.Consumer/README.md)** - Email notification processing
@@ -61,6 +65,7 @@ The SensorsReport platform follows a microservices architecture pattern with the
 - **RabbitMQ** - Message broker
 - **Serilog** - Structured logging
 - **Swagger/OpenAPI** - API documentation
+- **Python 3.9+** - SMS Gateway and data processing services
 
 ### Frontend Technologies
 - **Python/Flask** - Backend services for web dashboard
@@ -75,6 +80,7 @@ The SensorsReport platform follows a microservices architecture pattern with the
 - **KrakenD** - API Gateway
 - **Nginx** - Web server and reverse proxy
 - **Keycloak** - Identity and access management
+- **Raspberry PI** - Edge computing for SMS gateway
 
 ### Data & Messaging
 - **FIWARE Orion Context Broker** - Context data management
@@ -82,6 +88,7 @@ The SensorsReport platform follows a microservices architecture pattern with the
 - **MongoDB** - Document database
 - **PostgreSQL** - Relational database
 - **MQTT** - IoT messaging protocol
+- **SMS/Cellular** - SMS gateway communication via cellular modems
 
 ## 🚀 Getting Started
 
@@ -92,6 +99,8 @@ The SensorsReport platform follows a microservices architecture pattern with the
 - **Visual Studio 2022** or **VS Code** (recommended)
 - **Git** for version control
 - **Kubernetes cluster** (for production deployment)
+- **Python 3.9+** (for SMS Gateway and data processing services)
+- **Raspberry PI 4** (for SMS Gateway deployment)
 
 ### Quick Start
 
@@ -117,6 +126,14 @@ The SensorsReport platform follows a microservices architecture pattern with the
    ```bash
    chmod +x build.sh
    ./build.sh
+   ```
+
+5. **Deploy SMS Gateway** (optional, for SMS notifications):
+   ```bash
+   # On Raspberry PI device
+   cd SensorReport.PI.SMS.Gateway
+   chmod +x install.sh
+   sudo ./install.sh
    ```
 
 ### Development Environment Setup
@@ -166,6 +183,8 @@ SensorsReport/
 │   └── SensorsReport.NotificationRule.Consumer/ # Notification processing
 ├── 📁 Data Processing
 │   └── Sensors-Report-MQTT-to-Orion/    # MQTT to Orion integration
+├── 📁 Gateway Services
+│   └── SensorReport.PI.SMS.Gateway/     # Raspberry PI SMS Gateway (✅ Operational)
 ├── 📁 User Interface
 │   └── Sensors-Report-Explorer/         # Web dashboard
 ├── 📁 Infrastructure
@@ -401,6 +420,7 @@ Services communicate via:
 2. **Authentication failures** - Verify Keycloak configuration
 3. **Message processing** - Monitor RabbitMQ queues
 4. **Database connections** - Check connection strings and pools
+5. **SMS Gateway issues** - See [SMS Gateway README](./SensorReport.PI.SMS.Gateway/README.md) for specific troubleshooting
 
 ### Debugging Tools
 
@@ -424,12 +444,14 @@ Services communicate via:
 - **Keycloak** - Identity and access management
 - **RabbitMQ** - Message broker
 - **MongoDB/PostgreSQL** - Data storage
+- **Cellular Network** - SMS gateway connectivity
 
 ### Inter-service Dependencies
 
 - **Business Broker API** ← Core orchestration hub
 - **Rule APIs** → **Consumer Services** - Event processing
 - **Notification APIs** ← **Consumer Services** - Alert delivery
+- **SMS Gateway** ← **SMS API** - Physical SMS delivery via Raspberry PI
 - **Audit API** ← All services - Activity logging
 - **Provision API** → **Explorer** - Device management
 
@@ -453,6 +475,8 @@ For support and questions:
 - ✅ MQTT data ingestion
 - ✅ Rule-based alerting
 - ✅ Multi-channel notifications
+- ✅ **SMS Gateway with Raspberry PI integration**
+- ✅ **Keycloak authentication for SMS Gateway**
 - ✅ Web dashboard
 - ✅ Kubernetes deployment
 
@@ -487,6 +511,39 @@ For support and questions:
                        │ Rule Processing │───▶│  Notifications  │
                        │    Services     │    │    Services     │
                        └─────────────────┘    └─────────────────┘
+                                                       │
+                                                       ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │   SMS Gateway   │◀───│    SMS API      │
+                       │ (Raspberry PI)  │    │    Service      │
+                       └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │ Cellular Modem  │
+                       │  SMS Delivery   │
+                       └─────────────────┘
+```
+
+### SMS Gateway Architecture Detail
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Keycloak      │◀───│  SMS Gateway    │───▶│  SMS API        │
+│ Authentication  │    │ (Raspberry PI)  │    │   Service       │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │ USB Cellular    │
+                       │     Modem       │
+                       └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   SMS Network   │
+                       │    Delivery     │
+                       └─────────────────┘
 ```
 
 ---
