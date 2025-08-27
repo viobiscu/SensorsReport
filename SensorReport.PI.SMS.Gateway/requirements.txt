@@ -1,0 +1,36 @@
+# SensorReport.PI.SMS.Gateway Requirements
+# Python dependencies for Raspberry PI deployment
+
+# Core dependencies
+requests>=2.31.0,<3.0.0
+configparser>=5.3.0
+
+# Authentication and security
+PyJWT>=2.8.0,<3.0.0
+cryptography>=41.0.0,<42.0.0
+
+# API wrapper dependencies
+python-dateutil>=2.8.2,<3.0.0  # Date parsing for API responses
+urllib3>=1.26.0,<3.0.0  # HTTP client support
+
+# Serial communication for modem (Raspberry PI compatible)
+pyserial>=3.5,<4.0
+
+# SMS handling
+python-gammu>=3.2.4,<4.0.0  # For SMS modem support
+
+# Logging and monitoring
+loguru>=0.7.0,<1.0.0  # Alternative robust logging (optional)
+
+# System utilities
+psutil>=5.9.0,<6.0.0  # For system monitoring
+RPi.GPIO>=0.7.1,<1.0.0  # Raspberry PI GPIO control (if needed)
+
+# Development and testing
+pytest>=7.4.0,<8.0.0
+pytest-asyncio>=0.21.0,<1.0.0
+mock>=5.1.0,<6.0.0
+
+# Optional: For advanced SMS features
+# python-messaging>=1.0.0  # Additional SMS utilities
+# pySIM>=0.1.0  # SIM card management
