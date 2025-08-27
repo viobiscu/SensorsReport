@@ -217,20 +217,19 @@ execute_action() {
             echo "----------------------------------------"
             
             cd "$project" || continue
-            
             local executeCmd=""
             case $selectedAction in
                 "build")
                     echo "🔨 Building project..."
-                    executeCmd="dotnet build"
+                    executeCmd="dotnet build -v d"
                     ;;
                 "increment")
                     echo "📈 Incrementing version..."
-                    executeCmd="dotnet build -t:IncrementVersion"
+                    executeCmd="dotnet build -t:IncrementVersion -v d"
                     ;;
                 "copy-flux")
                     echo "📁 Copying flux files..."
-                    executeCmd="dotnet build -t:CopyFluxFiles"
+                    executeCmd="dotnet build -t:CopyFluxFiles -v d"
                     ;;
                 "docker-build")
                     if [[ ! -f "Dockerfile" ]]; then
@@ -239,7 +238,7 @@ execute_action() {
                         continue
                     fi
                     echo "🐳 Building Docker image..."
-                    executeCmd="dotnet build -t:BuildDocker"
+                    executeCmd="dotnet build -t:BuildDocker -v d"
                     ;;
                 "build-and-push-docker")
                     if [[ ! -f "Dockerfile" ]]; then
@@ -248,7 +247,7 @@ execute_action() {
                         continue
                     fi
                     echo "🚀 Building and pushing Docker image..."
-                    executeCmd="dotnet build -t:BuildAndPushDocker"
+                    executeCmd="dotnet build -t:BuildAndPushDocker -v d"
                     ;;
                 "apply-flux")
                     if [[ ! -d "flux" ]]; then

@@ -1,0 +1,80 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensors-report-frontend-openid-cm
+  namespace: default
+data:
+  # General flag
+  SR_OpenIdSettings__EnableClient: "true"
+
+  # Keycloak provider settings
+  SR_OpenIdSettings__ExternalProviders__Keycloak__Issuer: "https://keycloak.sensorsreport.net/realms/sr"
+  SR_OpenIdSettings__ExternalProviders__Keycloak__ClientId: "SensorsReport"
+
+  # Scopes as array items
+  SR_OpenIdSettings__ExternalProviders__Keycloak__Scopes__0: "openid"
+  SR_OpenIdSettings__ExternalProviders__Keycloak__Scopes__1: "profile"
+  SR_OpenIdSettings__ExternalProviders__Keycloak__Scopes__2: "email"
+
+  SR_OpenIdSettings__ExternalProviders__Keycloak__SignedOutCallbackPath: "https://keycloak.sensorsreport.net/realms/sr/protocol/openid-connect/logout"
+
+  # Token validation parameters
+  SR_OpenIdSettings__ExternalProviders__Keycloak__TokenValidationParameters__NameClaimType: "preferred_username"
+  SR_OpenIdSettings__ExternalProviders__Keycloak__TokenValidationParameters__RoleClaimType: "roles"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sensors-report-frontend-openid-secret
+  namespace: default
+type: Opaque
+stringData:
+  SR_OpenIdSettings__ExternalProviders__Keycloak__ClientSecret: "oUkHt6cK4a9Uh9Tt3kFnFd6KrrLogxdI"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensors-report-frontend-web
+  namespace: default
+  labels:
+    app: sensors-report-frontend-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensors-report-frontend-web
+  template:
+    metadata:
+      labels:
+        app: sensors-report-frontend-web
+    spec:
+      containers:
+        - name: sensors-report-frontend-web
+          image: viobiscu/sensors-report-frontend-web:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: SR_OrionLdOptions__BrokerUrl
+              value: "http://orion-ld-broker:1026"
+            - name: SR_Data__Default__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: frontend-api-mssql-connection
+                  key: MSSQL_URI
+          envFrom:
+            - configMapRef:
+                name: sensors-report-frontend-openid-cm
+            - secretRef:
+                name: sensors-report-frontend-openid-secret

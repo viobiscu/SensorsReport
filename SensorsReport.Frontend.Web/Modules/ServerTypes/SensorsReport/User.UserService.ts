@@ -1,0 +1,32 @@
+﻿import { SaveRequest, SaveResponse, ServiceOptions, DeleteRequest, DeleteResponse, RetrieveRequest, RetrieveResponse, ListRequest, ListResponse, serviceRequest } from "@serenity-is/corelib";
+import { UserRow } from "./User.UserRow";
+
+export namespace UserService {
+    export const baseUrl = 'SensorsReport/User';
+
+    export declare function Create(request: SaveRequest<UserRow>, onSuccess?: (response: SaveResponse) => void, opt?: ServiceOptions<any>): PromiseLike<SaveResponse>;
+    export declare function Update(request: SaveRequest<UserRow>, onSuccess?: (response: SaveResponse) => void, opt?: ServiceOptions<any>): PromiseLike<SaveResponse>;
+    export declare function Delete(request: DeleteRequest, onSuccess?: (response: DeleteResponse) => void, opt?: ServiceOptions<any>): PromiseLike<DeleteResponse>;
+    export declare function Retrieve(request: RetrieveRequest, onSuccess?: (response: RetrieveResponse<UserRow>) => void, opt?: ServiceOptions<any>): PromiseLike<RetrieveResponse<UserRow>>;
+    export declare function List(request: ListRequest, onSuccess?: (response: ListResponse<UserRow>) => void, opt?: ServiceOptions<any>): PromiseLike<ListResponse<UserRow>>;
+
+    export const Methods = {
+        Create: "SensorsReport/User/Create",
+        Update: "SensorsReport/User/Update",
+        Delete: "SensorsReport/User/Delete",
+        Retrieve: "SensorsReport/User/Retrieve",
+        List: "SensorsReport/User/List"
+    } as const;
+
+    [
+        'Create', 
+        'Update', 
+        'Delete', 
+        'Retrieve', 
+        'List'
+    ].forEach(x => {
+        (<any>UserService)[x] = function (r, s, o) {
+            return serviceRequest(baseUrl + '/' + x, r, s, o);
+        };
+    });
+}

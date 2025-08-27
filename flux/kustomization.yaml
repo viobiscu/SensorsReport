@@ -6,8 +6,11 @@ resources:
   - sensors-report-alarm-api/service.yaml
   - sensors-report-alarmrule-api/deployment.yaml
   - sensors-report-alarmrule-api/service.yaml
+  - sensors-report-alarmrule-consumer/deployment.yaml
+  - sensors-report-alarmrule-consumer/service.yaml
   - sensors-report-audit-api/deployment.yaml
   - sensors-report-audit-api/service.yaml
+  - sensors-report-business-broker-api/deployment-test.yaml
   - sensors-report-business-broker-api/deployment.yaml
   - sensors-report-business-broker-api/service.yaml
   - sensors-report-email-api/deployment.yaml
@@ -17,17 +20,26 @@ resources:
   - sensors-report-email-consumer/smtp-secret.yaml
   - sensors-report-explorer/backend-deployment.yaml
   - sensors-report-explorer/backend-service.yaml
+  - sensors-report-explorer/deployment.yaml
   - sensors-report-explorer/frontend-deployment.yaml
   - sensors-report-explorer/frontend-nginx-configmap.yaml
   - sensors-report-explorer/frontend-service.yaml
   - sensors-report-explorer/keycloak-ingress.yaml
+  - sensors-report-explorer/service.yaml
+  - sensors-report-frontend-web/database.yaml
+  - sensors-report-frontend-web/deployment.yaml
+  - sensors-report-frontend-web/service.yaml
   - sensors-report-logrule-api/deployment.yaml
   - sensors-report-logrule-api/service.yaml
+  - sensors-report-logrule-consumer/deployment.yaml
+  - sensors-report-logrule-consumer/service.yaml
   - sensors-report-mqtt-to-orion/deployment.yaml
   - sensors-report-mqtt-to-orion/service.yaml
   - sensors-report-notification-db/mongo-deployment.yaml
   - sensors-report-notificationrule-api/deployment.yaml
   - sensors-report-notificationrule-api/service.yaml
+  - sensors-report-notificationrule-consumer/deployment.yaml
+  - sensors-report-notificationrule-consumer/service.yaml
   - sensors-report-provision-api/deployment.yaml
   - sensors-report-provision-api/service.yaml
   - sensors-report-sms-api/deployment.yaml
@@ -39,9 +51,3 @@ resources:
   - sensors-report-webhook-api/service.yaml
   - sensors-report-workflow-api/deployment.yaml
   - sensors-report-workflow-api/service.yaml
-  - sensors-report-alarmrule-consumer/deployment.yaml
-  - sensors-report-alarmrule-consumer/service.yaml
-  - sensors-report-logrule-consumer/deployment.yaml
-  - sensors-report-logrule-consumer/service.yaml
-  - sensors-report-notificationrule-consumer/deployment.yaml
-  - sensors-report-notificationrule-consumer/service.yaml

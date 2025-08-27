@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
 namespace SensorsReport;
@@ -15,9 +15,6 @@ public class TenantRetriever(IHttpContextAccessor httpContextAccessor) : ITenant
         var tenant = headers?["NGSILD-Tenant"].ToString();
         if (string.IsNullOrEmpty(tenant))
             tenant = headers?["Fiware-Service"].ToString();
-
-        if (string.IsNullOrEmpty(tenant))
-            throw new HttpRequestException("Tenant header is missing.", null, System.Net.HttpStatusCode.BadRequest);
 
         var path = headers?["NGSILD-Path"].ToString();
         if (string.IsNullOrEmpty(path))
