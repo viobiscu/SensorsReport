@@ -52,6 +52,7 @@ The SensorsReport platform follows a microservices architecture pattern with the
 - **[Sensors-Report-MQTT-to-Orion](./Sensors-Report-MQTT-to-Orion/README.md)** - MQTT to FIWARE Orion Context Broker integration
 
 ### User Interface
+- **[SensorsReport.Frontend.Web](./SensorsReport.Frontend.Web/README.md)** - Enterprise-grade ASP.NET Core web application with Serenity Platform for comprehensive system administration
 - **[Sensors-Report-Explorer](./Sensors-Report-Explorer/README.md)** - Web-based dashboard for data visualization and system management
 
 ## 🛠️ Technology Stack
@@ -68,6 +69,10 @@ The SensorsReport platform follows a microservices architecture pattern with the
 - **Python 3.9+** - SMS Gateway and data processing services
 
 ### Frontend Technologies
+- **Serenity Platform** - Enterprise web application framework with TypeScript/Preact
+- **ASP.NET Core** - Modern web framework for enterprise applications
+- **TypeScript/JavaScript** - Type-safe frontend development
+- **Preact** - Lightweight React-compatible framework
 - **Python/Flask** - Backend services for web dashboard
 - **HTML5/CSS3/JavaScript** - Frontend technologies
 - **Bootstrap** - UI framework
@@ -186,6 +191,7 @@ SensorsReport/
 ├── 📁 Gateway Services
 │   └── SensorReport.PI.SMS.Gateway/     # Raspberry PI SMS Gateway (✅ Operational)
 ├── 📁 User Interface
+│   ├── SensorsReport.Frontend.Web/      # Enterprise web application (Serenity Platform)
 │   └── Sensors-Report-Explorer/         # Web dashboard
 ├── 📁 Infrastructure
 │   ├── flux/                            # GitOps deployment configurations
@@ -496,15 +502,18 @@ For support and questions:
                                                        │
                                                        ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    Explorer     │◀───│  API Gateway    │◀───│ Context Broker  │
-│   Dashboard     │    │   (KrakenD)     │    │    (Orion)      │
+│  Frontend.Web   │◀───│  API Gateway    │◀───│ Context Broker  │
+│ (Admin Portal)  │    │   (KrakenD)     │    │    (Orion)      │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 │                       │
-                                ▼                       ▼
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │  Business Logic │    │   QuantumLeap   │
-                       │     Services    │    │  (Time Series)  │
-                       └─────────────────┘    └─────────────────┘
+┌─────────────────┐             │                       ▼
+│    Explorer     │◀────────────┤              ┌─────────────────┐
+│   Dashboard     │             │              │   QuantumLeap   │
+└─────────────────┘             ▼              │  (Time Series)  │
+                       ┌─────────────────┐     └─────────────────┘
+                       │  Business Logic │
+                       │     Services    │
+                       └─────────────────┘
                                 │
                                 ▼
                        ┌─────────────────┐    ┌─────────────────┐
