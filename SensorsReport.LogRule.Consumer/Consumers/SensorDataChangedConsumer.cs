@@ -156,7 +156,7 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
                 }
             };
 
-            var statusText = isFaulty ? "faulty" : "operational";
+            var statusText = isFaulty ? EntityPropertyModel.StatusValues.Faulty : EntityPropertyModel.StatusValues.Operational;
             consecutiveHitUpdatePatch[metaPropKey].Add(
                 "status", new ObservedValuePropertyModel<string>
                 {

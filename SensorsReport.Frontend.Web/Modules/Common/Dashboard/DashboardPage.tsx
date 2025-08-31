@@ -1,13 +1,6 @@
 import { faIcon, stringFormat } from "@serenity-is/corelib";
-import * as preact from "preact";
 import { DashboardPageModel } from "../../ServerTypes/Common/DashboardPageModel";
-import { CalendarCard } from "./calendar/calendar-card";
-import { ChatCard } from "./chat/chat-card";
-import { OrdersCard } from "./orders/orders-card";
 import { SmallCard } from "./shared/small-card";
-import { TodoCard } from "./todo/todo-card";
-import { TrafficCard } from "./traffic/traffic-card";
-import { VisitorsCard } from "./visitors/visitors-card";
 
 export default function pageInit({ model, nwLinkFormat }: { model: DashboardPageModel, nwLinkFormat: string }) {
 
@@ -15,26 +8,27 @@ export default function pageInit({ model, nwLinkFormat }: { model: DashboardPage
 
     document.getElementById("DashboardContent").append(<>
         <div class="row">
-            <SmallCard caption="Open Orders" icon={faIcon("shopping-cart")} url={nwLink("Order?shippingState=0")} value={model.OpenOrders} />
-            <SmallCard caption="Closed Orders" icon={faIcon("truck")} url={nwLink("Order?shippingState=1")} value={<>{model.ClosedOrderPercent}<sup style="font-size: 20px">%</sup></>} />
-            <SmallCard caption="Total Customers" icon={faIcon("user-plus")} url={nwLink("Customer")} value={model.CustomerCount} />
-            <SmallCard caption="Product Types" icon={faIcon("tag")} url={nwLink("Product")} value={model.ProductCount} />
+            <SmallCard caption="Sensors" icon={faIcon("microchip")} value={model.SensorStaticsModel.SensorCount} colorClass="bg-primary text-white" />
+            <SmallCard caption="Active Sensors" icon={faIcon("check-circle")} value={model.SensorStaticsModel.ActiveSensorCount} colorClass="bg-success text-white" />
+            <SmallCard caption="Fault Sensors" icon={faIcon("times-circle")} value={model.SensorStaticsModel.FaultSensors} colorClass="bg-warning text-white" />
+            <SmallCard caption="Alerts" icon={faIcon("exclamation-triangle")} value={model.SensorStaticsModel.AlertSensorCount} colorClass="bg-danger text-white" />
         </div>
 
         <div class="row">
+            <SmallCard caption="Alarms" icon={faIcon("bell")} value={model.AlarmStaticsModel.AlarmCount} colClass="col-sm-2" colorClass="bg-info text-white" />
+            <SmallCard caption="Pre Low Alarms" icon={faIcon("arrow-down")} value={model.AlarmStaticsModel.PreLowAlarms} colClass="col-sm-2" colorClass="bg-warning text-white" />
+            <SmallCard caption="Low Alarms" icon={faIcon("arrow-down")} value={model.AlarmStaticsModel.LowAlarms} colClass="col-sm-2" colorClass="bg-danger text-white" />
+            <SmallCard caption="Pre High Alarms" icon={faIcon("arrow-up")} value={model.AlarmStaticsModel.PreHighAlarms} colClass="col-sm-2" colorClass="bg-warning text-white" />
+            <SmallCard caption="High Alarms" icon={faIcon("arrow-up")} value={model.AlarmStaticsModel.HighAlarms} colClass="col-sm-2" colorClass="bg-danger text-white" />
+            <SmallCard caption="Archived Alarms" icon={faIcon("archive")} value={model.AlarmStaticsModel.ArchivedAlarms} colClass="col-sm-2" colorClass="bg-black text-white" />
+        </div>
+
+
+        <div class="row">
             <section class="col-lg-7">
-                <OrdersCard />
-
-                {/* Chat is implemented via preact just as a demonstration of integrating another lib like preact/react inside jsx-dom tree */}
-                <div class="card s-dashboard-card s-chat" ref={el => preact.render(preact.h(ChatCard, {}), el)} />
-
-                <TodoCard />
             </section>
 
             <section class="col-lg-5">
-                <VisitorsCard />
-                <TrafficCard />
-                <CalendarCard />
             </section>
         </div>
     </>)

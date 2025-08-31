@@ -1,6 +1,7 @@
-﻿export interface DashboardPageModel {
-    OpenOrders?: number;
-    ClosedOrderPercent?: number;
-    CustomerCount?: number;
-    ProductCount?: number;
+﻿import { AlarmStaticsModel } from "./AlarmStaticsModel";
+import { SensorStaticsModel } from "./SensorStaticsModel";
+
+export interface DashboardPageModel {
+    SensorStaticsModel?: SensorStaticsModel;
+    AlarmStaticsModel?: AlarmStaticsModel;
 }

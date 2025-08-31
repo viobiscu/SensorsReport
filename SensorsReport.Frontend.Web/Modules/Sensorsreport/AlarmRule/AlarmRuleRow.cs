@@ -17,9 +17,9 @@ public sealed partial class AlarmRuleRow : OrionLDRow<AlarmRuleRow.RowFields>, I
     public string? Unit { get => fields.Unit[this]; set => fields.Unit[this] = value; }
     [DisplayName("Low"), JsonPropertyName("low")]
     public double? Low { get => fields.Low[this]; set => fields.Low[this] = value; }
-    [DisplayName("Pre Low"), JsonPropertyName("preLow")]
+    [DisplayName("Pre Low"), JsonPropertyName("prelow")]
     public double? PreLow { get => fields.PreLow[this]; set => fields.PreLow[this] = value; }
-    [DisplayName("Pre High"), JsonPropertyName("preHigh")]
+    [DisplayName("Pre High"), JsonPropertyName("prehigh")]
     public double? PreHigh { get => fields.PreHigh[this]; set => fields.PreHigh[this] = value; }
     [DisplayName("High"), JsonPropertyName("high")]
     public double? High { get => fields.High[this]; set => fields.High[this] = value; }
