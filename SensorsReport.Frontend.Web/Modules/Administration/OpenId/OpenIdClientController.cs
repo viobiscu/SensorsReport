@@ -72,6 +72,22 @@ public class OpenIdClientController : OpenIdClientControllerBase<UserExternalLog
     {
         return principal.GetFirstClaimValue("email_verified")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
     }
+
+    protected override ClaimsPrincipal MapExternalUserClaims(IDbConnection connection,
+     string provider, ClaimsPrincipal externalPrincipal, IUserClaimCreator userClaimCreator)
+    {
+        var appPrincipal = base.MapExternalUserClaims(connection, provider, externalPrincipal, userClaimCreator);
+
+        var organization = externalPrincipal.GetFirstClaimValue("organization");
+        if (!string.IsNullOrWhiteSpace(organization) && appPrincipal.Identity is ClaimsIdentity identity)
+        {
+            if (!identity.HasClaim(c => c.Type.Equals("organization", StringComparison.Ordinal)))
+                identity.AddClaim(new Claim("organization", organization, ClaimValueTypes.String));
+        }
+
+        return appPrincipal;
+    }
+
     private bool HasUser(IDbConnection connection, string provider, ClaimsPrincipal principal)
     {
         var providerKey = principal.GetFirstClaimValue(GetKeyClaimForProvider(provider));

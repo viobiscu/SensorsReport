@@ -10,6 +10,7 @@ using OpenIddict.Client.AspNetCore;
 using OpenIddict.Abstractions;
 using SensorsReport.OrionLD.Extensions;
 using SensorsReport.Extensions;
+using SensorsReport.Frontend.Modules.Common.OrionLDHandlers;
 
 namespace SensorsReport.Frontend;
 public partial class Startup
@@ -114,7 +115,7 @@ public partial class Startup
         services.AddReporting();
         services.AddTwoFactorAuth();
         services.AddOrionLdServices(Configuration);
-        services.AddTenantServices();
+        services.AddTransient<ITenantRetriever, ClaimsTenantRetriever>();
         var openIdSection = Configuration.GetSection(SensorsReportOpenIdSettings.SectionKey);
         var openIdSettings = openIdSection.Get<SensorsReportOpenIdSettings>() ?? new();
         if (openIdSettings.EnableClient)

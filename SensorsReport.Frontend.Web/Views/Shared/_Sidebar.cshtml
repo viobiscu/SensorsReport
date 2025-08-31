@@ -6,9 +6,9 @@
     void renderItem(Serenity.Navigation.NavigationItem item, string parentId, int index) {
         var isActive = Model.ActivePath.Contains(item);
         var hasChildren = item.Children.Any();
-        var klass = "s-sidebar-item" + 
+        var klass = "s-sidebar-item" +
             (item.IsSection ? " s-sidebar-section" : "") +
-            (isActive ? " active" : "") + 
+            (isActive ? " active" : "") +
             (hasChildren ? " has-children" : "") +
             (!string.IsNullOrEmpty(item.ItemClass) ? (" " + item.ItemClass) : "");
         var icon = item.IconClass ?? "s-sidebar-noicon";
@@ -58,7 +58,7 @@
         var prefix = mobile ? "s-mobile-header" : "s-sidebar-band";
         <li>
             <div class="dropdown@(mobile ? "" : " dropend")">
-                <a href="javascript:;" class="@prefix-link s-language-selection-link" 
+                <a href="javascript:;" class="@prefix-link s-language-selection-link"
                     data-bs-toggle="dropdown" title="switch language">
                     <i class="@prefix-icon fa fa-language"></i>
                 </a>
@@ -68,7 +68,7 @@
         </li>
         <li>
             <div class="dropdown@(mobile ? "" : " dropend")">
-                <a href="javascript:;" class="@prefix-link s-theme-selection-link" 
+                <a href="javascript:;" class="@prefix-link s-theme-selection-link"
                     data-bs-toggle="dropdown" title="switch theme">
                     <i class="@prefix-icon fa fa-fill-drip"></i>
                 </a>
@@ -83,7 +83,7 @@
         {
         <li>
             <div class="dropdown@(mobile ? "" : " dropend")">
-                <a href="javascript:;" class="@prefix-link s-user-profile-link" 
+                <a href="javascript:;" class="@prefix-link s-user-profile-link"
                     data-bs-toggle="dropdown" title="@User?.Identity?.Name">
                     <i class="@prefix-icon fa fa-user"></i>
                 </a>
@@ -93,7 +93,7 @@
                             <i class="fa fa-user"></i>
                         </h2>
                         <p class="s-user-info fs-6 mb-1">
-                            @Context.User?.Identity?.Name
+                                @Context.User?.Identity?.Name (@(Context.User?.Claims.FirstOrDefault(s => s.Type == "organization")?.Value ?? "undefined"))
                         </p>
                     </div>
                     <a class="dropdown-item" href="~/Account/ChangePassword">
@@ -107,7 +107,7 @@
                         {
                             <a class="dropdown-item" href="~/2FA/UserSettings">
                                 <em class="icon fa fa-link"></em><span> @Serenity.Pro.Extensions.TwoFactorTexts.UserSettingsMenuItem.ToString(Localizer)</span>
-                            </a>                                
+                            </a>
                         }
 #endif
                     }
@@ -120,7 +120,7 @@
                         {
                             <a class="dropdown-item" href="~/Account/ExternalLogins">
                                 <em class="icon fa fa-link"></em><span> @Serenity.Pro.OpenIdClient.ExternalLoginsFormTexts.MenuItem.ToString(Localizer)</span>
-                            </a>                                
+                            </a>
                         }
 #endif
                     }
@@ -156,7 +156,7 @@
                 {
                     <span class="s-sidebar-band-title">Start</span><span class="s-sidebar-band-title2">Sharp</span>
                 }
-                else 
+                else
                 {
                     <span class="s-sidebar-band-title">@SiteNavigationTexts.SiteTitle.ToString(Localizer)</span>
                 }

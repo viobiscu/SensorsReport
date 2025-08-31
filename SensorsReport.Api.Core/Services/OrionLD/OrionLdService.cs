@@ -302,9 +302,13 @@ public class OrionLdService : BaseHttpService<OrionLdService>, IOrionLdService
         }
 
         SetTenantHeaders(this._tenant, request);
-        if (!string.IsNullOrEmpty(this._options))
+        if (!string.IsNullOrEmpty(this._options) && request.Method == HttpMethod.Get)
         {
-            var uriBuilder = new UriBuilder(request.RequestUri ?? throw new InvalidOperationException("Request URI cannot be null"));
+            var uri = request.RequestUri ?? throw new InvalidOperationException("Request URI cannot be null");
+            if (request.RequestUri?.IsAbsoluteUri != true)
+                uri = new Uri(new Uri(Config.BrokerUrl), request.RequestUri!);
+
+            var uriBuilder = new UriBuilder(uri);
             var query = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
             query["options"] = this._options;
             uriBuilder.Query = query.ToString();

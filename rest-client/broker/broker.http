@@ -1,5 +1,5 @@
 
-@brokerUrl = http://127.0.0.1:1026
+@brokerUrl = http://localhost:55921
 
 ### Subscriptions
 GET {{brokerUrl}}/ngsi-ld/v1/subscriptions
@@ -98,3 +98,8 @@ content-type: application/json
         "value": 10
     }
 }
+
+
+### Get Entity by ID for tenant in keyvalues
+GET {{brokerUrl}}/ngsi-ld/v1/entities/urn:ngsi-ld:TG8I:240825003?options=keyValues
+NGSILD-Tenant: victor

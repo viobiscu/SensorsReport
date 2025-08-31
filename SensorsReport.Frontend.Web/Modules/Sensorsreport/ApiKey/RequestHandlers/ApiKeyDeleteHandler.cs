@@ -9,5 +9,5 @@ public interface IApiKeyDeleteHandler : IDeleteHandler<MyRow, MyRequest, MyRespo
 public class ApiKeyDeleteHandler(IHttpContextAccessor httpContextAccessor) :
     OrionLDDeleteHandler<MyRow, MyRequest, MyResponse>(httpContextAccessor), IApiKeyDeleteHandler
 {
-    protected override TenantInfo GetTenantInfo() => new ();
+    protected override TenantInfo GetTenantInfo() => new();
 }

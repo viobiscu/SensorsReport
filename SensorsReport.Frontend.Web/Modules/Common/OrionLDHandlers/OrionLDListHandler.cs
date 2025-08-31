@@ -12,7 +12,6 @@ public class OrionLDListHandler<TRow, TListRequest, TListResponse>(IHttpContextA
 {
     private readonly IOrionLdService orionLdService = httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IOrionLdService>();
     private readonly ITenantRetriever tenantRetriever = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<ITenantRetriever>();
-    protected List<string> columns = [];
     protected int skip = 0;
     protected int take = Int32.MaxValue;
 
@@ -21,11 +20,6 @@ public class OrionLDListHandler<TRow, TListRequest, TListResponse>(IHttpContextA
         return tenantRetriever.CurrentTenantInfo;
     }
 
-    /// <inheritdoc/>
-    protected override void SelectField(SqlQuery query, Field field)
-    {
-        this.columns.Add(field.Name);
-    }
 
     /// <inheritdoc/>
     protected override SqlQuery CreateQuery()
@@ -58,7 +52,7 @@ public class OrionLDListHandler<TRow, TListRequest, TListResponse>(IHttpContextA
                 {
                     foreach (var field in Row.Fields)
                     {
-                        if (!columns.Contains(field.Name) && field.Name != ((IIdRow)Row).IdField.Name)
+                        if (Request.IncludeColumns != null && !Request.IncludeColumns.TryGetValue(field.Name, out _))
                             field.AsObject(entity, null);
                     }
                 }

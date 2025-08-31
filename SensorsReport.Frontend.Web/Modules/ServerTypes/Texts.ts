@@ -75,10 +75,99 @@ namespace texts {
 
         namespace SensorsReport {
 
+            namespace Alarm {
+                export const Condition: string;
+                export const Description: string;
+                export const Id: string;
+                export const MeasuredValue: string;
+                export const Monitors: string;
+                export const Severity: string;
+                export const Status: string;
+                export const Threshold: string;
+            }
+
+            namespace AlarmRule {
+                export const High: string;
+                export const Id: string;
+                export const Low: string;
+                export const Name: string;
+                export const PreHigh: string;
+                export const PreLow: string;
+                export const Unit: string;
+            }
+
+            namespace AlarmType {
+                export const Description: string;
+                export const Id: string;
+                export const Name: string;
+                export const Style: string;
+            }
+
             namespace ApiKey {
                 export const ApiKey: string;
                 export const Id: string;
                 export const TenantId: string;
+            }
+
+            namespace EmailTemplate {
+                export const Body: string;
+                export const Id: string;
+                export const Subject: string;
+            }
+
+            namespace Group {
+                export const Id: string;
+                export const Name: string;
+                export const Users: string;
+            }
+
+            namespace LogRule {
+                export const ConsecutiveHit: string;
+                export const Enabled: string;
+                export const High: string;
+                export const Id: string;
+                export const Low: string;
+                export const Name: string;
+                export const Unit: string;
+            }
+
+            namespace Notification {
+                export const Email: string;
+                export const Enable: string;
+                export const Id: string;
+                export const Monitors: string;
+                export const Name: string;
+                export const NotificationRule: string;
+                export const NotificationUser: string;
+                export const SMS: string;
+            }
+
+            namespace NotificationRule {
+                export const ConsecutiveHits: string;
+                export const Enable: string;
+                export const Id: string;
+                export const Name: string;
+                export const NotificationChannel: string;
+                export const NotifyIfAcknowledged: string;
+                export const NotifyIfClose: string;
+                export const NotifyIfTimeOut: string;
+                export const RepeatAfter: string;
+                export const RepeatIfAcknowledged: string;
+            }
+
+            namespace NotificationUsers {
+                export const Enable: string;
+                export const Groups: string;
+                export const Id: string;
+                export const Name: string;
+                export const Notification: string;
+                export const Users: string;
+            }
+
+            namespace SmsTemplate {
+                export const Id: string;
+                export const Message: string;
+                export const Name: string;
             }
 
             namespace User {
@@ -89,6 +178,11 @@ namespace texts {
                 export const LastName: string;
                 export const Mobile: string;
                 export const Username: string;
+            }
+
+            namespace VariableTemplate {
+                export const Id: string;
+                export const Name: string;
             }
         }
     }
@@ -191,8 +285,19 @@ const Texts: typeof texts = proxyTexts({}, '', {
             UserRole: {}
         },
         SensorsReport: {
+            Alarm: {},
+            AlarmRule: {},
+            AlarmType: {},
             ApiKey: {},
-            User: {}
+            EmailTemplate: {},
+            Group: {},
+            LogRule: {},
+            Notification: {},
+            NotificationRule: {},
+            NotificationUsers: {},
+            SmsTemplate: {},
+            User: {},
+            VariableTemplate: {}
         }
     },
     Forms: {

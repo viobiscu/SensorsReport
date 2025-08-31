@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using SensorsReport.OrionLD;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
@@ -111,8 +112,7 @@ public class BaseHttpService<TServiceName> where TServiceName : BaseHttpService<
         if (!response.IsSuccessStatusCode)
             return null;
 
-        var jsonString = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<T>(jsonString, _jsonOptions);
+        return await response.GetContentAsAsync<T>();
     }
 
     public async virtual Task<T?> PostJsonAsync<T>(string endpoint, object content) where T : class
@@ -124,7 +124,6 @@ public class BaseHttpService<TServiceName> where TServiceName : BaseHttpService<
         if (!response.IsSuccessStatusCode)
             return null;
 
-        var jsonString = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<T>(jsonString, _jsonOptions);
+        return await response.GetContentAsAsync<T>();
     }
 }

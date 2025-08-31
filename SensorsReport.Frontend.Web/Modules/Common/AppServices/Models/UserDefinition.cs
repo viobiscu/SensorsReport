@@ -18,4 +18,5 @@ public class UserDefinition : IUserDefinition, IHasPassword, ITwoFactorUserDefin
     public DateTime? LastDirectoryUpdate { get; set; }
     public TwoFactorUserData TwoFactorData { get; set; }
     public bool HasPassword => PasswordSalt != "unassigned";
+    public string Tenant { get; set; }
 }

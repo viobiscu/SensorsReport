@@ -1,14 +1,14 @@
-using SensorsReport.Frontend.Administration;
 using SensorsReport.Frontend.Common;
 using System.Text.Json.Serialization;
+using AdminPermissionKeys = SensorsReport.Frontend.Administration.PermissionKeys;
 
 namespace SensorsReport.Frontend.SensorsReport.ApiKey;
 
 [ConnectionKey("Default"), Module("SensorsReport"), TableName("APIKey")]
 [DisplayName("API Keys"), InstanceName("API Key"), GenerateFields]
-[ReadPermission(PermissionKeys.Security)]
-[ModifyPermission(PermissionKeys.Security)]
-public sealed partial class ApiKeyRow : OLDRow<ApiKeyRow.RowFields>, IIdRow, INameRow
+[ReadPermission(AdminPermissionKeys.Security)]
+[ModifyPermission(AdminPermissionKeys.Security)]
+public sealed partial class ApiKeyRow : OrionLDRow<ApiKeyRow.RowFields>, IIdRow, INameRow
 {
     [DisplayName("Id"), IdProperty, JsonPropertyName("id")]
     public string? Id { get => fields.Id[this]; set => fields.Id[this] = value; }

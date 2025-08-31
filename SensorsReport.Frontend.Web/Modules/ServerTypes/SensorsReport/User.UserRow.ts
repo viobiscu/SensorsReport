@@ -14,10 +14,10 @@ export abstract class UserRow {
     static readonly idProperty = 'Id';
     static readonly nameProperty = 'Username';
     static readonly localTextPrefix = 'SensorsReport.User';
-    static readonly deletePermission = 'Administration:Security';
-    static readonly insertPermission = 'Administration:Security';
-    static readonly readPermission = 'Administration:Security';
-    static readonly updatePermission = 'Administration:Security';
+    static readonly deletePermission = 'Sensorsreport:Management';
+    static readonly insertPermission = 'Sensorsreport:Management';
+    static readonly readPermission = 'Sensorsreport:Management';
+    static readonly updatePermission = 'Sensorsreport:Management';
 
     static readonly Fields = fieldsProxy<UserRow>();
 }

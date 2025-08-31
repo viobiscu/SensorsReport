@@ -10,18 +10,11 @@ public class OrionLDRetrieveHandler<TRow, TRetrieveRequest, TRetrieveResponse>(I
 {
     private readonly IOrionLdService orionLdService = httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IOrionLdService>();
     private readonly ITenantRetriever tenantRetriever = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<ITenantRetriever>();
-    protected List<string> columns = [];
     protected string Id = string.Empty;
 
     protected virtual TenantInfo GetTenantInfo()
     {
         return tenantRetriever.CurrentTenantInfo;
-    }
-
-    /// <inheritdoc/>
-    protected override void SelectField(SqlQuery query, Field field)
-    {
-        this.columns.Add(field.Name);
     }
 
     /// <inheritdoc/>
@@ -49,7 +42,7 @@ public class OrionLDRetrieveHandler<TRow, TRetrieveRequest, TRetrieveResponse>(I
 
             foreach (var field in Row.Fields)
             {
-                if (!columns.Contains(field.Name) && field.Name != ((IIdRow)Row).IdField.Name)
+                if (Request.IncludeColumns != null && !Request.IncludeColumns.TryGetValue(field.Name, out _))
                     field.AsObject(entity, null);
             }
 

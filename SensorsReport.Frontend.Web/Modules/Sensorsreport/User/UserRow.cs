@@ -1,4 +1,3 @@
-using SensorsReport.Frontend.Administration;
 using SensorsReport.Frontend.Common;
 using System.Text.Json.Serialization;
 
@@ -6,9 +5,9 @@ namespace SensorsReport.Frontend.SensorsReport.User;
 
 [ConnectionKey("Default"), Module("SensorsReport"), TableName("User")]
 [DisplayName("Users"), InstanceName("User"), GenerateFields]
-[ReadPermission(PermissionKeys.Security)]
-[ModifyPermission(PermissionKeys.Security)]
-public sealed partial class UserRow : OLDRow<UserRow.RowFields>, IIdRow, INameRow
+[ReadPermission(PermissionKeys.Management)]
+[ModifyPermission(PermissionKeys.Management)]
+public sealed partial class UserRow : OrionLDRow<UserRow.RowFields>, IIdRow, INameRow
 {
     [DisplayName("Id"), IdProperty, JsonPropertyName("id")]
     public string? Id { get => fields.Id[this]; set => fields.Id[this] = value; }
