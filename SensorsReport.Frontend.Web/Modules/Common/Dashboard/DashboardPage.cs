@@ -10,13 +10,11 @@ public class DashboardPage : Controller
     public ActionResult Index([FromServices] IOrionLdService orionLdService, [FromServices] ITwoLevelCache cache, [FromServices] ITenantRetriever tenantRetriever)
     {
         orionLdService.SetTenant(tenantRetriever.CurrentTenantInfo);
-        var model = cache.Get<DashboardPageModel>("DashboardPageModel", TimeSpan.FromSeconds(10), "DashboardPageModel", () => {
-            return new DashboardPageModel
-            {
-                SensorStaticsModel = SensorData(orionLdService, cache),
-                AlarmStaticsModel = AlarmData(orionLdService, cache)
-            };
-        });
+        var model =new DashboardPageModel
+        {
+            SensorStaticsModel = SensorData(orionLdService, cache),
+            AlarmStaticsModel = AlarmData(orionLdService, cache)
+        };
 
         return View(MVC.Views.Common.Dashboard.DashboardIndex, model);
     }
@@ -98,9 +96,16 @@ public static class EntityModelExtensions
 
         result.GroupId = model.Id;
         result.GroupType = model.Type;
-        result.Description = model.Properties!.FirstOrDefault(s => s.Key.Equals("description", StringComparison.OrdinalIgnoreCase)).Value.GetProperty("value").GetString();
-        result.Status = model.Properties!.FirstOrDefault(s => s.Key.Equals("status", StringComparison.OrdinalIgnoreCase)).Value.GetProperty("value").GetString();
-        result.Severity = model.Properties!.FirstOrDefault(s => s.Key.Equals("severity", StringComparison.OrdinalIgnoreCase)).Value.GetProperty("value").GetString();
+
+        if (model.Properties!.FirstOrDefault(s => s.Key.Equals("description", StringComparison.OrdinalIgnoreCase)).Value.ValueKind != JsonValueKind.Undefined)
+            result.Description = model.Properties!.FirstOrDefault(s => s.Key.Equals("description", StringComparison.OrdinalIgnoreCase)).Value.GetProperty("value").GetString();
+
+        if (model.Properties!.FirstOrDefault(s => s.Key.Equals("status", StringComparison.OrdinalIgnoreCase)).Value.ValueKind != JsonValueKind.Undefined)
+            result.Status = model.Properties!.FirstOrDefault(s => s.Key.Equals("status", StringComparison.OrdinalIgnoreCase)).Value.GetProperty("value").GetString();
+
+        if (model.Properties!.FirstOrDefault(s => s.Key.Equals("severity", StringComparison.OrdinalIgnoreCase)).Value.ValueKind != JsonValueKind.Undefined)
+            result.Severity = model.Properties!.FirstOrDefault(s => s.Key.Equals("severity", StringComparison.OrdinalIgnoreCase)).Value.GetProperty("value").GetString();
+
         var monitors = model.Properties!.FirstOrDefault(s => s.Key.Equals("monitors", StringComparison.OrdinalIgnoreCase)).Value;
 
         string? relatedSensorGroupId = null;

@@ -164,6 +164,20 @@ namespace texts {
                 export const Users: string;
             }
 
+            namespace Sensor {
+                export const Id: string;
+                export const RH0: string;
+                export const RH0_Name: string;
+                export const RH0_ObservedAt: string;
+                export const RH0_Status: string;
+                export const RH0_Unit: string;
+                export const T0: string;
+                export const T0_Name: string;
+                export const T0_ObservedAt: string;
+                export const T0_Status: string;
+                export const T0_Unit: string;
+            }
+
             namespace SmsTemplate {
                 export const Id: string;
                 export const Message: string;
@@ -295,6 +309,7 @@ const Texts: typeof texts = proxyTexts({}, '', {
             Notification: {},
             NotificationRule: {},
             NotificationUsers: {},
+            Sensor: {},
             SmsTemplate: {},
             User: {},
             VariableTemplate: {}

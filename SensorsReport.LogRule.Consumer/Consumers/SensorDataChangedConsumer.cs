@@ -87,7 +87,7 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
                 continue;
             }
 
-            var updateAlarmEvent = new TriggerAlarmRuleEvent
+            var triggerAlarmRuleEvent = new TriggerAlarmRuleEvent
             {
                 Tenant = sensorDataChangedEvent.Tenant,
                 SensorId = sensor.Id,
@@ -100,7 +100,7 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
             if (logRule is null)
             {
                 logger.LogWarning("LogRule with ID {LogRuleId} not found", sensorPropertyMetadata.LogRule?.Object?.FirstOrDefault());
-                await eventBus.PublishAsync(updateAlarmEvent);
+                await eventBus.PublishAsync(triggerAlarmRuleEvent);
                 continue;
             }
 
@@ -108,7 +108,7 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
             {
                 logger.LogInformation("LogRule {LogRuleId} is disabled, skipping processing", logRule.Id);
                 await ResetConsecutiveHit(sensor.Id!, propertyKey, metadataKey);
-                await eventBus.PublishAsync(updateAlarmEvent);
+                await eventBus.PublishAsync(triggerAlarmRuleEvent);
                 continue;
             }
 
@@ -120,7 +120,7 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
             {
                 logger.LogInformation("Sensor property {Property} value {Value} is within the defined thresholds", propertyKey, sensorProperty.Value);
                 await ResetConsecutiveHit(sensor.Id!, propertyKey, metadataKey);
-                await eventBus.PublishAsync(updateAlarmEvent);
+                await eventBus.PublishAsync(triggerAlarmRuleEvent);
                 continue;
             }
 

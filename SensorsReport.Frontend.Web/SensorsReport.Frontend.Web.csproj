@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="pro-packages\" />
+    <Folder Include="wwwroot\Content\site\images\" />
   </ItemGroup>
   <Target Name="NpmInstall" Condition="!Exists('node_modules\@serenity-is\tsbuild\package.json')">
     <Message Text="Installing NPM packages for $(ProjectName)..." Importance="high" />

@@ -10,8 +10,8 @@ public class OrionLDListHandler<TRow, TListRequest, TListResponse>(IHttpContextA
     where TListRequest : ListRequest
     where TListResponse : ListResponse<TRow>, new ()
 {
-    private readonly IOrionLdService orionLdService = httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IOrionLdService>();
-    private readonly ITenantRetriever tenantRetriever = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<ITenantRetriever>();
+    protected readonly IOrionLdService orionLdService = httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IOrionLdService>();
+    protected readonly ITenantRetriever tenantRetriever = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<ITenantRetriever>();
     protected int skip = 0;
     protected int take = Int32.MaxValue;
 

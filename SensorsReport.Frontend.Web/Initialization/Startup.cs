@@ -27,7 +27,6 @@ public partial class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        Console.WriteLine($"ConnectionString: {Configuration.GetDataConnectionString("Default").ConnectionString}");
         services.AddExceptionLogger(Configuration.GetDataConnectionString("Default"));
         services.AddApplicationPartsFeatureToggles(Configuration);
         services.AddApplicationPartsTypeSource();
@@ -175,7 +174,6 @@ public partial class Startup
         app.UseEndpoints(endpoints => endpoints.MapControllers());
 
         app.ApplicationServices.GetRequiredService<IDataMigrations>().Initialize();
-        app.UseBackgroundJob<Serenity.Pro.EmailQueue.EmailQueueJob>();
     }
 
     public static Action<IApplicationBuilder> ConfigureTestPipeline { get; set; }

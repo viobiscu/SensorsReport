@@ -51,7 +51,6 @@ public class DataMigrations(ITypeSource typeSource,
     {
         var cs = sqlConnections.TryGetConnectionString(databaseKey) ??
             throw new ArgumentOutOfRangeException(nameof(databaseKey));
-        logger?.LogInformation("Running migrations for {DatabaseKey} ({ServerType}) - ({ConnectionString})...", databaseKey, cs.Dialect.ServerType, cs.ConnectionString);
         string serverType = cs.Dialect.ServerType;
         bool isOracle = serverType.StartsWith("Oracle", StringComparison.OrdinalIgnoreCase);
         bool isFirebird = serverType.StartsWith("Firebird", StringComparison.OrdinalIgnoreCase);
