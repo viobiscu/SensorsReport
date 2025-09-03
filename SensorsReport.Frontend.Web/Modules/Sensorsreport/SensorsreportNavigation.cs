@@ -12,6 +12,7 @@ using NotificationUser = SensorsReport.Frontend.SensorsReport.NotificationUsers.
 using Notification = SensorsReport.Frontend.SensorsReport.Notification.Pages;
 using Alarm = SensorsReport.Frontend.SensorsReport.Alarm.Pages;
 using Sensors = SensorsReport.Frontend.SensorsReport.Sensor.Pages;
+using SensorsHistory = SensorsReport.Frontend.SensorsReport.SensorHistory.Pages;
 
 [assembly: NavigationMenu(1000, "Sensors", icon: "fa-network-wired")]
 [assembly: NavigationLink(1100, "Sensors/Sensors", typeof(Sensors.SensorPage), icon: "fa-microchip")]
@@ -37,3 +38,4 @@ using Sensors = SensorsReport.Frontend.SensorsReport.Sensor.Pages;
 [assembly: NavigationLink(5200, "Management/Notification Users", typeof(NotificationUser.NotificationUsersPage), icon: "fa-user-check")]
 [assembly: NavigationLink(5300, "Management/Notifications", typeof(Notification.NotificationPage), icon: "fa-bullhorn")]
 [assembly: NavigationLink(5400, "Management/Api Key", typeof(ApiKey.Pages.ApiKeyPage), icon: "fa-key")]
+[assembly: NavigationLink(5500, "Management/Sensor History", typeof(SensorsHistory.SensorHistoryPage), icon: "fa-history")]

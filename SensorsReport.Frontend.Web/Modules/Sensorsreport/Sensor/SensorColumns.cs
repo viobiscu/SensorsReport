@@ -6,13 +6,13 @@ namespace SensorsReport.Frontend.SensorsReport.Sensor.Forms;
 [BasedOnRow(typeof(SensorRow), CheckNames = true)]
 public class SensorColumns
 {
-    [EditLink, AlignRight]
+    [AlignRight]
     public string? Id { get; set; }
     [Width(130), DisplayName("Name")]
     public string? T0_Name { get; set; }
     [Width(30), DisplayName("")]
     public string? T0_Status { get; set; }
-    [Width(50)]
+    [Width(60)]
     public double? T0 { get; set; }
     [Width(50)]
     public string? T0_Unit { get; set; }
@@ -22,7 +22,7 @@ public class SensorColumns
     public string? RH0_Name { get; set; }
     [Width(30), DisplayName("")]
     public string? RH0_Status { get; set; }
-    [Width(50)]
+    [Width(60)]
     public double? RH0 { get; set; }
     [Width(50)]
     public string? RH0_Unit { get; set; }

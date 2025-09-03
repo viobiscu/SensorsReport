@@ -100,7 +100,7 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
             if (logRule is null)
             {
                 logger.LogWarning("LogRule with ID {LogRuleId} not found", sensorPropertyMetadata.LogRule?.Object?.FirstOrDefault());
-                await eventBus.PublishAsync(triggerAlarmRuleEvent);
+                await PublishMessage(triggerAlarmRuleEvent, sensorProperty.Value, sensorProperty.Unit?.Value);
                 continue;
             }
 
@@ -108,7 +108,7 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
             {
                 logger.LogInformation("LogRule {LogRuleId} is disabled, skipping processing", logRule.Id);
                 await ResetConsecutiveHit(sensor.Id!, propertyKey, metadataKey);
-                await eventBus.PublishAsync(triggerAlarmRuleEvent);
+                await PublishMessage(triggerAlarmRuleEvent, sensorProperty.Value, sensorProperty.Unit?.Value);
                 continue;
             }
 
@@ -120,7 +120,7 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
             {
                 logger.LogInformation("Sensor property {Property} value {Value} is within the defined thresholds", propertyKey, sensorProperty.Value);
                 await ResetConsecutiveHit(sensor.Id!, propertyKey, metadataKey);
-                await eventBus.PublishAsync(triggerAlarmRuleEvent);
+                await PublishMessage(triggerAlarmRuleEvent, sensorProperty.Value, sensorProperty.Unit?.Value);
                 continue;
             }
 
@@ -141,6 +141,21 @@ public class SensorDataChangedConsumer(ILogger<SensorDataChangedConsumer> logger
             }
 
             logger.LogWarning("Sensor property {Property} value {Value} has exceeded the consecutive violations threshold {ConsecutiveHits}", propertyKey, sensorProperty.Value, consecutiveHit);
+        }
+
+        async Task PublishMessage(TriggerAlarmRuleEvent publishEvent, double? value, string? unit)
+        {
+            await eventBus.PublishAsync(publishEvent);
+            await eventBus.PublishAsync(new SensorDataHistoryLogEvent
+            {
+                Tenant = publishEvent.Tenant,
+                SensorId = publishEvent.SensorId,
+                PropertyKey = publishEvent.PropertyKey,
+                MetadataKey = publishEvent.MetadataKey,
+                ObservedAt = DateTimeOffset.UtcNow,
+                Value = value,
+                Unit = unit
+            });
         }
 
         async Task SetConsecutiveHit(string entityId, string propKey, string metaPropKey, int consecutiveHit, bool isFaulty)

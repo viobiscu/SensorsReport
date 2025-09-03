@@ -1,4 +1,4 @@
-import { EntityGrid } from "@serenity-is/corelib";
+import { confirmDialog, EntityGrid, Fluent, htmlEncode, stringFormat } from "@serenity-is/corelib";
 import { FormatterContext } from "@serenity-is/sleekgrid";
 import { SensorDialog } from "./SensorDialog";
 import { SensorRow, SensorColumns, SensorService } from "../../ServerTypes/SensorsReport";
@@ -19,6 +19,8 @@ export class SensorGrid extends EntityGrid<SensorRow> {
     protected override getColumns() {
         var columns = super.getColumns();
         var cols = new SensorColumns(columns);
+
+        cols.Id.format = ctx => (<a href="#" class="chart-details">{ctx.value}</a>);
 
         cols.RH0.format = (ctx) => {
             return <>
@@ -95,5 +97,31 @@ export class SensorGrid extends EntityGrid<SensorRow> {
             klass += " text-danger";
 
         return klass.trim() || null;
+    }
+
+    protected onClick(e: Event, row: number, cell: number): void {
+
+        // let base grid handle clicks for its edit links
+        super.onClick(e, row, cell);
+
+        // if base grid already handled, we shouldn"t handle it again
+        if (Fluent.isDefaultPrevented(e)) {
+            return;
+        }
+
+        // get reference to current item
+        var item = this.itemAt(row);
+
+        // get reference to clicked element
+        var target = e.target as HTMLElement;
+
+        if (target.classList.contains("chart-details")) {
+            e.preventDefault();
+            var dialog = new SensorDialog({
+                sensorId: item.Id
+            });
+
+            dialog.dialogOpen();
+        }
     }
 }

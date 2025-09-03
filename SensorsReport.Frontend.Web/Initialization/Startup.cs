@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
@@ -5,12 +6,15 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Serenity.Extensions.DependencyInjection;
-using OpenIddict.Client.AspNetCore;
 using OpenIddict.Abstractions;
-using SensorsReport.OrionLD.Extensions;
+using OpenIddict.Client.AspNetCore;
+using RabbitMQ.Client;
 using SensorsReport.Extensions;
 using SensorsReport.Frontend.Modules.Common.OrionLDHandlers;
+using SensorsReport.OrionLD.Extensions;
+using Serenity.Extensions.DependencyInjection;
+using SensorsReport.Api.Core.MassTransit;
+using System.Reflection;
 
 namespace SensorsReport.Frontend;
 public partial class Startup
@@ -125,6 +129,42 @@ public partial class Startup
             });
         }
         services.TryAddSingleton<IPermissionService, AppServices.PermissionService>();
+
+        var eventBusOptions = Configuration.GetSection(EventBusOptions.SectionName).Get<EventBusOptions>();
+        if (eventBusOptions != null)
+        {
+            services.AddSingleton<EventBusOptions>((s) => eventBusOptions);
+            services.AddSingleton<IOptions<EventBusOptions>>((s) => Options.Create(eventBusOptions));
+        }
+
+        if (HostEnvironment.IsDevelopment() && eventBusOptions != null)
+        {
+            services.PostConfigure<MassTransitHostOptions>(options =>
+            {
+                options.WaitUntilStarted = true;
+                options.StartTimeout = TimeSpan.FromSeconds(30);
+            });
+        }
+
+        if (eventBusOptions != null)
+        {
+            var connectionString = $"amqp://{eventBusOptions.Username}:{eventBusOptions.Password}@{eventBusOptions.Host}:{eventBusOptions.Port}{eventBusOptions.VirtualHost}";
+            services.AddSingleton<IConnection>(sp =>
+            {
+                var factory = new ConnectionFactory
+                {
+                    Uri = new Uri(connectionString),
+                };
+                return factory.CreateConnectionAsync().GetAwaiter().GetResult();
+            });
+
+            services.AddEventBus(s =>
+            {
+                var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly() ?? Assembly.GetCallingAssembly();
+                s.AddConsumers(assembly);
+            });
+
+        }
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
