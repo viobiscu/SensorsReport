@@ -6,7 +6,19 @@ using MyRow = SensorsReport.Frontend.SensorsReport.SensorHistory.SensorHistoryRo
 namespace SensorsReport.Frontend.SensorsReport.SensorHistory;
 public interface ISensorHistoryListHandler : IListHandler<MyRow, MyRequest, MyResponse> { }
 
-public class SensorHistoryListHandler(IRequestContext context) :
+public class SensorHistoryListHandler(IRequestContext context, ITenantRetriever tenantRetriever) :
     ListRequestHandler<MyRow, MyRequest, MyResponse>(context), ISensorHistoryListHandler
 {
+    private readonly ITenantRetriever tenantRetriever = tenantRetriever;
+
+    protected override void PrepareQuery(SqlQuery query)
+    {
+        base.PrepareQuery(query);
+        if (!Permissions.HasPermission(Administration.PermissionKeys.Security) && tenantRetriever != null)
+        {
+            var tenant = tenantRetriever.CurrentTenantInfo.Tenant;
+            if (tenant != null)
+                query.Where(MyRow.Fields.Tenant == tenant);
+        }
+    }
 }
